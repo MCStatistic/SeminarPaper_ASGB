@@ -9,11 +9,6 @@ output: html_document
 ```{r}
 library(magrittr)
 library(dplyr)
-library(rvest)
-library(XML)
-library(httr)
-# install.packages("urltools")
-library(urltools) # for parsing the url
 library(stringr) # for creating all the urls
 
 
@@ -59,6 +54,7 @@ length(urls)
 
 
 ```{r}
+library(urltools) # for parsing the url
 url_fun <- url_parse("http://dipbt.bundestag.de/dip21/btd/19/057/1905741.pdf")
 url_fun <- url_fun %>% 
   select(-port, - user, -query, -fragment)
