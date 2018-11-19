@@ -1,0 +1,91 @@
+---
+title: "Data Wrangling"
+author: "Marlon Schumacher"
+date: "19 11 2018"
+output: html_document
+---
+
+## Creating the URL's for 19. BDT
+```{r}
+library(magrittr)
+library(dplyr)
+library(rvest)
+library(XML)
+library(httr)
+# install.packages("urltools")
+library(urltools) # for parsing the url
+library(stringr) # for creating all the urls
+
+
+# short code for creating all 5800 URL's (19. BTD)
+# rep() replicates the object n-times
+base <- rep("http://dipbt.bundestag.de/dip21/btd/19/0", each = 5800) 
+end <- rep(".pdf", each = 5800)
+mid <- rep("/190", each = 5800)
+
+# first step: creating a vector with the values from 00 up to 57 as characters
+# second step: creating a vector where each value is replicated 100 times
+first <- as.character(sprintf("%02.0f", 00:57)) %>% 
+  rep(each = 100) 
+
+# creating a vector which includes the values 0000 up to 5799
+# important: sprintf() is used for the 4-digit format
+second <- as.character(sprintf("%04.0f", 0000:5799))
+
+urls <- str_c(base, first, mid, second, end, 
+              sep = "")
+
+# checking url
+head(urls)
+
+# checking length
+length(urls)
+```
+
+## Just for validation
+```{r}
+"http://dipbt.bundestag.de/dip21/btd/19/057/1905741.pdf"
+"http://dipbt.bundestag.de/dip21/btd/19/057/1905740.pdf"
+"http://dipbt.bundestag.de/dip21/btd/19/057/1905739.pdf"
+
+
+# changing in /055/ for "Drucksache" starting with 55..
+"http://dipbt.bundestag.de/dip21/btd/19/055/1905500.pdf"
+"http://dipbt.bundestag.de/dip21/btd/19/054/1905499.pdf"
+
+# example for beginning
+"http://dipbt.bundestag.de/dip21/btd/19/000/1900009.pdf"
+```
+
+
+```{r}
+url_fun <- url_parse("http://dipbt.bundestag.de/dip21/btd/19/057/1905741.pdf")
+url_fun <- url_fun %>% 
+  select(-port, - user, -query, -fragment)
+
+# splitting the url in 
+url_fun$path_1 <- str_sub(url_fun$path, start = 1L, end = 15L)
+url_fun$end <- str_sub(url_fun$path, start = -4L, end = -1L)
+url_fun$first <- str_sub(url_fun$path, start = 16L, end = 17L)
+url_fun$mid <- str_sub(url_fun$path, start = 18L, end = 21L)
+url_fun$second <- str_sub(url_fun$path, start = 22L, end = 25L)
+url_fun$path <- url_fun$path_1
+url_fun$path_1 <- NULL
+url_fun
+
+scheme_v <- rep(url_fun$scheme, each = 5800)
+scheme_v2 <- rep("://", each = 5800)
+server_v <- rep(url_fun$server, each = 5800)
+path_v <- rep(url_fun$path, each = 5800)
+end_v <- rep(url_fun$end, each = 5800)
+mid_v <- rep(url_fun$mid, each = 5800)
+first_v <- as.character(sprintf("%02.0f", 00:57))
+first_v <- rep(first_v, each = 100)
+length(first_v)
+
+# creating a vecotr which contains all URL's 
+# str_c(): join multiple strings in one single string
+final_url_v <- str_c(scheme_v, scheme_v2, server_v, path_v, first_v, mid_v, second_v, end_v, 
+                     sep = "")
+```
+
