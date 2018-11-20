@@ -37,6 +37,16 @@ head(urls)
 length(urls)
 ```
 
+## Test
+```{r}
+urls_test <- urls[1:10]
+destinations <- "/Users/marlonschumacher/Documents/2_Master/Git_Projekte"
+for(i in seq_along(urls_test)){
+    download.file(urls_test[i], destinations[i], mode="wb")
+}
+```
+
+
 ## Just for validation
 ```{r}
 "http://dipbt.bundestag.de/dip21/btd/19/057/1905741.pdf"
@@ -44,7 +54,7 @@ length(urls)
 "http://dipbt.bundestag.de/dip21/btd/19/057/1905739.pdf"
 
 
-# changing in /055/ for "Drucksache" starting with 55..
+# changing in /055/ for "Drucksache" starting with 55
 "http://dipbt.bundestag.de/dip21/btd/19/055/1905500.pdf"
 "http://dipbt.bundestag.de/dip21/btd/19/054/1905499.pdf"
 
@@ -53,16 +63,17 @@ length(urls)
 ```
 
 
+## First Try
 ```{r}
 library(urltools) # for parsing the url
 url_fun <- url_parse("http://dipbt.bundestag.de/dip21/btd/19/057/1905741.pdf")
 url_fun <- url_fun %>% 
-  select(-port, - user, -query, -fragment)
+  select(-port, -fragment, -parameter)
 
 # splitting the url in 
-url_fun$path_1 <- str_sub(url_fun$path, start = 1L, end = 15L)
+url_fun$path_1 <- str_sub(url_fun$path, start = 1L, end = 14L)
 url_fun$end <- str_sub(url_fun$path, start = -4L, end = -1L)
-url_fun$first <- str_sub(url_fun$path, start = 16L, end = 17L)
+url_fun$first <- str_sub(url_fun$path, start = 15L, end = 18L)
 url_fun$mid <- str_sub(url_fun$path, start = 18L, end = 21L)
 url_fun$second <- str_sub(url_fun$path, start = 22L, end = 25L)
 url_fun$path <- url_fun$path_1
@@ -78,10 +89,14 @@ mid_v <- rep(url_fun$mid, each = 5800)
 first_v <- as.character(sprintf("%02.0f", 00:57))
 first_v <- rep(first_v, each = 100)
 length(first_v)
-
+second_v <- as.character(sprintf("%04.0f", 0000:5799))
 # creating a vecotr which contains all URL's 
 # str_c(): join multiple strings in one single string
 final_url_v <- str_c(scheme_v, scheme_v2, server_v, path_v, first_v, mid_v, second_v, end_v, 
                      sep = "")
+
+final.df <- as.data.frame(final_url_v, stringsAsFactors = F)
+final.df <- final.df[(5200:5220),]
+length(final.df)
 ```
 
