@@ -7,10 +7,9 @@ output: html_document
 
 ## Creating the URL's for 19. BDT
 ```{r}
-library(magrittr)
-library(dplyr)
-library(stringr) # for creating all the urls
-
+# just use its
+library(pacman)
+p_load(magrittr, dplyr, stringr, downloader, purrr)
 
 # short code for creating all 5800 URL's (19. BTD)
 # rep() replicates the object n-times
@@ -37,13 +36,44 @@ head(urls)
 length(urls)
 ```
 
-## Test
+## Testing
 ```{r}
-urls_test <- urls[1:10]
-destinations <- "/Users/marlonschumacher/Documents/2_Master/Git_Projekte"
+basename(head(urls))
+paste("/19_btd/", head(basename(urls)), sep = "")
+
+urls_test <- urls[2:10]
+destination_test <- paste("./19_btd/", basename(urls_test), sep = "")
+
+# testing for loop with url_printing
 for(i in seq_along(urls_test)){
-    download.file(urls_test[i], destinations[i], mode="wb")
+    download(urls_test[i], destination_test[i], mode="wb")
+  print(urls_test[i])
 }
+```
+
+## live coding with fabio <3
+```{r}
+# fn + F2 :)
+download
+
+# sleep
+sleep_down <- function(...) {
+  download(...)
+  Sys.sleep(1.5)
+}
+
+# creating safely
+safe_download <- safely(sleep_down)
+
+map_results <- map2(urls, destinations,
+                    ~safe_download(.x, .y, mode ="wb"))
+
+results <- map(map_results, "result") %>% 
+  as.character() 
+error <- map(map_results, "error") %>% 
+  as.character()
+
+tibble(results, error)
 ```
 
 
@@ -62,41 +92,4 @@ for(i in seq_along(urls_test)){
 "http://dipbt.bundestag.de/dip21/btd/19/000/1900009.pdf"
 ```
 
-
-## First Try
-```{r}
-library(urltools) # for parsing the url
-url_fun <- url_parse("http://dipbt.bundestag.de/dip21/btd/19/057/1905741.pdf")
-url_fun <- url_fun %>% 
-  select(-port, -fragment, -parameter)
-
-# splitting the url in 
-url_fun$path_1 <- str_sub(url_fun$path, start = 1L, end = 14L)
-url_fun$end <- str_sub(url_fun$path, start = -4L, end = -1L)
-url_fun$first <- str_sub(url_fun$path, start = 15L, end = 18L)
-url_fun$mid <- str_sub(url_fun$path, start = 18L, end = 21L)
-url_fun$second <- str_sub(url_fun$path, start = 22L, end = 25L)
-url_fun$path <- url_fun$path_1
-url_fun$path_1 <- NULL
-url_fun
-
-scheme_v <- rep(url_fun$scheme, each = 5800)
-scheme_v2 <- rep("://", each = 5800)
-server_v <- rep(url_fun$server, each = 5800)
-path_v <- rep(url_fun$path, each = 5800)
-end_v <- rep(url_fun$end, each = 5800)
-mid_v <- rep(url_fun$mid, each = 5800)
-first_v <- as.character(sprintf("%02.0f", 00:57))
-first_v <- rep(first_v, each = 100)
-length(first_v)
-second_v <- as.character(sprintf("%04.0f", 0000:5799))
-# creating a vecotr which contains all URL's 
-# str_c(): join multiple strings in one single string
-final_url_v <- str_c(scheme_v, scheme_v2, server_v, path_v, first_v, mid_v, second_v, end_v, 
-                     sep = "")
-
-final.df <- as.data.frame(final_url_v, stringsAsFactors = F)
-final.df <- final.df[(5200:5220),]
-length(final.df)
-```
 
