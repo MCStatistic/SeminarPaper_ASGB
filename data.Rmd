@@ -36,6 +36,16 @@ head(urls)
 length(urls)
 ```
 
+## Creating URL's for the 18. BDT
+```{r}
+# static body
+# IMPRTANT: check/validate the links for the 18 BDT!
+base <- rep("http://dipbt.bundestag.de/dip21/btd/18/0", each = 5800) 
+end <- rep(".pdf", each = 5800)
+mid <- rep("/180", each = 5800)
+```
+
+
 ## Testing
 ```{r}
 basename(head(urls))
