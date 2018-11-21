@@ -5,49 +5,106 @@ date: "19 11 2018"
 output: html_document
 ---
 
-## Creating the URL's for 19. BDT
+## Source of Data
+
+[DIP (Dokumentations- und Informationssystem für Parlamentarische Vorgänge)](https://dipbt.bundestag.de/dip21.web/bt)
+
+## Creating the URL's for 19. BTD
+
+Last document of the 18. Bundestag
+http://dipbt.bundestag.de/dip21/btd/19/000/1800001.pdf
+
+First Document of the 18. Bundestag (Update is comming)
+http://dipbt.bundestag.de/dip21/btd/19/057/1905799.pdf
+
 ```{r}
-# just use its
+# just use pacman, it's delicous!
 library(pacman)
 p_load(magrittr, dplyr, stringr, downloader, purrr)
 
 # short code for creating all 5800 URL's (19. BTD)
 # rep() replicates the object n-times
-base <- rep("http://dipbt.bundestag.de/dip21/btd/19/0", each = 5800) 
-end <- rep(".pdf", each = 5800)
-mid <- rep("/190", each = 5800)
+base_19 <- rep("http://dipbt.bundestag.de/dip21/btd/19/0", each = 5800) 
+
+# code explaining: replicate the character ".pdf" 5800 times
+end_19 <- rep(".pdf", each = 5800)
+mid_19 <- rep("/190", each = 5800)
 
 # first step: creating a vector with the values from 00 up to 57 as characters
 # second step: creating a vector where each value is replicated 100 times
-first <- as.character(sprintf("%02.0f", 00:57)) %>% 
+# code exp: create a vector with the values of 00 to 57, all numbers
+#           should be 2 digit long (defined by "%02.0f") and should be
+#           defined as characters. Then take this vector and replicate it 100 times
+first_19 <- as.character(sprintf("%02d", 00:57)) %>% 
   rep(each = 100) 
 
 # creating a vector which includes the values 0000 up to 5799
 # important: sprintf() is used for the 4-digit format
-second <- as.character(sprintf("%04.0f", 0000:5799))
+second_19 <- as.character(sprintf("%04d", 0000:5799))
 
-urls <- str_c(base, first, mid, second, end, 
+# code exp: take all the vectors and combine these vectors with the function str_c()
+#           sep = "" -> there is no seperation, otherwise it would be not a functonal url
+urls_19 <- str_c(base_19, first_19, mid_19, second_19, end_19, 
               sep = "")
 
 # checking url
-head(urls)
+head(urls_19, 2)
+tail(urls_19, 2)
 
 # checking length
-length(urls)
+length(urls_19)
+
+# deleting the first link because theres no content
+urls_19 <- urls_19[!urls_19 == "http://dipbt.bundestag.de/dip21/btd/19/000/1900000.pdf"]
+
+# checking length again
+length(urls_19)
 ```
 
-## Creating URL's for the 18. BDT
+## Creating URL's for the 18. BTD
+
+Last document of the 18. Bundestag
+http://dipbt.bundestag.de/dip21/btd/18/137/1813705.pdf
+
+First Document of the 18. Bundestag
+http://dipbt.bundestag.de/dip21/btd/18/000/1800001.pdf
+
+Documents 13700 up to 13705 doesn't include any type of document which is of interest
+
 ```{r}
 # static body
 # IMPRTANT: check/validate the links for the 18 BDT!
-base <- rep("http://dipbt.bundestag.de/dip21/btd/18/0", each = 5800) 
-end <- rep(".pdf", each = 5800)
-mid <- rep("/180", each = 5800)
+base_18 <- rep("http://dipbt.bundestag.de/dip21/btd/18/", each = 13700) 
+end_18 <- rep(".pdf", each = 13700)
+mid_18 <- rep("/18", each = 13700)
+
+# dynamic body
+first_18 <- as.character(sprintf("%03d", 000:136)) %>% 
+  rep(each = 100)
+
+second_18 <- as.character(sprintf("%05d", 00000:13699))
+
+# combine all url-elements
+urls_18 <- str_c(base_18, first_18, mid_18, second_18, end_18, spe = "")
+
+# checking the URLs
+head(urls_18, 2)
+tail(urls_18, 2)
+
+# checking length
+length(urls_18)
+
+# deleting first URL because there is no content
+urls_18 <- urls_18[!urls_18 == "http://dipbt.bundestag.de/dip21/btd/18/000/1800000.pdf"]
+
+# checking length again
+length(urls_18)
 ```
 
 
 ## Testing
 ```{r}
+# testing the filepath-creation
 basename(head(urls))
 paste("/19_btd/", head(basename(urls)), sep = "")
 
@@ -66,18 +123,26 @@ for(i in seq_along(urls_test)){
 # fn + F2 :)
 download
 
-# sleep
+# creating sleep function
+# take the function download() and set the sleep to 1.5 seconds
 sleep_down <- function(...) {
   download(...)
   Sys.sleep(1.5)
 }
 
 # creating safely
+# code exp: take the function sleep_down() and create with the function safely() a new function
+#           because of the safely function, the loop will not interrupt, if it comes to errors
 safe_download <- safely(sleep_down)
 
+# downloading the documents
+# code exp: map2() can use two arguments -> take the vector urls as the first argument 
+#           and the vector destinations as the second argument
+#           
 map_results <- map2(urls, destinations,
                     ~safe_download(.x, .y, mode ="wb"))
 
+# converting list into two vectors as.character()
 results <- map(map_results, "result") %>% 
   as.character() 
 error <- map(map_results, "error") %>% 
