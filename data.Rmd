@@ -112,18 +112,13 @@ length(path_18)
 
 ## Testing
 ```{r}
-# testing the filepath-creation
-basename(head(urls))
-paste("/19_btd/", head(basename(urls)), sep = "")
-
-urls_test <- urls[2:10]
-destination_test <- paste("./19_btd/", basename(urls_test), sep = "")
-
 # testing for loop with url_printing
 for(i in seq_along(urls_test)){
     download(urls_test[i], destination_test[i], mode="wb")
   print(urls_test[i])
 }
+
+# using map2() instead of a for loop
 ```
 
 ## live coding with fabio <3
@@ -171,7 +166,6 @@ error_19 <- map(map_results_19, "error") %>%
 
 # creating df again
 tibble(results_19, error_19)
-
 ```
 
 ## Data Wrangling with PDF Documents
