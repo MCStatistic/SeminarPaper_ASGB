@@ -9,18 +9,18 @@ output: html_document
 
 [DIP (Dokumentations- und Informationssystem für Parlamentarische Vorgänge)](https://dipbt.bundestag.de/dip21.web/bt)
 
-## Creating the URL's for 19. BTD
+## Creating the URL's & file-paths for 19. BTD
 
-Last document of the 18. Bundestag
-http://dipbt.bundestag.de/dip21/btd/19/000/1800001.pdf
+Last document of the 19. Bundestag
+http://dipbt.bundestag.de/dip21/btd/19/000/1900001.pdf
 
-First Document of the 18. Bundestag (Update is comming)
+First Document of the 19. Bundestag (Update is comming)
 http://dipbt.bundestag.de/dip21/btd/19/057/1905799.pdf
 
 ```{r}
 # just use pacman, it's delicous!
 library(pacman)
-p_load(magrittr, dplyr, stringr, downloader, purrr)
+p_load(magrittr, dplyr, stringr, downloader, purrr, pdftools)
 
 # short code for creating all 5800 URL's (19. BTD)
 # rep() replicates the object n-times
@@ -59,6 +59,10 @@ urls_19 <- urls_19[!urls_19 == "http://dipbt.bundestag.de/dip21/btd/19/000/19000
 
 # checking length again
 length(urls_19)
+
+# creating file-path for each link
+path_19 <- paste("./19_btd/", basename(urls_19), sep = "")
+length(path_19)
 ```
 
 ## Creating URL's for the 18. BTD
@@ -99,6 +103,10 @@ urls_18 <- urls_18[!urls_18 == "http://dipbt.bundestag.de/dip21/btd/18/000/18000
 
 # checking length again
 length(urls_18)
+
+# creating file-path for each link
+path_18 <- paste("./18_btd/", basename(urls_18), sep = "")
+length(path_18)
 ```
 
 
@@ -135,36 +143,46 @@ sleep_down <- function(...) {
 #           because of the safely function, the loop will not interrupt, if it comes to errors
 safe_download <- safely(sleep_down)
 
-# downloading the documents
+# downloading the documents for the 18. Bundestag
 # code exp: map2() can use two arguments -> take the vector urls as the first argument 
 #           and the vector destinations as the second argument
 #           
-map_results <- map2(urls, destinations,
+map_results_18 <- map2(urls_18, path_18,
                     ~safe_download(.x, .y, mode ="wb"))
 
 # converting list into two vectors as.character()
-results <- map(map_results, "result") %>% 
+results_18 <- map(map_results_18, "result") %>% 
   as.character() 
-error <- map(map_results, "error") %>% 
+error_18 <- map(map_results_18, "error") %>% 
   as.character()
 
-tibble(results, error)
+# creating df
+tibble(results_18, error_18)
+
+# downloading all documents for the 19. Bundestag (cut off: end of Nov 2018)
+map_results_19 <- map2(urls_19, path_19,
+                       ~safe_download(.x, .y, mode = "wb"))
+
+# creating two vectors regarding record of errors again
+results_19 <- map(map_results_19, "results") %>% 
+  as.character()
+error_19 <- map(map_results_19, "error") %>% 
+  as.character()
+
+# creating df again
+tibble(results_19, error_19)
+
 ```
 
+## Data Wrangling with PDF Documents
 
-## Just for validation
+[tidyless introduction to it](https://www.r-bloggers.com/how-to-extract-data-from-a-pdf-file-with-r/)
+
+Used package: [pdftools](https://cran.r-project.org/web/packages/pdftools/pdftools.pdf)
+
 ```{r}
-"http://dipbt.bundestag.de/dip21/btd/19/057/1905741.pdf"
-"http://dipbt.bundestag.de/dip21/btd/19/057/1905740.pdf"
-"http://dipbt.bundestag.de/dip21/btd/19/057/1905739.pdf"
 
-
-# changing in /055/ for "Drucksache" starting with 55
-"http://dipbt.bundestag.de/dip21/btd/19/055/1905500.pdf"
-"http://dipbt.bundestag.de/dip21/btd/19/054/1905499.pdf"
-
-# example for beginning
-"http://dipbt.bundestag.de/dip21/btd/19/000/1900009.pdf"
 ```
+
 
 
