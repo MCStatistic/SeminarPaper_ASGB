@@ -20,7 +20,7 @@ http://dipbt.bundestag.de/dip21/btd/19/057/1905799.pdf
 ```{r}
 # just use pacman, it's delicous!
 library(pacman)
-p_load(magrittr, dplyr, stringr, downloader, purrr, pdftools)
+p_load(magrittr, dplyr, stringr, downloader, purrr, pdftools, glue)
 
 # short code for creating all 5800 URL's (19. BTD)
 # rep() replicates the object n-times
@@ -121,7 +121,7 @@ for(i in seq_along(urls_test)){
 # using map2() instead of a for loop
 ```
 
-## live coding with fabio <3
+## live coding with fabio <3 & Download 18. BTD
 ```{r}
 # fn + F2 :)
 download
@@ -130,7 +130,7 @@ download
 # take the function download() and set the sleep to 1.5 seconds
 sleep_down <- function(...) {
   download(...)
-  Sys.sleep(1.5)
+  Sys.sleep(0.5)
 }
 
 # creating safely
@@ -145,6 +145,8 @@ safe_download <- safely(sleep_down)
 map_results_18 <- map2(urls_18, path_18,
                     ~safe_download(.x, .y, mode ="wb"))
 
+
+
 # converting list into two vectors as.character()
 results_18 <- map(map_results_18, "result") %>% 
   as.character() 
@@ -153,7 +155,11 @@ error_18 <- map(map_results_18, "error") %>%
 
 # creating df
 tibble(results_18, error_18)
+```
 
+
+## Download 19. BTD
+```{r}
 # downloading all documents for the 19. Bundestag (cut off: end of Nov 2018)
 map_results_19 <- map2(urls_19, path_19,
                        ~safe_download(.x, .y, mode = "wb"))
@@ -168,14 +174,25 @@ error_19 <- map(map_results_19, "error") %>%
 tibble(results_19, error_19)
 ```
 
+
 ## Data Wrangling with PDF Documents
 
 [tidyless introduction to it](https://www.r-bloggers.com/how-to-extract-data-from-a-pdf-file-with-r/)
 
 Used package: [pdftools](https://cran.r-project.org/web/packages/pdftools/pdftools.pdf)
 
-```{r}
+[very great tutorial](https://www.brodrigues.co/blog/2018-06-10-scraping_pdfs/)
 
+```{r}
+file <- pdf_text("./19_btd/1900038.pdf")
+
+glue(file)
+
+# look at the text of the first page
+file[1]
+
+# cat() makes it more readable
+cat(file[1])
 ```
 
 
