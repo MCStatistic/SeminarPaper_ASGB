@@ -119,7 +119,7 @@ The forloop is not used, instead the `map()` function from the package `purrr` i
 for(i in seq_along(urls_test)){
     download(urls_test[i], destination_test[i], mode="wb")
   print(urls_test[i])
-}
+}-
 
 # using map2() instead of a for loop
 ```
