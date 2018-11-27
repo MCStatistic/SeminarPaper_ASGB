@@ -20,7 +20,8 @@ http://dipbt.bundestag.de/dip21/btd/19/057/1905799.pdf
 ```{r}
 # just use pacman, it's delicous!
 library(pacman)
-p_load(magrittr, dplyr, stringr, downloader, purrr, pdftools, glue)
+p_load(magrittr, dplyr, stringr, downloader, purrr, pdftools, 
+       glue, tm, janeaustenr, tidytext, corpus)
 
 # short code for creating all 5800 URL's (19. BTD)
 # rep() replicates the object n-times
@@ -183,17 +184,96 @@ Used package: [pdftools](https://cran.r-project.org/web/packages/pdftools/pdftoo
 
 [very great tutorial](https://www.brodrigues.co/blog/2018-06-10-scraping_pdfs/)
 
+
 ```{r}
-file <- pdf_text("./19_btd/1900038.pdf")
+# setting options for text mining
+options(stringsAsFactors = FALSE)
 
-glue(file)
+file_1 <- pdf_text("./18_btd/1800038.pdf") %>% 
+  readr::read_lines() %>% 
+  unlist()
 
-# look at the text of the first page
-file[1]
+file_test <- map()
+
+full_file <- path_18[1:10] %>% 
+  map(~pdf_text(.x))
+
+readr::read_lines(full_file[[1]])
+full_file[1] %>% 
+  unlist() %>% 
+  str_split("\n") %>% 
+  unlist()
+
+pdf_text(path_18[1])
+
+corpus <- Corpus(VectorSource(full_file))
+readr::read_lines(corpus$content[1])
+
+class(file_2)
+
+
+file_2 <- pdf_text("./18_btd/1800038.pdf") %>% 
+  unlist()
+
+file_corpus <- Corpus(VectorSource(file))
+file_corpus$content
+
+# removing stop words
+head(stopwords("de"))
+tm_map(corpus, removeWords, stopwords("de"))
+
+file <- str_split(file, "\n")
 
 # cat() makes it more readable
 cat(file[1])
+
+testing <- pdf_text("./18_btd/1800038.pdf") %>% 
+  strsplit("\n") %>% 
+  unlist()
+
+pdf_text_2 <- function(pdf){
+  testing <- pdf_text(pdf) %>% 
+    strsplit("\n") %>% 
+    unlist()
+}
+
+pdf_vector_test <- c("./18_btd/1800038.pdf", "./18_btd/1800039.pdf", "./18_btd/1800040.pdf")
+map_test <- map(pdf_vector_test,
+                ~pdf_text_2(.x))
+
 ```
 
+suport vector model Machine Learning
 
+
+
+# corpus dtype
+
+This procedure is not used for data manipulation! However, the code exists for documentation.
+```{r}
+# using tm package for reading pdf-documents
+read <- readPDF(engine = "xpdf", 
+                control = list(text = "-layout"))
+
+document <- Corpus(URISource("./18_btd/1800038.pdf"), 
+                   readerControl = list(reader = read))
+
+# creating test_vector for pdf reading
+pdf_vector_test <- c("./18_btd/1800038.pdf", "./18_btd/1800039.pdf", "./18_btd/1800040.pdf")
+
+document2 <- Corpus(URISource(pdf_vector_test, encoding = "UTF-8"), 
+                   readerControl = list(reader = read))
+
+content(document2[[3]])
+
+meta(document2[[3]])
+
+doc_2 <- content(document2[[1]])
+head(doc_2, 15)
+
+doc_2 %>% 
+  str_replace_all("\xdc", "ü") %>% 
+  str_replace_all("\xfc", "ü") %>% 
+  str_replace_all("\xf6", "ö") 
+```
 
