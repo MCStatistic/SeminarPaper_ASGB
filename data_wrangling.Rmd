@@ -219,6 +219,55 @@ df_18 %>%
   mutate(perc = n/nrow(df_18)*100)
 ```
 
+## Getting the Date of Document
+```{r}
+load("path_a_18_clean.RData")
+
+# # checking vector
+# path_anfragen_18_clean
+# length(path_anfragen_18_clean)
+# # testing loop for single case
+# text_string <- pdf_text(path_anfragen_18_clean[1]) %>% 
+#     strsplit("\n") %>% 
+#     unlist()
+#   # select the row of the document-type
+#   datum_string <- strsplit(text_string, split='\r', fixed=TRUE)[2] 
+#   datum_string <- gsub(" ", "", datum_string, fixed = TRUE)
+#   final_datum <- unlist(strsplit(datum_string, split='ode', fixed=TRUE))[2]
+#   date <- c(date, final_datum)
+
+# creating string for the date
+date <- c()
+
+for (i in seq_along(path_anfragen_18_clean)) {
+  # reading the pdf document
+  text_string <- pdf_text(path_anfragen_18_clean[i]) %>% 
+    strsplit("\n") %>% 
+    unlist()
+  # select the row of the document-type
+  datum_string <- strsplit(text_string, split='\r', fixed=TRUE)[2] 
+  datum_string <- gsub(" ", "", datum_string, fixed = TRUE)
+  final_datum <- unlist(strsplit(datum_string, split='ode', fixed=TRUE))[2]
+  date <- c(date, final_datum)
+}
+print("Vorgang abgeschlossen!")
+
+# checking string
+date
+length(date) # looks fine :)
+
+# add the date string to the data frame
+df_18$date <- date
+
+# saving df
+save(df_18, file = "df_18.RData")
+```
+
+## Getting the party for each document
+```{r}
+
+```
+
 
 
 suport vector model Machine Learning
@@ -227,6 +276,7 @@ suport vector model Machine Learning
 
 This procedure is not used for data manipulation! However, the code exists for documentation.
 ```{r}
+
 # using tm package for reading pdf-documents
 read <- readPDF(engine = "xpdf", 
                 control = list(text = "-layout"))
@@ -252,4 +302,3 @@ doc_2 %>%
   str_replace_all("\xfc", "ü") %>% 
   str_replace_all("\xf6", "ö") 
 ```
-
