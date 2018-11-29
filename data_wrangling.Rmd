@@ -16,7 +16,7 @@ Used package: [pdftools](https://cran.r-project.org/web/packages/pdftools/pdftoo
 
 ```{r}
 # loading nedded packages
-p_load(dplyr, ggplot2, pdftools, stringr, lubridate)
+p_load(dplyr, ggplot2, pdftools, stringr, lubridate, RColorBrewer)
 
 # setting options for text mining
 options(stringsAsFactors = FALSE)
@@ -346,22 +346,34 @@ save(df_18, file = "df_18.RData")
 ```
 
 ## Plotting n() for each party (+ by year)
+
+[Here](http://sape.inf.usi.ch/quick-reference/ggplot2/colour) are some information for plot colours
+
+Moreover, use the package `RColorBrewer` as an addition:
 ```{r}
+# library(RColorBrewer)
+display.brewer.all() 
+```
+
+```{r}
+# loading data
+load("df_18.RData")
+
 # plotting n(type) for each party
 df_18 %>% 
   filter(party != "NA" & type != "Große Anfrage") %>% 
+  mutate(party = case_when(party == "Union" ~ "CDU/CSU",
+                           TRUE ~ party)) %>% 
   group_by(party) %>% 
   summarise(n = n()) %>% 
-  ggplot(aes(party, n)) +
+  ggplot(aes(x = reorder(party, -n), y = n, width=0.5)) +
   xlab("") + ylab("") +
   geom_col(stat = "identity", 
-           fill = "skyblue4") +
+           fill = "steelblue3") +
   geom_text(aes(label = n), 
-            size = 3, 
+            size = 4, 
             vjust = -0.5) +
   theme_bw()
-
-# green color = darkseagreen
 
 # testint date transformation with base code
 # as.Date(df_18$date, "%d.%m.%Y")
@@ -370,20 +382,22 @@ df_18 %>%
 df_18 %>% 
   filter(party != "NA" & type != "Große Anfrage") %>% 
   mutate(date_n = as.Date(date, "%d.%m.%Y")) %>% 
-  mutate(year = year(date_n)) %>% 
+  mutate(year = year(date_n),
+         party = case_when(party == "Union" ~ "CDU/CSU",
+                           TRUE ~ party)) %>% 
   group_by(party, year) %>% 
   summarise(n = n()) %>% 
   mutate(year = as.character(year)) %>% 
   mutate(year = case_when(year == "2013" ~ "2013\nOkt-Dez",
                           year == "2017" ~ "2017\nJan-Okt",
                           TRUE ~ year)) %>% 
-  ggplot(aes(x = as.factor(year), fill = party, y = n)) +
+  ggplot(aes(x = as.factor(year), fill = reorder(party, -n), y = n)) +
   geom_bar(position="dodge", 
            stat="identity") +
-  geom_text(position = position_dodge(width = 1),
-            aes(label = n),
-            vjust = -0.5,
-            size = 3) +
+  geom_text(position = position_dodge(width = 1), # positioning for grouped barplot
+            aes(label = n), # n-value should be the label for each bar
+            vjust = -0.5, # adjusting the vertical dimension (overlapping)
+            size = 3) + # setting the size of the label
   xlab("") + 
   ylab("") + 
   labs(fill = "Partei") +
