@@ -265,9 +265,154 @@ save(df_18, file = "df_18.RData")
 
 ## Getting the party for each document
 ```{r}
+text_string <- pdf_text(path_anfragen_18_clean[77]) %>% 
+     strsplit("\n") %>% 
+     unlist()
+partei<-text_string[4:7]
+O <- str_detect(partei, "GRÜNE")
 
+if(TRUE %in% O){
+  parte <- "Grüne"
+}
+a<-grep("DIE LINKE", partei)
+            if(length(a)>=1){
+              qs<-"Linke"
+            }
+
+# 4 bis 7 kommt Partei vor
+# creating vector for partei
+party <- c()
+for (i in path_anfragen_18_clean) {
+  text <- pdf_text(path_anfragen_18_clean[i]) 
+  text_string <- strsplit(text, "\n") %>% 
+    unlist()
+  #Bereich, indem Parteinamen steht
+  partei<-text_string[4:7]
+  a<-str_detect(partei, "SPD")
+  if(TRUE %in% a){
+    part<-"SPD"
+  }
+  
+    else{
+          b<-str_detect(partei, "DIE LINKE")
+          if(TRUE %in% b){
+            part<-"Linke"
+          }
+      
+        
+       else{
+         c<-str_detect(partei, "CDU/CSU")
+         if(TRUE %in% c){
+           part<-"Union"
+         }
+          
+          else{
+          d<-str_detect(partei, "BÜNDNIS 90/DIE GRÜNEN")
+          if(TRUE %in% d){
+          part<-"Grüne"
+          }
+            
+            else{
+              part<-"NA"
+            }
+          }
+        }
+      }
+  party <- c(party, part)
+}
+print("Vorgang abgeschlossen!")
+
+party
 ```
 
+
+```{r}
+
+text_string <- pdf_text(path_anfragen_18_clean[413]) %>% 
+     strsplit("\n") %>% 
+     unlist()
+  partei<-text_string[4:19]
+  a <- str_detect(partei, "GRÜNEN")
+  
+  if(TRUE %in% a){
+    z <- "Grüne"
+  } else{
+      a <- str_detect(partei, "LINKE")
+      
+      if(TRUE %in% a){
+        z <- "Linke"
+      } else{
+          z <- "NA"
+        }
+    }
+  party <- c(party, z)
+
+  
+party <- c()
+for(i in seq_along(path_anfragen_18_clean)){
+  text_string <- pdf_text(path_anfragen_18_clean[i]) %>% 
+     strsplit("\n") %>% 
+     unlist()
+  partei<-text_string[4:20]
+  a <- str_detect(partei, "GRÜNEN")
+  
+  if(TRUE %in% a){
+    z <- "Grüne"
+  } else{
+      b <- str_detect(partei, "LINKE")
+      
+      if(TRUE %in% b){
+        z <- "Linke"
+      } else{
+        c <- str_detect(partei, "SPD")
+        
+        if(TRUE %in% c){
+          z <- "SPD"
+        } else{
+          d <- str_detect(partei, "CDU/CSU")
+          
+          if(TRUE %in% d){
+            z <- "Union"
+          } else{
+          z <- "NA"
+          }
+        }
+      }
+    }
+  party <- c(party, z)
+}
+
+party
+length(party)
+
+df_18$party <- party
+
+library(ggplot2)
+p_load(jcolors)
+df_18 %<>% 
+  mutate(type = case_when(type == " Kleine Anfrage" ~ "Kleine Anfrage",
+                          TRUE ~ type))
+
+df_18 %>% 
+  filter(party != "NA" & type != "Große Anfrage") %>% 
+  group_by(party) %>% 
+  summarise(n = n()) %>% 
+  ggplot(aes(party, n)) +
+  xlab("Partei") + ylab("") +
+  geom_col(stat = "identity", 
+           fill = "darkseagreen") +
+  geom_text(aes(label = n), 
+            size = 4, 
+            vjust = -0.5) # edding label position
+
+df_18 %>% 
+  group_by(party, type) %>% 
+  summarise(n = n()) %>% 
+  filter(party != "NA")
+
+# saving data frame
+save(df_18, file = "df_18.RData")
+```
 
 
 suport vector model Machine Learning
