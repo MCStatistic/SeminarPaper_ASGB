@@ -15,6 +15,9 @@ Used package: [pdftools](https://cran.r-project.org/web/packages/pdftools/pdftoo
 
 
 ```{r}
+# loading nedded packages
+p_load(dplyr, ggplot2, pdftools, stringr, lubridate)
+
 # setting options for text mining
 options(stringsAsFactors = FALSE)
 
@@ -327,24 +330,10 @@ length(party)
 # adding vector to the df
 df_18$party <- party
 
-# loading ggplot...should be above!
-library(ggplot2)
+# changing the one character value which is kind of akward...
 df_18 %<>% 
   mutate(type = case_when(type == " Kleine Anfrage" ~ "Kleine Anfrage",
                           TRUE ~ type))
-
-# plotting n(type) for each party
-df_18 %>% 
-  filter(party != "NA" & type != "Große Anfrage") %>% 
-  group_by(party) %>% 
-  summarise(n = n()) %>% 
-  ggplot(aes(party, n)) +
-  xlab("Partei") + ylab("") +
-  geom_col(stat = "identity", 
-           fill = "darkseagreen") +
-  geom_text(aes(label = n), 
-            size = 4, 
-            vjust = -0.5) # edding label position
 
 # just a short inspection
 df_18 %>% 
@@ -354,6 +343,71 @@ df_18 %>%
 
 # saving data frame
 save(df_18, file = "df_18.RData")
+```
+
+## Plotting n() for each party (+ by year)
+```{r}
+# plotting n(type) for each party
+df_18 %>% 
+  filter(party != "NA" & type != "Große Anfrage") %>% 
+  group_by(party) %>% 
+  summarise(n = n()) %>% 
+  ggplot(aes(party, n)) +
+  xlab("") + ylab("") +
+  geom_col(stat = "identity", 
+           fill = "skyblue4") +
+  geom_text(aes(label = n), 
+            size = 3, 
+            vjust = -0.5) +
+  theme_bw()
+
+# green color = darkseagreen
+
+# testint date transformation with base code
+# as.Date(df_18$date, "%d.%m.%Y")
+
+# year on x and party als filler
+df_18 %>% 
+  filter(party != "NA" & type != "Große Anfrage") %>% 
+  mutate(date_n = as.Date(date, "%d.%m.%Y")) %>% 
+  mutate(year = year(date_n)) %>% 
+  group_by(party, year) %>% 
+  summarise(n = n()) %>% 
+  mutate(year = as.character(year)) %>% 
+  mutate(year = case_when(year == "2013" ~ "2013\nOkt-Dez",
+                          year == "2017" ~ "2017\nJan-Okt",
+                          TRUE ~ year)) %>% 
+  ggplot(aes(x = as.factor(year), fill = party, y = n)) +
+  geom_bar(position="dodge", 
+           stat="identity") +
+  geom_text(position = position_dodge(width = 1),
+            aes(label = n),
+            vjust = -0.5,
+            size = 3) +
+  xlab("") + 
+  ylab("") + 
+  labs(fill = "Partei") +
+  scale_fill_brewer(palette = "Set2") +
+  theme_bw()
+```
+
+## Stack Overflow Stuff - Got no Hobbies...I know
+```{r}
+pupil_ratio <- read.csv('pupil_ratio.csv')  #this data has all the countries I want
+countries <-as.vector(pupil_ratio$Country.Name) #I convert it to a vector
+
+d_f <- read.csv('fertility_rate.csv') %>%
+  gather(year, fert, X1960:X2017) %>% 
+  dplyr::filter(Country.Name %in% countries) # only select all countries which are in countries
+
+# testing
+df_18 %>% 
+  filter(party != "NA" & type != "Große Anfrage") %>% 
+  mutate(date_n = as.Date(date, "%d.%m.%Y")) %>% 
+  mutate(year = year(date_n)) %>% 
+  group_by(party, year) %>% 
+  summarise(n = n()) %>% 
+  filter(party %in% c("Grüne", "Linke"))
 ```
 
 
