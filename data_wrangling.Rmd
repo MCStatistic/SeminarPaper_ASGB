@@ -250,7 +250,6 @@ for (i in seq_along(path_anfragen_18_clean)) {
   final_datum <- unlist(strsplit(datum_string, split='ode', fixed=TRUE))[2]
   date <- c(date, final_datum)
 }
-print("Vorgang abgeschlossen!")
 
 # checking string
 date
@@ -265,69 +264,8 @@ save(df_18, file = "df_18.RData")
 
 ## Getting the party for each document
 ```{r}
-text_string <- pdf_text(path_anfragen_18_clean[77]) %>% 
-     strsplit("\n") %>% 
-     unlist()
-partei<-text_string[4:7]
-O <- str_detect(partei, "GRÜNE")
-
-if(TRUE %in% O){
-  parte <- "Grüne"
-}
-a<-grep("DIE LINKE", partei)
-            if(length(a)>=1){
-              qs<-"Linke"
-            }
-
-# 4 bis 7 kommt Partei vor
-# creating vector for partei
+# testing the function which will part of the loop
 party <- c()
-for (i in path_anfragen_18_clean) {
-  text <- pdf_text(path_anfragen_18_clean[i]) 
-  text_string <- strsplit(text, "\n") %>% 
-    unlist()
-  #Bereich, indem Parteinamen steht
-  partei<-text_string[4:7]
-  a<-str_detect(partei, "SPD")
-  if(TRUE %in% a){
-    part<-"SPD"
-  }
-  
-    else{
-          b<-str_detect(partei, "DIE LINKE")
-          if(TRUE %in% b){
-            part<-"Linke"
-          }
-      
-        
-       else{
-         c<-str_detect(partei, "CDU/CSU")
-         if(TRUE %in% c){
-           part<-"Union"
-         }
-          
-          else{
-          d<-str_detect(partei, "BÜNDNIS 90/DIE GRÜNEN")
-          if(TRUE %in% d){
-          part<-"Grüne"
-          }
-            
-            else{
-              part<-"NA"
-            }
-          }
-        }
-      }
-  party <- c(party, part)
-}
-print("Vorgang abgeschlossen!")
-
-party
-```
-
-
-```{r}
-
 text_string <- pdf_text(path_anfragen_18_clean[413]) %>% 
      strsplit("\n") %>% 
      unlist()
@@ -347,7 +285,7 @@ text_string <- pdf_text(path_anfragen_18_clean[413]) %>%
     }
   party <- c(party, z)
 
-  
+# test looks fine...let the looping start  
 party <- c()
 for(i in seq_along(path_anfragen_18_clean)){
   text_string <- pdf_text(path_anfragen_18_clean[i]) %>% 
@@ -382,17 +320,20 @@ for(i in seq_along(path_anfragen_18_clean)){
   party <- c(party, z)
 }
 
+# checking vector
 party
 length(party)
 
+# adding vector to the df
 df_18$party <- party
 
+# loading ggplot...should be above!
 library(ggplot2)
-p_load(jcolors)
 df_18 %<>% 
   mutate(type = case_when(type == " Kleine Anfrage" ~ "Kleine Anfrage",
                           TRUE ~ type))
 
+# plotting n(type) for each party
 df_18 %>% 
   filter(party != "NA" & type != "Große Anfrage") %>% 
   group_by(party) %>% 
@@ -405,6 +346,7 @@ df_18 %>%
             size = 4, 
             vjust = -0.5) # edding label position
 
+# just a short inspection
 df_18 %>% 
   group_by(party, type) %>% 
   summarise(n = n()) %>% 
