@@ -405,26 +405,6 @@ df_18 %>%
   theme_bw()
 ```
 
-## Stack Overflow Stuff - Got no Hobbies...I know
-```{r}
-pupil_ratio <- read.csv('pupil_ratio.csv')  #this data has all the countries I want
-countries <-as.vector(pupil_ratio$Country.Name) #I convert it to a vector
-
-d_f <- read.csv('fertility_rate.csv') %>%
-  gather(year, fert, X1960:X2017) %>% 
-  dplyr::filter(Country.Name %in% countries) # only select all countries which are in countries
-
-# testing
-df_18 %>% 
-  filter(party != "NA" & type != "Große Anfrage") %>% 
-  mutate(date_n = as.Date(date, "%d.%m.%Y")) %>% 
-  mutate(year = year(date_n)) %>% 
-  group_by(party, year) %>% 
-  summarise(n = n()) %>% 
-  filter(party %in% c("Grüne", "Linke"))
-```
-
-
 suport vector model Machine Learning
 
 ## corpus dtype
