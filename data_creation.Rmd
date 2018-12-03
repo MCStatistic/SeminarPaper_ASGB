@@ -25,23 +25,23 @@ p_load(magrittr, dplyr, stringr, downloader, purrr, pdftools,
 
 # short code for creating all 5800 URL's (19. BTD)
 # rep() replicates the object n-times
-base_19 <- rep("http://dipbt.bundestag.de/dip21/btd/19/0", each = 5800) 
+base_19 <- rep("http://dipbt.bundestag.de/dip21/btd/19/0", each = 6100) 
 
 # code explaining: replicate the character ".pdf" 5800 times
-end_19 <- rep(".pdf", each = 5800)
-mid_19 <- rep("/190", each = 5800)
+end_19 <- rep(".pdf", each = 6100)
+mid_19 <- rep("/190", each = 6100)
 
 # first step: creating a vector with the values from 00 up to 57 as characters
 # second step: creating a vector where each value is replicated 100 times
 # code exp: create a vector with the values of 00 to 57, all numbers
 #           should be 2 digit long (defined by "%02.0f") and should be
 #           defined as characters. Then take this vector and replicate it 100 times
-first_19 <- as.character(sprintf("%02d", 00:57)) %>% 
+first_19 <- as.character(sprintf("%02d", 00:60)) %>% 
   rep(each = 100) 
 
 # creating a vector which includes the values 0000 up to 5799
 # important: sprintf() is used for the 4-digit format
-second_19 <- as.character(sprintf("%04d", 0000:5799))
+second_19 <- as.character(sprintf("%04d", 0000:6099))
 
 # code exp: take all the vectors and combine these vectors with the function str_c()
 #           sep = "" -> there is no seperation, otherwise it would be not a functonal url
@@ -57,6 +57,7 @@ length(urls_19)
 
 # deleting the first link because theres no content
 urls_19 <- urls_19[!urls_19 == "http://dipbt.bundestag.de/dip21/btd/19/000/1900000.pdf"]
+tail(urls_19, 50)
 
 # checking length again
 length(urls_19)
@@ -119,7 +120,7 @@ The forloop is not used, instead the `map()` function from the package `purrr` i
 for(i in seq_along(urls_test)){
     download(urls_test[i], destination_test[i], mode="wb")
   print(urls_test[i])
-}-
+}
 
 # using map2() instead of a for loop
 ```
@@ -163,6 +164,13 @@ tibble(results_18, error_18)
 
 ## Download 19. BTD
 ```{r}
+# checking urls & path
+# IMPORTANT: check the last documents!
+head(urls_19)
+head(path_19)
+tail(urls_19)
+tail(path_19)
+
 # downloading all documents for the 19. Bundestag (cut off: end of Nov 2018)
 map_results_19 <- map2(urls_19, path_19,
                        ~safe_download(.x, .y, mode = "wb"))
@@ -176,5 +184,22 @@ error_19 <- map(map_results_19, "error") %>%
 # creating df again
 tibble(results_19, error_19)
 ```
+
+```{r}
+library(ggplot2)
+library(ggthemes)
+year_table <- structure(list(Year = c(2020L, 2021L, 2022L, NA), number = c(55L, 
+81L, 187L, 3L), pct = c(0.168711656441718, 0.248466257668712, 
+0.573619631901841, 0.00920245398773006)), class = c("tbl_df", 
+"tbl", "data.frame"), row.names = c(NA, -4L))
+
+ggplot(data = year_table, mapping = aes(x = Year, y = number)) +
+  geom_col(fill= "darkslategray3") + 
+  theme_economist() +
+  ggtitle("Distribution of Applicants based on Class Year") +
+  geom_text(data=year_table, aes(label=paste0(round(pct*100,1),"%"),
+                                 y=number), size=4, vjust = -.5)
+```
+
 
 

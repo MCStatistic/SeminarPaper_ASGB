@@ -1,5 +1,5 @@
 ---
-title: "Data Wrangling"
+title: "Data Wrangling 18. Bundestag"
 author: "Marlon Schumacher"
 date: "27 11 2018"
 output: html_document
@@ -241,6 +241,7 @@ display.brewer.all()
 ```{r}
 # loading data
 load("df_18.RData")
+library(ggthemes)
 
 # plotting n(type) for each party
 df_18 %>% 
@@ -249,14 +250,16 @@ df_18 %>%
                            TRUE ~ party)) %>% 
   group_by(party) %>% 
   summarise(n = n()) %>% 
-  ggplot(aes(x = reorder(party, -n), y = n, width=0.5)) +
+  ggplot(aes(x = reorder(party, -n), y = n)) +
   xlab("") + ylab("") +
-  geom_col(stat = "identity", 
+  geom_bar(stat = "identity", 
            fill = "steelblue3") +
   geom_text(aes(label = n), 
             size = 4, 
             vjust = -0.5) +
-  theme_bw()
+  theme_economist() 
+
+# theme_economist instead of theme_bw?
 
 # testint date transformation with base code
 # as.Date(df_18$date, "%d.%m.%Y")
@@ -283,9 +286,12 @@ df_18 %>%
             size = 3) + # setting the size of the label
   xlab("") + 
   ylab("") + 
-  labs(fill = "Partei") +
+  labs(fill = "") +
   scale_fill_brewer(palette = "Set2") +
-  theme_bw()
+  theme(legend.position="bottom") +
+  theme_economist() 
+
+# line plot
 ```
 
 suport vector model Machine Learning
