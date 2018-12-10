@@ -16,7 +16,7 @@ Used package: [pdftools](https://cran.r-project.org/web/packages/pdftools/pdftoo
 
 ```{r}
 # loading nedded packages
-p_load(dplyr, ggplot2, pdftools, stringr, lubridate, RColorBrewer)
+p_load(dplyr, haven, readr, ggplot2, pdftools, stringr, lubridate, RColorBrewer)
 
 ```
 
@@ -291,10 +291,35 @@ df_18 %>%
   theme(legend.position="bottom") +
   theme_economist() 
 
-# line plot
+# line plot for quarter
+df_18 %>% 
+  filter(party != "NA" & type != "Große Anfrage") %>% 
+  mutate(date_n = as.Date(date, "%d.%m.%Y")) %>% 
+  mutate(quarter = quarter(date_n, with_year = TRUE),
+         party = case_when(party == "Union" ~ "CDU/CSU",
+                           TRUE ~ party)) %>% 
+  filter(party != "CDU/CSU" & party != "SPD") %>% 
+  group_by(party, quarter) %>% 
+  summarise(n = n()) %>% 
+  ggplot(aes(x = quarter, y = n, col = party)) +
+  geom_line() +
+  xlab("") + ylab("") +
+  scale_color_discrete("") +
+  theme_economist() +
+  ggtitle("Anzahl kleiner Anfragen nach Partei")
+
 ```
 
+
+## Getting Title and content
+
+```{r}
+
+```
+
+
 suport vector model Machine Learning
+
 
 
 ## Some Testing
@@ -398,3 +423,52 @@ doc_2 %>%
   str_replace_all("\xfc", "ü") %>% 
   str_replace_all("\xf6", "ö") 
 ```
+
+## Merging - Title (18. Bundestag)
+```{r}
+# reading downloaded csv
+DIP21_18 <- read.csv("DIP21Export_18_btd.csv", sep = ";")
+
+# filtering for kleine Anfrage
+DIP21_18 %>% 
+  filter(DRS_TYP == "Kleine Anfrage")
+
+# creating a new variable with the clean document number
+DIP21_18$DRS_NR_clean <- str_replace_all(DIP21_18$DRS_NR, "18/", "")
+
+# creating the document number for matching (same systematic as in the main df)
+DIP21_18$DRS_NR_MATCH <- str_pad(DIP21_18$DRS_NR_clean, 5, 'left', pad = '0') %>% 
+  paste0("18", .)
+
+# selecting the needed variables and saving the new df at the same time
+DIP21_18 %<>% 
+  select(DRS_NR, DRS_NR_MATCH, TITLE, DRS_TYP, DATE)
+
+# checking the number for matching
+head(DIP21_18)
+tail(DIP21_18)
+```
+
+
+## shape files
+
+working with shape files for plotting some maps! :D
+```{r}
+
+DIP21_19 <- read.csv("/Users/marlonschumacher/Downloads/DIP21Export.csv", sep = ";")
+
+DIP21_19 %>% 
+  filter(DRS_TYP == "Kleine Anfrage")
+
+DIP21_19$DRS_NR_clean <- str_replace_all(DIP21_19$DRS_NR, "19/", "")
+
+DIP21_19$DRS_NR_MATCH <- str_pad(DIP21_19$DRS_NR_clean, 5, 'left', pad = '0') %>% 
+  paste0("19", .)
+
+DIP21_19 %<>% 
+  select(DRS_NR, DRS_NR_MATCH, DRS_TITLE, DRS_TYP, DATE)
+
+
+
+```
+
