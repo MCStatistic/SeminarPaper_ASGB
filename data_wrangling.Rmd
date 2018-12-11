@@ -289,7 +289,15 @@ df_18 %>%
   labs(fill = "") +
   scale_fill_brewer(palette = "Set2") +
   theme(legend.position="bottom") +
-  theme_economist() 
+  theme_hc() +
+  scale_fill_manual(values = c("Grüne" = "#50822E", "Linke" = "#B61C3E", 
+                     "CDU/CSU" = "#32372C", "SPD" = "#E3000F"))
+  ggsave("AnfragenPartei_18_BT.png", path = "./images/", width = 6, height = 4.5)
+
+ggsav
+
+df_18 %>% 
+  group_by(party)
 
 # line plot for quarter
 df_18 %>% 
@@ -387,6 +395,8 @@ pdf_text_2 <- function(pdf){
     unlist()
 }
 
+
+
 pdf_vector_test <- c("./18_btd/1800038.pdf", "./18_btd/1800039.pdf", "./18_btd/1800040.pdf")
 map_test <- map(pdf_vector_test,
                 ~pdf_text_2(.x))
@@ -442,11 +452,126 @@ DIP21_18$DRS_NR_MATCH <- str_pad(DIP21_18$DRS_NR_clean, 5, 'left', pad = '0') %>
 
 # selecting the needed variables and saving the new df at the same time
 DIP21_18 %<>% 
-  select(DRS_NR, DRS_NR_MATCH, TITLE, DRS_TYP, DATE)
+  select(DRS_NR, DRS_NR_MATCH, TITLE, DRS_TYP, DATE) %>% 
+  filter(DRS_TYP == "Kleine Anfrage") %>% 
+  rename(file = DRS_NR_MATCH)
 
 # checking the number for matching
 head(DIP21_18)
 tail(DIP21_18)
+
+# checking both data frames
+DIP21_18
+df_18
+
+# merging
+df_18_v2 <- left_join(df_18, DIP21_18 %>% select(file, TITLE), by = "file")
+save(df_18_v2, file = "df_18_v2.RData")
+load("df_18_v2.RData")
+
+df_18_v2 %<>% 
+  filter(type != "Große Anfrage")
+
+path_18_clean_v2 <- str_replace_all(path_18_clean, "./18_btd", "./18_btd_anfragen")
+
+# inspect it again, because the code would be much cleaner as the other one...
+content <- c()
+for (i in seq_along(path_18_clean_v2)){
+  # getting the content as whole string
+  complete_string <- pdf_text(path_18_clean_v2[i]) %>% 
+    unlist() %>% 
+    toString()
+  
+  content_r <- strsplit(complete_string, "LINKE | GRÜNE | SPD | CDU/CSU") %>% 
+  unlist() %>% 
+  .[2]
+  
+  content <- c(content, content_r)
+}
+
+content <- c()
+for (i in seq_along(path_18_clean_v2)){
+text_string <- pdf_text(path_anfragen_18_clean[i]) %>% 
+     strsplit("\n") %>% 
+     unlist()
+  partei<-text_string[4:20]
+  a <- str_detect(partei, "GRÜNEN")
+  
+  if(TRUE %in% a){
+    complete_string <- pdf_text(path_18_clean_v2[i]) %>% 
+      unlist() %>% 
+      toString()
+  
+    content_r <- strsplits(complete_string, "GRÜNEN") %>% 
+       unlist() %>% 
+      .[2]
+  } else{
+      b <- str_detect(partei, "LINKE")
+      
+      if(TRUE %in% b){
+        complete_string <- pdf_text(path_18_clean_v2[i]) %>% 
+          unlist() %>% 
+          toString()
+  
+         content_r <- strsplits(complete_string, "LINKE") %>% 
+           unlist() %>% 
+           .[2]
+      } else{
+        c <- str_detect(partei, "SPD")
+        
+        if(TRUE %in% c){
+          complete_string <- pdf_text(path_18_clean_v2[i]) %>% 
+            unlist() %>% 
+            toString()
+  
+          content_r <- strsplits(complete_string, "SPD") %>% 
+            unlist() %>% 
+            .[2]
+        } else{
+          d <- str_detect(partei, "CDU/CSU")
+          
+          if(TRUE %in% d){
+            complete_string <- pdf_text(path_18_clean_v2[i]) %>% 
+               unlist() %>% 
+               toString()
+  
+            content_r <- strsplits(complete_string, "CDU/CSU") %>% 
+               unlist() %>% 
+               .[2]
+          } else{
+          z <- "NA"
+          }
+        }
+      }
+    }
+  content <- c(content, content_r)
+}
+
+c_merge_df <- data.frame(path_18_clean_v2, content) %>% 
+  mutate(file = str_replace_all(path_18_clean_v2, "./18_btd_anfragen/", "")) %>% 
+  mutate(file = str_replace_all(file, ".pdf", "")) %>% 
+  select(file, content)
+
+df_18_v3 <- left_join(df_18_v2, c_merge_df, by = "file")
+
+save(df_18_v2, file = "df_18_v3.RData")
+load("df_18_v3.RData")
+
+
+# testing
+# complete_string <- pdf_text(path_18_clean_v2[33]) %>% 
+#     unlist() %>% 
+#     toString() 
+# 
+# strsplit(complete_string, "GRÜNE | LINKE") %>% 
+#   unlist() %>% 
+#   .[2]
+
+```
+
+## content
+```{r}
+toString(unlist(pdf_text("./18_btd_anfragen/1800038.pdf")))
 ```
 
 
