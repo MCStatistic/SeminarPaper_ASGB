@@ -16,6 +16,7 @@ Used package: [pdftools](https://cran.r-project.org/web/packages/pdftools/pdftoo
 
 ```{r}
 # loading nedded packages
+library(pacman)
 p_load(dplyr, haven, readr, ggplot2, pdftools, stringr, lubridate, RColorBrewer)
 
 ```
@@ -474,6 +475,9 @@ df_18_v2 %<>%
 
 path_18_clean_v2 <- str_replace_all(path_18_clean, "./18_btd", "./18_btd_anfragen")
 
+save(path_18_clean_v2, file = "path_18_c2.RData")
+load("path_18_c2.RData")
+
 # inspect it again, because the code would be much cleaner as the other one...
 content <- c()
 for (i in seq_along(path_18_clean_v2)){
@@ -557,6 +561,32 @@ df_18_v3 <- left_join(df_18_v2, c_merge_df, by = "file")
 save(df_18_v2, file = "df_18_v3.RData")
 load("df_18_v3.RData")
 
+
+
+testpath <- path_18_clean_v2[1:100]
+
+# this code works fine!
+content <- c()
+for (i in seq_along(testpath)){
+  # getting the content as whole string
+  complete_string <- pdf_text(testpath[i]) %>% 
+    unlist() %>% 
+    toString()
+  
+  content_r <- strsplit(complete_string, "LINKE|GRÜNE|SPD|CDU/CSU") %>% 
+  unlist() %>% 
+  .[2]
+  
+  content <- c(content, content_r)
+}
+
+complete_string <- pdf_text(testpath[1]) %>% 
+    unlist() %>% 
+    toString() %>% 
+    str_split(., "LINKE|GRÜNEN|SPD|CSU") %>% 
+    unlist() %>% 
+    .[2] %>% 
+    str_replace(".", "")
 
 # testing
 # complete_string <- pdf_text(path_18_clean_v2[33]) %>% 
