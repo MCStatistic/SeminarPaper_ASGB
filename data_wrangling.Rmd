@@ -481,87 +481,36 @@ load("path_18_c2.RData")
 # inspect it again, because the code would be much cleaner as the other one...
 content <- c()
 for (i in seq_along(path_18_clean_v2)){
-  # getting the content as whole string
-  complete_string <- pdf_text(path_18_clean_v2[i]) %>% 
-    unlist() %>% 
-    toString()
+  content_r <- pdf_text(path_18_clean_v2[i]) %>% # reading the pdf
+    unlist() %>% # unlist the content
+    toString() %>% # make it to own string
+    # split the string in two strings, when one of the following characters are showing up
+    # n=2: only two strings -> if Linke comes again, there will be no more split
+    str_split("LINKE|GRÜNEN|SPD|CSU", n =2) %>% 
+    unlist() %>% # unlisting again
+    .[2] # chosing the splittet string which includes the content 
   
-  content_r <- strsplit(complete_string, "LINKE | GRÜNE | SPD | CDU/CSU") %>% 
-  unlist() %>% 
-  .[2]
-  
+  # fill the content string
   content <- c(content, content_r)
 }
 
-content <- c()
-for (i in seq_along(path_18_clean_v2)){
-text_string <- pdf_text(path_anfragen_18_clean[i]) %>% 
-     strsplit("\n") %>% 
-     unlist()
-  partei<-text_string[4:20]
-  a <- str_detect(partei, "GRÜNEN")
-  
-  if(TRUE %in% a){
-    complete_string <- pdf_text(path_18_clean_v2[i]) %>% 
-      unlist() %>% 
-      toString()
-  
-    content_r <- strsplits(complete_string, "GRÜNEN") %>% 
-       unlist() %>% 
-      .[2]
-  } else{
-      b <- str_detect(partei, "LINKE")
-      
-      if(TRUE %in% b){
-        complete_string <- pdf_text(path_18_clean_v2[i]) %>% 
-          unlist() %>% 
-          toString()
-  
-         content_r <- strsplits(complete_string, "LINKE") %>% 
-           unlist() %>% 
-           .[2]
-      } else{
-        c <- str_detect(partei, "SPD")
-        
-        if(TRUE %in% c){
-          complete_string <- pdf_text(path_18_clean_v2[i]) %>% 
-            unlist() %>% 
-            toString()
-  
-          content_r <- strsplits(complete_string, "SPD") %>% 
-            unlist() %>% 
-            .[2]
-        } else{
-          d <- str_detect(partei, "CDU/CSU")
-          
-          if(TRUE %in% d){
-            complete_string <- pdf_text(path_18_clean_v2[i]) %>% 
-               unlist() %>% 
-               toString()
-  
-            content_r <- strsplits(complete_string, "CDU/CSU") %>% 
-               unlist() %>% 
-               .[2]
-          } else{
-          z <- "NA"
-          }
-        }
-      }
-    }
-  content <- c(content, content_r)
-}
+# checking if there are any NA's
+nrow(data.frame(content))
+data.frame(content) %>% 
+  na.omit() %>% 
+  nrow()
 
+# creating the df for merging
 c_merge_df <- data.frame(path_18_clean_v2, content) %>% 
   mutate(file = str_replace_all(path_18_clean_v2, "./18_btd_anfragen/", "")) %>% 
   mutate(file = str_replace_all(file, ".pdf", "")) %>% 
   select(file, content)
 
+# merging the content by file-name
 df_18_v3 <- left_join(df_18_v2, c_merge_df, by = "file")
 
 save(df_18_v2, file = "df_18_v3.RData")
 load("df_18_v3.RData")
-
-
 
 testpath <- path_18_clean_v2[1:100]
 
@@ -571,11 +520,10 @@ for (i in seq_along(testpath)){
   # getting the content as whole string
   complete_string <- pdf_text(testpath[i]) %>% 
     unlist() %>% 
-    toString()
-  
-  content_r <- strsplit(complete_string, "LINKE|GRÜNE|SPD|CDU/CSU") %>% 
-  unlist() %>% 
-  .[2]
+    toString() %>% 
+    str_split("LINKE|GRÜNE|SPD|CDU/CSU", n=2) %>% 
+    unlist() %>% 
+    .[2]
   
   content <- c(content, content_r)
 }
