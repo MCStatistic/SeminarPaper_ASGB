@@ -458,12 +458,12 @@ DIP21_18 %<>%
   rename(file = DRS_NR_MATCH)
 
 # checking the number for matching
-head(DIP21_18)
-tail(DIP21_18)
+# head(DIP21_18)
+# tail(DIP21_18)
 
 # checking both data frames
-DIP21_18
-df_18
+# DIP21_18
+# df_18
 
 # merging
 df_18_v2 <- left_join(df_18, DIP21_18 %>% select(file, TITLE), by = "file")
@@ -472,18 +472,26 @@ load("df_18_v2.RData")
 
 df_18_v2 %<>% 
   filter(type != "Große Anfrage")
+```
 
+## content
+```{r}
+# testing toString function
+toString(unlist(pdf_text("./18_btd_anfragen/1800038.pdf")))
+
+# changing the folder name...
 path_18_clean_v2 <- str_replace_all(path_18_clean, "./18_btd", "./18_btd_anfragen")
 
 save(path_18_clean_v2, file = "path_18_c2.RData")
 load("path_18_c2.RData")
 
-# inspect it again, because the code would be much cleaner as the other one...
+# creating empty vector for the loop
 content <- c()
+# for loop for all "kleine anfragen" - 18. BT
 for (i in seq_along(path_18_clean_v2)){
   content_r <- pdf_text(path_18_clean_v2[i]) %>% # reading the pdf
     unlist() %>% # unlist the content
-    toString() %>% # make it to own string
+    toString() %>% # make it to one string
     # split the string in two strings, when one of the following characters are showing up
     # n=2: only two strings -> if Linke comes again, there will be no more split
     str_split("LINKE|GRÜNEN|SPD|CSU", n =2) %>% 
@@ -499,6 +507,7 @@ nrow(data.frame(content))
 data.frame(content) %>% 
   na.omit() %>% 
   nrow()
+# one NA is there. However, it's not a big deal regarding the number of documents (1 of 3600)
 
 # creating the df for merging
 c_merge_df <- data.frame(path_18_clean_v2, content) %>% 
@@ -506,13 +515,14 @@ c_merge_df <- data.frame(path_18_clean_v2, content) %>%
   mutate(file = str_replace_all(file, ".pdf", "")) %>% 
   select(file, content)
 
-# merging the content by file-name
+# merging the content by nr of document (NR = file)
 df_18_v3 <- left_join(df_18_v2, c_merge_df, by = "file")
 
 save(df_18_v2, file = "df_18_v3.RData")
 load("df_18_v3.RData")
 
-testpath <- path_18_clean_v2[1:100]
+# previous testing for the for loop above
+testpath <- path_18_clean_v2[1:10]
 
 # this code works fine!
 content <- c()
@@ -527,51 +537,9 @@ for (i in seq_along(testpath)){
   
   content <- c(content, content_r)
 }
-
-complete_string <- pdf_text(testpath[1]) %>% 
-    unlist() %>% 
-    toString() %>% 
-    str_split(., "LINKE|GRÜNEN|SPD|CSU") %>% 
-    unlist() %>% 
-    .[2] %>% 
-    str_replace(".", "")
-
-# testing
-# complete_string <- pdf_text(path_18_clean_v2[33]) %>% 
-#     unlist() %>% 
-#     toString() 
-# 
-# strsplit(complete_string, "GRÜNE | LINKE") %>% 
-#   unlist() %>% 
-#   .[2]
-
-```
-
-## content
-```{r}
-toString(unlist(pdf_text("./18_btd_anfragen/1800038.pdf")))
 ```
 
 
 ## shape files
 
 working with shape files for plotting some maps! :D
-```{r}
-
-DIP21_19 <- read.csv("/Users/marlonschumacher/Downloads/DIP21Export.csv", sep = ";")
-
-DIP21_19 %>% 
-  filter(DRS_TYP == "Kleine Anfrage")
-
-DIP21_19$DRS_NR_clean <- str_replace_all(DIP21_19$DRS_NR, "19/", "")
-
-DIP21_19$DRS_NR_MATCH <- str_pad(DIP21_19$DRS_NR_clean, 5, 'left', pad = '0') %>% 
-  paste0("19", .)
-
-DIP21_19 %<>% 
-  select(DRS_NR, DRS_NR_MATCH, DRS_TITLE, DRS_TYP, DATE)
-
-
-
-```
-
