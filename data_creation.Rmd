@@ -9,7 +9,7 @@ output: html_document
 
 [DIP (Dokumentations- und Informationssystem für Parlamentarische Vorgänge)](https://dipbt.bundestag.de/dip21.web/bt)
 
-## Creating the URL's & file-paths for 19. BTD
+## URL's 19. BT
 
 Last document of the 19. Bundestag
 http://dipbt.bundestag.de/dip21/btd/19/000/1900001.pdf
@@ -17,31 +17,35 @@ http://dipbt.bundestag.de/dip21/btd/19/000/1900001.pdf
 First Document of the 19. Bundestag (Update is comming)
 http://dipbt.bundestag.de/dip21/btd/19/057/1905799.pdf
 
+## loading packages
 ```{r}
 # just use pacman, it's delicous!
 library(pacman)
 p_load(magrittr, dplyr, stringr, downloader, purrr, pdftools, 
        glue, tm, janeaustenr, tidytext, corpus)
+```
 
+## creating URL's for each PDF
+```{r}
 # short code for creating all 5800 URL's (19. BTD)
 # rep() replicates the object n-times
-base_19 <- rep("http://dipbt.bundestag.de/dip21/btd/19/0", each = 6100) 
+base_19 <- rep("http://dipbt.bundestag.de/dip21/btd/19/0", each = 6700) 
 
 # code explaining: replicate the character ".pdf" 5800 times
-end_19 <- rep(".pdf", each = 6100)
-mid_19 <- rep("/190", each = 6100)
+end_19 <- rep(".pdf", each = 6700)
+mid_19 <- rep("/190", each = 6700)
 
 # first step: creating a vector with the values from 00 up to 57 as characters
 # second step: creating a vector where each value is replicated 100 times
 # code exp: create a vector with the values of 00 to 57, all numbers
 #           should be 2 digit long (defined by "%02.0f") and should be
 #           defined as characters. Then take this vector and replicate it 100 times
-first_19 <- as.character(sprintf("%02d", 00:60)) %>% 
+first_19 <- as.character(sprintf("%02d", 00:66)) %>% 
   rep(each = 100) 
 
 # creating a vector which includes the values 0000 up to 5799
 # important: sprintf() is used for the 4-digit format
-second_19 <- as.character(sprintf("%04d", 0000:6099))
+second_19 <- as.character(sprintf("%04d", 0000:6699))
 
 # code exp: take all the vectors and combine these vectors with the function str_c()
 #           sep = "" -> there is no seperation, otherwise it would be not a functonal url
@@ -182,7 +186,7 @@ error_19 <- map(map_results_19, "error") %>%
   as.character()
 
 # creating df again
-tibble(results_19, error_19)
+tail(tibble(results_19, error_19))
 ```
 
 ```{r}
@@ -202,4 +206,18 @@ ggplot(data = year_table, mapping = aes(x = Year, y = number)) +
 ```
 
 
+```{r}
+r <- rep(c(0.1,0.2,0.3,0.4,0.5,0.6,0.7), 19)
+n <- rep(c(2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20), each = 7)
+df <- data.frame(r, n)
+df$alpha <- (df$n*df$r)/(1+df$r*(df$n-1))
+
+df %>% 
+  ggplot(aes(n, alpha, col = as.character(r)))+
+  geom_line() +
+  geom_hline(yintercept = 0.7, linetype = "dashed") +
+  scale_x_continuous(breaks = scales::pretty_breaks(n = 10)) +
+  scale_y_continuous(breaks = scales::pretty_breaks(n = 10)) +
+  labs(color = "Korrelation", y = "Cronbachs Alpha", x = "Anzahl Variablen")
+```
 

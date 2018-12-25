@@ -21,7 +21,7 @@ p_load(dplyr, haven, readr, ggplot2, pdftools, stringr, lubridate, RColorBrewer)
 
 ```
 
-## Deleting Files
+## Deleting Files - 18. Bundestag
 ```{r}
 # creating 
 typen_anfragen_18 <- c()
@@ -67,6 +67,56 @@ head(path_anfragen_18_clean, 10)
 # saving vectors
 save(typen_anfragen_18_clean, file = "type_a_18_clean.RData")
 save(path_anfragen_18_clean, file = "path_a_18_clean.RData")
+```
+
+##Deleting Files - 19. Bundestag
+```{r}
+# creating 
+typen_anfragen_19 <- c()
+typen_anfragen_19_clean <- c()
+path_anfragen_19_clean <- c()
+
+path_anfragen_19 <- path_19 %>% 
+  str_replace_all("./19_btd", "./19_btd_anfragen")
+
+# Deleting all documents which are != to type "Kleine Anfrage" or "Große Anfrage"
+for (i in seq_along(path_anfragen_19)) {
+  # reading the pdf document
+  text_string <- tryCatch(pdf_text(path_anfragen_19[i]),
+                           error = function(e)
+  paste("something gone wrong"))
+  text_string <- strsplit(text_string, "\n") 
+  # select the row of the document-type
+  typ <- text_string[[1]][3]
+  typen_anfragen_19 <- c(typen_anfragen_19, typ)
+  
+  # creating pattern which should match!
+  patterns <- c("Kleine Anfrage")
+  
+  # grep only the characters which are defined in the patterns string
+  a <- grep(paste(patterns, collapse="|"), typ)
+  
+  # if there is a matching in between the patterns & document type, the string will be longer than 1
+  if(length(a) >= 1) {
+    
+    # if there is a matching, save the path of the document in the vector path_18_clean
+    path_anfragen_19_clean <- c(path_anfragen_19_clean, path_anfragen_19[i])
+    typen_anfragen_19_clean <- c(typen_anfragen_19_clean, typ)
+    
+    # if there is no matching, delete the file
+  } else {
+    unlink(path_anfragen_19[i])
+  }
+}
+print("Vorgang abgeschlossen!")
+
+# inspecting vectors -> no trouble
+head(typen_anfragen_19_clean, 10)
+head(path_anfragen_19_clean, 10)
+
+# saving vectors
+save(typen_anfragen_19_clean, file = "type_a_19_clean.RData")
+save(path_anfragen_19_clean, file = "path_a_19_clean.RData")
 ```
 
 
@@ -188,32 +238,44 @@ for(i in seq_along(path_anfragen_18_clean)){
       if(TRUE %in% b){
         z <- "Linke"
       } else{
-        c <- str_detect(partei, "SPD")
+        g <- str_detect(partei, "FDP")
         
-        if(TRUE %in% c){
-          z <- "SPD"
+        if(TRUE %in% g){
+          z <- "FDP"
         } else{
-          d <- str_detect(partei, "CDU/CSU")
+          h <- str_detect(partei, "AfD")
           
-          if(TRUE %in% d){
-            z <- "Union"
-          } else{
-          z <- "NA"
+          if(TRUE %in% h){
+            z <- "AfD"
+          }else{
+            c <- str_detect(partei, "SPD")
+        
+          if(TRUE %in% c){
+           z <- "SPD"
+         } else{
+           d <- str_detect(partei, "CDU/CSU")
+          
+           if(TRUE %in% d){
+             z <- "Union"
+            } else{
+              z <- "NA"
           }
         }
       }
     }
+  }
+}
   party <- c(party, z)
 }
 
 # checking vector
 party
 length(party)
+nrow(df_18)
 
 # adding vector to the df
-df_18$party <- party
+df_19$party <- party
 
-# changing the one character value which is kind of akward...
 df_18 %<>% 
   mutate(type = case_when(type == " Kleine Anfrage" ~ "Kleine Anfrage",
                           TRUE ~ type))
@@ -227,6 +289,122 @@ df_18 %>%
 # saving data frame
 save(df_18, file = "df_18.RData")
 ```
+
+## party for 19. BDT
+```{r}
+load("path_a_19_clean.RData")
+
+party <- c()
+for(i in seq_along(path_anfragen_19_clean)){
+  text_string <- tryCatch(pdf_text(path_anfragen_19_clean[i]),
+                          error = function(e)
+  paste("Something gone wrong"))                          
+  
+  text_string <- strsplit(text_string, "\n") %>% 
+     unlist()
+  partei<-text_string[4:20]
+  a <- str_detect(partei, "GRÜNEN")
+  
+  if(TRUE %in% a){
+    z <- "Grüne"
+  } else{
+      b <- str_detect(partei, "LINKE")
+      
+      if(TRUE %in% b){
+        z <- "Linke"
+      } else{
+        g <- str_detect(partei, "FDP")
+        
+        if(TRUE %in% g){
+          z <- "FDP"
+        } else{
+          h <- str_detect(partei, "AfD")
+          
+          if(TRUE %in% h){
+            z <- "AfD"
+          }else{
+            c <- str_detect(partei, "SPD")
+        
+          if(TRUE %in% c){
+           z <- "SPD"
+         } else{
+           d <- str_detect(partei, "CDU/CSU")
+          
+           if(TRUE %in% d){
+             z <- "Union"
+            } else{
+              z <- "NA"
+          }
+        }
+      }
+    }
+  }
+}
+  party <- c(party, z)
+}
+
+# checking vector
+party
+length(party)
+
+# creating df
+df_19 <- as.data.frame(cbind(as.character(path_anfragen_19_clean), 
+                    typen_anfragen_19_clean), 
+              stringsAsFactors = FALSE)
+
+# adding vector to the df
+df_18$party <- party
+
+
+
+# just a short inspection
+df_18 %>% 
+  group_by(party, type) %>% 
+  summarise(n = n()) %>% 
+  filter(party != "NA")
+
+# saving data frame
+save(df_18, file = "df_18.RData")
+```
+
+
+## Merging (19. Bundestag)
+```{r}
+# reading downloaded csv
+DIP21_19 <- read.csv("DIP21Export_19_btd.csv", sep = ";")
+
+# filtering for kleine Anfrage
+DIP21_19 %>% 
+  filter(TYP == "Kleine Anfrage")
+
+# creating a new variable with the clean document number
+DIP21_19$NR_clean <- str_replace_all(DIP21_19$NR, "19/", "")
+
+# creating the document number for matching (same systematic as in the main df)
+DIP21_19$NR_MATCH <- str_pad(DIP21_19$NR_clean, 5, 'left', pad = '0') %>% 
+  paste0("19", .)
+
+# selecting the needed variables and saving the new df at the same time
+DIP21_19 %<>% 
+  select(NR, NR_MATCH, TITLE, TYP, DATE) %>% 
+  filter(TYP == "Kleine Anfrage") %>% 
+  rename(file = NR_MATCH)
+
+# creating file for each document
+df_19 %<>% 
+  mutate(file = str_replace_all(V1, "./19_btd/", "")) %>% 
+  mutate(file = str_replace_all(file, ".pdf", ""))
+
+# merging two df
+df_19_v2 <- left_join(df_19, DIP21_19 %>% 
+                        select(file, TITLE, DATE, TYP), by = "file")
+
+df_19_v2
+
+save(df_19_v2, file = "df_19_v2.RData")
+load("df_19_v2.RData")
+```
+
 
 ## Plotting n() for each party (+ by year)
 
@@ -320,16 +498,9 @@ df_18 %>%
 ```
 
 
-## Getting Title and content
-
-```{r}
-
-```
 
 
 suport vector model Machine Learning
-
-
 
 ## Some Testing
 ```{r}
@@ -474,7 +645,7 @@ df_18_v2 %<>%
   filter(type != "Große Anfrage")
 ```
 
-## content
+## content - 18. Bundestag
 ```{r}
 # testing toString function
 toString(unlist(pdf_text("./18_btd_anfragen/1800038.pdf")))
@@ -507,7 +678,7 @@ nrow(data.frame(content))
 data.frame(content) %>% 
   na.omit() %>% 
   nrow()
-# one NA is there. However, it's not a big deal regarding the number of documents (1 of 3600)
+# one NA is there. However, it's not a big deal regarding the number of documents (1 of 3996)
 
 # creating the df for merging
 c_merge_df <- data.frame(path_18_clean_v2, content) %>% 
@@ -518,7 +689,7 @@ c_merge_df <- data.frame(path_18_clean_v2, content) %>%
 # merging the content by nr of document (NR = file)
 df_18_v3 <- left_join(df_18_v2, c_merge_df, by = "file")
 
-save(df_18_v2, file = "df_18_v3.RData")
+save(df_18_v3, file = "df_18_v3.RData")
 load("df_18_v3.RData")
 
 # previous testing for the for loop above
@@ -537,6 +708,62 @@ for (i in seq_along(testpath)){
   
   content <- c(content, content_r)
 }
+```
+
+## content - 19. Bundestag
+```{r}
+# creating empty vector for the loop
+
+real_path_19 <- list.files(path = "./19_btd/")
+real_path_19 %<>% 
+  paste0("./19_btd/",.)
+content <- c()
+# for loop for all "kleine anfragen" - 18. BT
+for (i in seq_along(real_path_19)){
+  content_r <- pdf_text(real_path_19[i]) %>% 
+    unlist() %>% # unlist the content
+    toString() %>% # make it to one string
+    # split the string in two strings, when one of the following characters are showing up
+    # n=2: only two strings -> if Linke comes again, there will be no more split
+    str_split("LINKE|GRÜNEN|SPD|CSU|FDP|AfD", n =2) %>% 
+    unlist() %>% # unlisting again
+    .[2] # chosing the splittet string which includes the content 
+  
+  # fill the content string
+  content <- c(content, content_r)
+}
+
+# checking if there are any NA's
+nrow(data.frame(content))
+data.frame(content) %>% 
+  na.omit() %>% 
+  nrow()
+# one NA is there. However, it's not a big deal regarding the number of documents (1 of 3996)
+
+# creating the df for merging
+c_merge_df <- data.frame(real_path_19, content) %>%  
+  rename(file = real_path_19) %>% 
+  mutate(file = str_replace_all(file, ".pdf", "")) %>% 
+  mutate(file = str_replace_all(file, "./19_btd/", "")) %>% 
+  select(file, content)
+  
+  colnames(c_merge_df)
+
+# merging the content by nr of document (NR = file)
+df_19_v3 <- left_join(df_19_v2, c_merge_df, by = "file")
+
+save(df_19_v3, file = "df_19_v3.RData")
+load("df_19_v3.RData")
+
+colnames(df_19_v3)
+```
+
+## merging df 18 & 19
+```{r}
+# latest data frame
+load("df_18_v3.RData")
+
+
 ```
 
 
