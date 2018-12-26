@@ -753,17 +753,67 @@ c_merge_df <- data.frame(real_path_19, content) %>%
 df_19_v3 <- left_join(df_19_v2, c_merge_df, by = "file")
 
 save(df_19_v3, file = "df_19_v3.RData")
-load("df_19_v3.RData")
-
-colnames(df_19_v3)
 ```
 
 ## merging df 18 & 19
 ```{r}
-# latest data frame
+# loading data frames
 load("df_18_v3.RData")
+load("df_19_v3.RData")
 
+# insepcting colnames and data types for df_19
+glimpse(df_19_v3)
 
+# new df with nice format
+df_19_v4 <- df_19_v3 %>% 
+  select(file, party, TITLE, DATE, typen_anfragen_19_clean, DATE, content) %>% 
+  rename(date = DATE) %>% 
+  rename(title = TITLE) %>% 
+  rename(type = typen_anfragen_19_clean) %>% 
+  mutate(title = as.character(title)) %>% 
+  mutate(date = as.character(date)) %>% 
+  mutate(content = as.character(content))
+
+# checking: everything fine <3
+glimpse(df_19_v4)
+
+# insepcting colnames and data types for df_18
+glimpse(df_18_v3)
+
+df_18_v4 <- df_18_v3 %>% 
+  select(file, party, TITLE, type, date, content) %>% 
+  rename(title = TITLE) %>% 
+  mutate(content = as.character(content))
+
+# checking: everyting fine <3
+glimpse(df_18_v4)
+
+# combining both df's
+df_complete <- rbind.data.frame(df_19_v4, df_18_v4)
+
+# checking: everything fine <3
+View(df_complete)
+
+# saving merged df
+save(df_complete, file = "df_complete.RData")
+```
+
+## cleaning
+```{r}
+load("df_complete.RData")
+
+# just some little cleaning
+df_complete_clean <- df_complete %>% 
+  mutate(content = str_remove_all(content, "[\r\n]")) %>% 
+  mutate(content = str_remove_all(content, "[.]")) %>% 
+  mutate(content = str_remove_all(content, "[:]")) %>% 
+  mutate(content = str_remove_all(content, "[(]")) %>% 
+  mutate(content = str_remove_all(content, "[)]"))
+
+glimpse(df_complete_clean)
+
+save(df_complete_clean, file = "df_complete_clean.RData")
+load("df_complete_clean.RData")
 ```
 
 
