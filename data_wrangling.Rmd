@@ -17,7 +17,7 @@ Used package: [pdftools](https://cran.r-project.org/web/packages/pdftools/pdftoo
 ```{r}
 # loading nedded packages
 library(pacman)
-p_load(dplyr, haven, readr, ggplot2, pdftools, stringr, lubridate, RColorBrewer)
+p_load(dplyr, haven, readr, ggplot2, pdftools, stringr, lubridate, RColorBrewer, tm)
 
 ```
 
@@ -802,18 +802,58 @@ save(df_complete, file = "df_complete.RData")
 ```{r}
 load("df_complete.RData")
 
-# just some little cleaning
-df_complete_clean <- df_complete %>% 
-  mutate(content = str_remove_all(content, "[\r\n]")) %>% 
-  mutate(content = str_remove_all(content, "[.]")) %>% 
-  mutate(content = str_remove_all(content, "[:]")) %>% 
-  mutate(content = str_remove_all(content, "[(]")) %>% 
-  mutate(content = str_remove_all(content, "[)]"))
+stopwords_ger <- read_csv("stopwords.csv")
+stopwords_ger_s <- as.character(stopwords_ger$word)
+      
+umlaute <- as.data.frame(c("dafür", "darüber", "demgegenüber", "demgemäss", "dürfen",
+        "dürft",
+        "früher", "fünf", "fünfte", "fünften", "fünfter", "fünftes",
+        "für", "gegenüber",  "hätten", "hätte", "können", "könnt",
+        "könnte", "möchte", "mögen", "möglich", "mögt", "müssen", 
+        "natürlich", "später", "über", "überhaupt", "übrigens", 
+        "während", "währenddem", "währenddessen", "wäre", "würde",
+        "würden", "zunächst", "zurück", "zwölf", "––", "–", "§", "derzeit"))
+
+colnames(umlaute) <- "word"
+umlaute <- as.character(umlaute$word)
+
+df_complete_clean <- df_complete
+
+df_complete_clean$title %<>%
+  tolower()
+
+df_complete_clean$content <- df_complete$content %>% 
+  str_remove_all("[\r\n]") %>% 
+  removeNumbers() %>% 
+  removePunctuation() %>% 
+  tolower() %>% 
+  removeWords(stopwords_ger_s) %>% 
+  removeWords(stopwords("german")) %>% 
+  removeWords(umlaute)
+
+# removeWords(, stopwords_ger_s)
 
 glimpse(df_complete_clean)
 
+# extracting the number of Bundestag
+df_complete_clean %>% 
+  mutate(bt = str_sub(file, start = 1L, end = 2L)) %>% # take the first two strings out of the vector
+  head(10) 
+
 save(df_complete_clean, file = "df_complete_clean.RData")
+
 load("df_complete_clean.RData")
+
+head(df_complete_clean, 10)
+matrix <- VectorSource(df_complete_clean$content) %>% 
+  Corpus() %>% 
+  DocumentTermMatrix()
+
+## other stuff with tm package
+#leere Zeilen entfernen
+corpus <- tm_map(corpus, stripWhitespace)
+#dtm erstellen.
+mat <- DocumentTermMatrix(corpus)
 ```
 
 
