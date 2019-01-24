@@ -1,0 +1,95 @@
+---
+title: "categorization"
+author: "Marlon Schumacher"
+date: "24 1 2019"
+output: html_document
+---
+
+```{r}
+library(pacman)
+p_load(dplyr, haven, readr, ggplot2, pdftools, stringr, lubridate, RColorBrewer, tm, ggthemes)
+```
+
+
+```{r}
+load("df_complete_clean.RData")
+
+# removing numbers and punctuation
+df_complete_clean$title %<>% 
+  removeNumbers() %>% 
+  removePunctuation()
+
+# funktioniert 
+head(grepl("polizei", df_complete_clean$title))
+
+head(grepl(("polizei|sicherheit"), df_complete_clean$title))
+
+df_complete_clean %>% 
+  
+head(df_complete_clean)
+
+# first matching
+makroöko <- c("arbeitslosigkeit", "arbeitslosenquote", "zinsen","haushaltsschulden",
+              "steuern","industrie","export") %>% 
+  paste0(collapse = "|")
+
+gesundheit <- c("pflege", "pflegeversicherung", "krankenversicherung", "krankenkasse",
+                "arzt", "krankheit","impfquote", "impfung") %>% 
+  paste0(collapse = "|")
+
+agrar <- c("agrarwirtschaft", "landwirtschaft", "landwirte", "pflanzenschutzmittel","glyphosat") %>% 
+  paste0(collapse = "|")
+
+arbeit <- c("gewerkschaft", "elternzeit","kinderbetreuung", "saisonarbeit", "arbeitsschutz", 
+            "arbeitssicherheit", "mindestlohn", "mindestlöhne") %>% 
+  paste0(collapse = "|")
+
+bildung <- c("studium", "lehrer", "schule", "universität", "weiterbildung", "forschung") %>% 
+  paste0(collapse = "|")
+
+umwelt <- c("trinkwasser", "recycling", "müllentsorgung", "luftverschmutzung",
+            "klimawandel", "emissionen", "artenschutz", "stickoxide") %>% 
+  paste0(collapse = "|")
+
+energie <- c("kohle", "kohleausstieg", "energie", "atomkraft", "solar", "windenergie") %>% 
+  paste0(collapse = "|")
+
+einwanderung <- c("flüchtlinge", "asyl", "migration", "einwanderer", "einwanderung", "abschiebung") %>% 
+  paste0(collapse = "|")
+
+transport <- c("autobahn", "schienenverkehr", "bahn", "flughafen", "lkw") %>% 
+  paste0(collapse = "|")
+
+krimi <- c("rauschmittel", "steuerhinterziehung", "bnd", "bundesnachrichtendienst", 
+           "gefängnis", "kindesmissbrauch", "kinderpornografie", "interpol", 
+           "kindesentführung", "straftaten", "kriminalität") %>% 
+  paste0(collapse = "|")
+
+sozi <- c("mietpreis", "wohnungsbau", "obdachlos", "arbeitslosengeld") %>% 
+  paste0(collapse = "|")
+
+verteidigung <- c("bundeswehr", "krieg") %>% 
+  paste0(collapse = "|")
+
+df_complete_clean %<>% 
+  mutate(thema = case_when(
+    str_detect(title, makroöko) ~ "Makroökonomie",
+    str_detect(title, gesundheit) ~ "Gesundheit",
+    str_detect(title, agrar) ~ "Agrarwirtschaft",
+    str_detect(title, arbeit) ~ "Arbeit & Beschäftigung",
+    str_detect(title, bildung) ~ "Bildung",
+    str_detect(title, umwelt) ~ "Umwelt",
+    str_detect(title, energie) ~ "Energie",
+    str_detect(title, einwanderung) ~ "Einwanderung",
+    str_detect(title, transport) ~ "Transport",
+    str_detect(title, krimi) ~ "Kriminalität & Familienprobleme",
+    str_detect(title, sozi) ~ "Soziale Wohlfahrt",
+    str_detect(title, verteidigung) ~ "Verteidigung",
+    TRUE ~ "Sonstiges"
+  ))
+
+df_complete_clean %>% 
+  sjmisc::frq(thema)
+
+```
+

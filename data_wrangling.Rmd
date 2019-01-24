@@ -17,7 +17,7 @@ Used package: [pdftools](https://cran.r-project.org/web/packages/pdftools/pdftoo
 ```{r}
 # loading nedded packages
 library(pacman)
-p_load(dplyr, haven, readr, ggplot2, pdftools, stringr, lubridate, RColorBrewer, tm)
+p_load(dplyr, haven, readr, ggplot2, pdftools, stringr, lubridate, RColorBrewer, tm, ggthemes)
 
 ```
 
@@ -798,6 +798,78 @@ View(df_complete)
 save(df_complete, file = "df_complete.RData")
 ```
 
+## complete distribution
+```{r}
+# year on x and party als filler
+df_complete_clean$bt
+
+df_complete_clean %>% 
+  select(bt) %>% 
+  head()
+df_complete_clean %>% 
+  filter(party != "NA") %>% 
+  mutate(date_n = as.Date(date, "%d.%m.%Y")) %>% 
+  mutate(year = year(date_n),
+         party = case_when(party == "Union" ~ "CDU/CSU",
+                           TRUE ~ party)) %>% 
+  group_by(party, year) %>% 
+  summarise(n = n()) %>% 
+  mutate(year = as.character(year)) %>% 
+  mutate(year = case_when(year == "2013" ~ "2013\nOkt-Dez",
+                          TRUE ~ year)) %>% 
+  ggplot(aes(x = as.factor(year), fill = reorder(party, -n), y = n)) +
+  geom_bar(position="dodge", 
+           stat="identity") +
+  geom_text(position = position_dodge(width = 1), # positioning for grouped barplot
+            aes(label = n), # n-value should be the label for each bar
+            vjust = -0.5, # adjusting the vertical dimension (overlapping)
+            size = 3) + # setting the size of the label
+  xlab("") + 
+  ylab("") + 
+  labs(fill = "") +
+  theme(legend.position="bottom") +
+  theme_hc() +
+  scale_fill_manual(values = c("Grüne" = "#50822E", "Linke" = "#B61C3E", 
+                     "CDU/CSU" = "#32372C", "SPD" = "#E3000F", "AfD" = "#0088FF", "FDP" = "#FFD600")) +
+  facet_wrap(~ as.integer(bt))
+  ggsave("AnfragenPartei_18_BT.png", path = "./images/", width = 6, height = 4.5)
+  
+  df_complete_clean %>% 
+  filter(party != "NA", bt == "19") %>% 
+  mutate(date_n = as.Date(date, "%d.%m.%Y")) %>% 
+  mutate(year = year(date_n),
+         party = case_when(party == "Union" ~ "CDU/CSU",
+                           TRUE ~ party)) %>% 
+  group_by(party, year) %>% 
+  summarise(n = n()) %>% 
+  mutate(year = as.character(year)) %>% 
+  mutate(year = case_when(year == "2017" ~ "2017\nNov-Dez",
+                          TRUE ~ year)) %>% 
+  ggplot(aes(x = as.factor(year), fill = reorder(party, -n), y = n)) +
+  geom_bar(position="dodge", 
+           stat="identity") +
+  geom_text(position = position_dodge(width = 1), # positioning for grouped barplot
+            aes(label = n), # n-value should be the label for each bar
+            vjust = -0.5, # adjusting the vertical dimension (overlapping)
+            size = 3) + # setting the size of the label
+  xlab("") + 
+  ylab("") + 
+  labs(fill = "") +
+  theme(legend.position="bottom", plot.title = element_text(hjust = 0.5)) +
+  theme_hc() +
+  scale_fill_manual(values = c("Grüne" = "#50822E", "Linke" = "#B61C3E", 
+                     "CDU/CSU" = "#32372C", "SPD" = "#E3000F", "AfD" = "#0088FF", "FDP" = "#FFD600")) +
+    ggtitle("19. Bundestag")
+  
+party <- c("Linke", "Grüne", "FDP", "CDU/CSU", "AfD", "SPD")
+sitze18 <- c(70, 63, 0, 255, 0, 193)
+sitze19 <- c(69, 67, 80, 246, 91, 152)
+  
+sitze <- cbind(party, sitze18, sitze19) %>% 
+  as.data.frame() 
+```
+
+
 ## cleaning
 ```{r}
 load("df_complete.RData")
@@ -820,7 +892,7 @@ umlaute <- as.character(umlaute$word)
 df_complete_clean <- df_complete
 
 df_complete_clean$title %<>%
-  tolower()
+  tolower() 
 
 df_complete_clean$content <- df_complete$content %>% 
   str_remove_all("[\r\n]") %>% 
@@ -836,7 +908,7 @@ df_complete_clean$content <- df_complete$content %>%
 glimpse(df_complete_clean)
 
 # extracting the number of Bundestag
-df_complete_clean %>% 
+df_complete_clean <- df_complete_clean %>% 
   mutate(bt = str_sub(file, start = 1L, end = 2L)) %>% # take the first two strings out of the vector
   head(10) 
 
