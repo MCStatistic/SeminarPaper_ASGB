@@ -24,68 +24,113 @@ head(grepl("polizei", df_complete_clean$title))
 
 head(grepl(("polizei|sicherheit"), df_complete_clean$title))
 
-df_complete_clean %>% 
+df_complete_clean$title
   
 head(df_complete_clean)
 
-# first matching
+# matching words for each category
+
+# topic 1
 makroöko <- c("arbeitslosigkeit", "arbeitslosenquote", "zinsen","haushaltsschulden",
-              "steuern","industrie","export") %>% 
+              "steuern","industrie","export", "waffenexport") %>% 
   paste0(collapse = "|")
 
+# topic 2
+buerger <- c("diskriminierung", "minderheiten", "meinungsfreiheit", "religionsfreiheit", 
+            "partizipation", "wahlrecht") %>% 
+  paste0(collapse = "|")
+
+# topic 3
 gesundheit <- c("pflege", "pflegeversicherung", "krankenversicherung", "krankenkasse",
-                "arzt", "krankheit","impfquote", "impfung") %>% 
+                "arzt", "krankheit","impfquote", "impfung", "alkoholkonsum", "arzneimittel") %>% 
   paste0(collapse = "|")
 
+# topic 4
 agrar <- c("agrarwirtschaft", "landwirtschaft", "landwirte", "pflanzenschutzmittel","glyphosat") %>% 
   paste0(collapse = "|")
 
+# topic 5
 arbeit <- c("gewerkschaft", "elternzeit","kinderbetreuung", "saisonarbeit", "arbeitsschutz", 
             "arbeitssicherheit", "mindestlohn", "mindestlöhne") %>% 
   paste0(collapse = "|")
 
+# topic 6
 bildung <- c("studium", "lehrer", "schule", "universität", "weiterbildung", "forschung") %>% 
   paste0(collapse = "|")
 
+# topic 7 
 umwelt <- c("trinkwasser", "recycling", "müllentsorgung", "luftverschmutzung",
-            "klimawandel", "emissionen", "artenschutz", "stickoxide") %>% 
+            "klimawandel", "emissionen", "artenschutz", "stickoxide", "wasserqualität") %>% 
   paste0(collapse = "|")
 
+# topic 8
 energie <- c("kohle", "kohleausstieg", "energie", "atomkraft", "solar", "windenergie") %>% 
   paste0(collapse = "|")
 
-einwanderung <- c("flüchtlinge", "asyl", "migration", "einwanderer", "einwanderung", "abschiebung") %>% 
+# topic 9
+einwanderung <- c("flüchtlinge", "asyl", "migration", "einwanderer", "einwanderung", "abschiebung", "islam") %>% 
   paste0(collapse = "|")
 
-transport <- c("autobahn", "schienenverkehr", "bahn", "flughafen", "lkw") %>% 
+# topic 10
+transport <- c("autobahn", "schienenverkehr", "bahn", "flughafen", "lkw", "maut") %>% 
   paste0(collapse = "|")
 
+# topic 11
 krimi <- c("rauschmittel", "steuerhinterziehung", "bnd", "bundesnachrichtendienst", 
            "gefängnis", "kindesmissbrauch", "kinderpornografie", "interpol", 
-           "kindesentführung", "straftaten", "kriminalität") %>% 
+           "kindesentführung", "straftaten", "kriminalität", "sicherungsverwahrung") %>% 
   paste0(collapse = "|")
 
-sozi <- c("mietpreis", "wohnungsbau", "obdachlos", "arbeitslosengeld") %>% 
+# topic 12
+sozi <- c("arbeitslosengeld", "renten", "altersarmut", "pension") %>% 
   paste0(collapse = "|")
 
+# topic 13
+wohn <- c("mietpreis", "wohnungsbau", "obdachlos", "wohnhilfe") %>% 
+  paste0(collapse = "|")
+
+# topic 14
+banken <- c("banken", "kartell", "finanzsektor", "verbraucherschutz", "tourismus", "patent", "urheberrecht",
+            "verbraucherschutz", "fluthilfe", "wettbewerbsbeschränkung") %>% 
+  paste0(collapse = "|")
+
+# topic 15
 verteidigung <- c("bundeswehr", "krieg") %>% 
+  paste0(collapse = "|")
+
+# topic 16
+tech_kom <- c("internet", "breitband", "telekommunikation", "gez", "rundfunk", "twitter", "facebook") %>% 
+  paste0(collapse = "|")
+
+# topic 17
+außenh <- c("handelsabkommen", "export", "zoll", "zölle", "einfuhrbeschränkungen", "einfuhr", "steueroasen") %>% 
+  paste0(collapse = "|")
+
+# topic 18
+int_aus <- c("auslandshilfe", "entwicklungsländer", "menschenrechte") %>% 
   paste0(collapse = "|")
 
 df_complete_clean %<>% 
   mutate(thema = case_when(
-    str_detect(title, makroöko) ~ "Makroökonomie",
-    str_detect(title, gesundheit) ~ "Gesundheit",
-    str_detect(title, agrar) ~ "Agrarwirtschaft",
-    str_detect(title, arbeit) ~ "Arbeit & Beschäftigung",
-    str_detect(title, bildung) ~ "Bildung",
-    str_detect(title, umwelt) ~ "Umwelt",
-    str_detect(title, energie) ~ "Energie",
-    str_detect(title, einwanderung) ~ "Einwanderung",
-    str_detect(title, transport) ~ "Transport",
-    str_detect(title, krimi) ~ "Kriminalität & Familienprobleme",
-    str_detect(title, sozi) ~ "Soziale Wohlfahrt",
-    str_detect(title, verteidigung) ~ "Verteidigung",
-    TRUE ~ "Sonstiges"
+    str_detect(title, makroöko) ~ "Makroökonomie", #1
+    str_detect(title, buerger) ~ "Bürgerrechte",#2
+    str_detect(title, gesundheit) ~ "Gesundheit", #3
+    str_detect(title, agrar) ~ "Agrarwirtschaft", #4
+    str_detect(title, arbeit) ~ "Arbeit & Beschäftigung", #5
+    str_detect(title, bildung) ~ "Bildung", #6
+    str_detect(title, umwelt) ~ "Umwelt", #7
+    str_detect(title, energie) ~ "Energie", #8
+    str_detect(title, einwanderung) ~ "Einwanderung", #9
+    str_detect(title, transport) ~ "Transport", #10
+    str_detect(title, krimi) ~ "Kriminalität & Familienprobleme", #11
+    str_detect(title, sozi) ~ "Soziale Wohlfahrt", #12
+    str_detect(title, wohn) ~ "Gemeindeentwicklung & Wohnungsprobleme", #13
+    str_detect(title, banken) ~ "Banken, Finanzen & Binnenhandel", #14
+    str_detect(title, verteidigung) ~ "Verteidigung", #15
+    str_detect(title, tech_kom) ~ "Technologie & Kommunikation", #16
+    str_detect(title, außenh) ~ "Außenhandel", #17
+    str_detect(title, int_aus) ~ "Auslandshilfe", #18
+    TRUE ~ "zSonstiges"
   ))
 
 df_complete_clean %>% 
