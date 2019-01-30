@@ -1,0 +1,27 @@
+---
+output: pdf_document
+---
+
+## Agenda-Setting?
+
+Einführung...
+
+### Part 1
+
+Was kann das heißen
+
+
+### Part 2
+
+...und wieso?
+
+## Issue Ownership explained
+
+meins meins
+
+### Wie siehts genau aus?
+
+### So macht man einen Einzug, MERKEN!!!
+
+> H1: The more precarious the economic situation of an individual, the higher the probability of that individual supporting populist parties.
+

@@ -1,0 +1,213 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\newcommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{}
+    \pretitle{\vspace{\droptitle}}
+  \posttitle{}
+    \author{}
+    \preauthor{}\postauthor{}
+    \date{}
+    \predate{}\postdate{}
+  
+
+\begin{document}
+
+This section will briefly summarize the results and then conclude the
+study with a few words on limitations and future research.
+
+With regard to our multinomial logistic models, it can be said that our
+hypotheses were able to be mainly \emph{confirmed}. Let's start with the
+economic hypothesis:
+
+\begin{quote}
+H1: The less economically fortunate (economic dissatisfaction,
+unemployment, economic insecurity, living on welfare), the higher the
+probability of supporting populist parties.
+\end{quote}
+
+The models estimated here mainly support this hypothesis. Unemployment,
+economic insecurity and receiving welfare increase the chance to support
+populists compared to support of established parties. Altough, the
+impact of living on welfare seems not to be as great as the other two
+factors mentioned and does not yield a significant effect in supporting
+traditionalist populists. In addition, in Model 3, where the cultural
+dimension has been added, there is a slight reduction of the effects.
+Despite this, all significances remain stable and the estimates continue
+to show the expected effects.
+
+Concerning the cultural dimension, the results of the multinomial
+logistic regression also support our hypotheses:
+
+\begin{quote}
+H2: The more culturally inclusive (values), the higher the probability
+of supporting progressive populist parties.
+\end{quote}
+
+\begin{quote}
+H3: The more culturally exclusive, the higher the probability of
+supporting a traditionalist populist party.
+\end{quote}
+
+Inclusive values (high values for self-transcendence and openness and
+lower anti-immigration sentiment) increases the probability of support
+for progressive populists, but openness lacks a statistically
+significant effect. In addition, exclusive values (low values for
+self-transcendence and openness and a high value for anti-immigration),
+increase the probability of supporting traditionalist populism.
+Anti-immigration in particular seems very important here and stands out
+clearly from the other effects. Additionally, openness values decrease
+the chance of supporting traditionalist populist parties. Even in Model
+4, which combines all predictors, all estimated effects remain stable.
+The effects also show our previously suspected differentiation. The
+economic dimension increases the likelihood of supporting populist
+parties in general. The cultural dimension, on the other hand, shows
+that it has diametrically opposed effects on the support of
+traditionalist and progressive populists.
+
+The last hypothesis concerning interaction effects stated as follows:
+
+\begin{quote}
+H4: When economic and cultural factors interact, the support for
+populist parties is higher.
+\end{quote}
+
+The empirical evidence obtained through multinomial logistic regression
+does not support this hypothesis. Two statistically significant effects
+were found, however most interactions were not. An interaction between
+\emph{Anti-Immigration Sentiment} and \emph{Economic Insecurity} implied
+that the effect of the former on populist party support is \emph{weaker}
+for those that are very economically insecure, suggesting the direct
+opposite of what we expected. Future research should further investigate
+what factors might cause this discrepancy. On the other hand, the other
+interaction effect between \emph{Unemployment} and
+\emph{Self-Enhancment} showed the expected direction and the influence
+of self-enhancement values was \emph{stronger} for those that are
+unemployed. However, given the overwhelming contradictory evidence, this
+hypothesis has to be rejected.
+
+\begin{table}[]
+    \centering
+    \caption{Summary of Results}
+    \label{summaryy}
+    \resizebox{\textwidth}{!}{%
+        \begin{tabular}{@{}lccl@{}}
+            \toprule
+            \multicolumn{1}{c}{\textbf{Hypothesis}} & 
+            \textbf{Confirmed} & 
+            \textbf{\begin{tabular}[c]{@{}c@{}}Indications/\\  Tendencies\end{tabular}} &
+            \multicolumn{1}{c}{\textbf{Restrictions}} \\ 
+            \midrule
+            \textit{\begin{tabular}[c]{@{}l@{}}\textbf{H1:} The less economically fortunate \\(economic dissatisfaction, unemployment, \\ economic insecurity, living on welfare), \\the higher the probability of supporting \\ anti-establishment parties.\end{tabular}}                                  & Yes  & +                                                                          & \begin{tabular}[c]{@{}l@{}}Weak Effects \\ 
+            Welfare not signicant for \\
+            Traditionalist Populists\end{tabular}                           \\ \midrule
+            
+\textit{\begin{tabular}[c]{@{}l@{}}\textbf{H2:} The more culturally inclusive \\(values), the higher the probability of \\ supporting progressive populist parties.\end{tabular}}               & Yes                                                               & +                                                                          & \begin{tabular}[c]{@{}l@{}}Weak Effects \\ 
+            Openness not signicant for \\
+            Progressive Populists. \end{tabular}                                                                                      \\ \midrule
+            \textit{\begin{tabular}[c]{@{}l@{}}\textbf{H3:} The more culturally exclusive, \\the higher the probability of supporting \\a traditionalist populist party.\end{tabular}}             & Yes                                                                & +                                                                          & \begin{tabular}[c]{@{}l@{}}Weak Effects. \end{tabular} \\ \midrule
+            \textit{\begin{tabular}[c]{@{}l@{}}\textbf{H4:} When economic and cultural factors interact, \\ the support for populist parties is higher.\end{tabular}}               & No                                                                & \textbf{-}                                                                 & \begin{tabular}[c]{@{}l@{}}No significant effects \\
+            except for two \\
+            inconclusive evidence\end{tabular}                                                            \\ \bottomrule    \\[-1em]
+            \multicolumn{4}{l}{%
+                \begin{minipage}{19cm}%
+                    \flushright
+                    \scriptsize A "+" sign indicates at least some empirical evidence in favor of the hypothesis and a "-" sign stands for contradictory empirical evidence.%
+                \end{minipage}%
+            }
+        \end{tabular}
+}
+\end{table}
+
+It should also be stressed that while all the effects found are
+significant, they are rather weak, especially when it comes to the
+cultural dimension. In addition, almost all control effects remain
+significant in all models. In the academic literature, supporters of
+populist parties are often associated with features such as older age
+and lower education. Some minor surprises were found here: in terms of
+educational attainment, more education decreases the support for
+traditional populists, whereas the same isn't true for supporters of
+progressive populists where higher education levels are associated with
+higher support. Further, when it comes to age, the models suggest that
+younger age is associated with higher support for progressive as well as
+traditional populists.
+
+The goal of this paper was to bring some clarity on the confusion
+between different variants of populism that all too often have neglected
+this multidimensionality. Further research might be able to build upon
+our conceptualization and give more attention to the different variants
+of populism, so as to not conflate the distinct explanatory frameworks
+that come along with them.
+
+
+\end{document}

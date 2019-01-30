@@ -1,0 +1,108 @@
+
+%<!-- Titleseite -->
+\thispagestyle{empty}
+
+%%% redefine \maketitle
+\renewcommand{\maketitle}{
+	\begin{titlepage}
+		\begin{center}
+			\setlength{\parskip}{0pt}
+			
+			%	    \begin{flushright}
+			%	    \colorbox{darkgray}{\color{white}{\Large \textsf{\@headerimg}}}
+			%             \end{flushright}
+			\begin{multicols}{2}
+				\flushleft
+                {Prof. Dr. Patrick Bernhagen\par}
+				%{Seminar: Transformation of representative democracy\par}
+				{Institut für Sozialwissenschaften\par}
+				{Abteilung für Politische Systeme\\ und Politische Soziologie\par}
+				\begin{flushright}
+					\includegraphics[width=7cm]{images/logo_stuttgart.jpg}
+				\end{flushright}
+			\end{multicols}
+			\vspace*{2mm}
+			\center
+			\vspace*{20mm}
+			
+			\vspace*{8mm}
+			
+			\line(1,0){450}
+			
+			\vspace*{3mm}
+			
+			{\fontsize{26}{38} {\bfseries Agenda-Setting} \par}
+			\vspace*{1mm}
+			{ \Large Eine empirische Analyse der kleinen Anfragen des 18. und 19. Bundestages}
+			\vspace*{3mm}
+			
+			\line(1,0){450}
+		
+			
+			\vspace*{10mm}
+
+	\centering
+	\textsc{\large Autoren} \\
+	
+	\vspace*{5mm}
+	
+	\begin{tabular}{@{}cc@{}}
+		Marlon \textsc{Schumacher}                             & Robin \textsc{Gerl}                     \\
+		Mail: m.c.schumacher@live.de                  & Mail: gerl.robin@web.de               \\
+		Matrikel-Nr.: 2954594                         & Matrikel-Nr.: 2959667                                          
+	\end{tabular}
+
+			
+			\vspace*{10mm}
+			
+			\textsc{\Large Seminar}\\[0.3cm]
+			\textsc{\large  Interessengruppen, Regierungen und öffentliche Meinung}\\[0.5cm]
+			
+			\vspace*{75mm}
+			
+			{Abgabedatum: 30.03.2019 \par} %\date{xxx}
+			
+		\end{center}
+		\vspace*{2mm}
+		
+	    \vspace*{2mm}
+        \center		
+        {\large {} \par}
+		
+		
+		
+	\end{titlepage}
+}
+
+%%% automated table of contents
+\newcommand{\content}{
+	\newpage
+	\thispagestyle{empty}
+	\vspace{5mm}
+	\tableofcontents
+}
+%%% änderung des Namens...
+\renewcommand{\contentsname}{Inhaltsverzeichnis}
+
+
+%%% Title page
+\maketitle
+\newpage
+\content
+\clearpage
+\listoffigures
+\clearpage
+\listoftables
+\clearpage
+
+%\clearpage
+%
+%%<!-- Inhaltsverzeichnisse -->
+%\thispagestyle{empty}
+%\setstretch{1.15}
+%\tableofcontents
+%\listoffigures
+%
+%\clearpage
+%\setstretch{1.44}
+%<!-- \onehalfspacing -->

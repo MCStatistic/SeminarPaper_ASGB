@@ -28,6 +28,10 @@ df_complete_clean$title
   
 head(df_complete_clean)
 
+# deleting all files with no title (15 rows only)
+df_complete_clean %<>% 
+  filter(!is.na(title))
+
 ```
 
 ## matching with str_detect
@@ -41,13 +45,14 @@ makroöko <- c("arbeitslosigkeit", "arbeitslosenquote", "zinsen","haushaltsschul
 
 # topic 2
 buerger <- c("diskriminierung", "minderheit", "meinungsfreiheit", "religionsfreiheit", 
-             "partizipation", "wahlrecht", "gender", "gleichberechtigung", "gleichstellung") %>% 
+             "partizipation", "wahlrecht", "gender", "gleichberechtigung", "gleichstellung",
+             "gleichgeschlechtliche ehen", "öffentlichkeitsbeteiligung") %>% 
   paste0(collapse = "|")
 
 # topic 3
 gesundheit <- c("pflege", "pflegeversicherung", "krankenversicherung", "krankenkasse",
                 "arzt", "krankheit","impfquote", "impfung", "alkoholkonsum", "arzneimittel",
-                "gesundheitsschutz", "medizin") %>% 
+                "gesundheitsschutz", "medizin", "patienten") %>% 
   paste0(collapse = "|")
 
 # topic 4
@@ -57,7 +62,8 @@ agrar <- c("agrar", "landwirtschaft", "landwirte", "pflanzenschutzmittel","glyph
 # topic 5
 arbeit <- c("gewerkschaft", "elternzeit", "kinderbetreuung", "saisonarbeit", "arbeitsschutz", 
             "arbeitssicherheit", "mindestlohn", "mindestlöhne", "streik", "überstunden",
-            "arbeitszeitgesetz") %>% 
+            "arbeitszeitgesetz", "fachkräftemangel", "arbeitszeit", "geringfügige beschäftigung",
+            "befristete beschäftigung") %>% 
   paste0(collapse = "|")
 
 # topic 6
@@ -68,7 +74,7 @@ bildung <- c("studium", "lehrer", "schule", "universität", "weiterbildung",
 # topic 7 
 umwelt <- c("trinkwasser", "recycling", "müll", "luftverschmutzung", "plastik",
             "klimawandel", "emission", "artenschutz", "stickoxide", "wasserqualität", "umwelt",
-            "klimaschutz", "insekten", "co2-speicherung", "grundwasser") %>% 
+            "klimaschutz", "insekten", "co2-speicherung", "grundwasser", "tierschutz") %>% 
   paste0(collapse = "|")
 
 # topic 8
@@ -84,7 +90,7 @@ einwanderung <- c("flüchtlinge", "asyl", "migration", "einwanderer", "einwander
 # topic 10
 transport <- c("autobahn", "schienenverkehr", "bahn", "flughafen", "lkw", "maut", "mobilität", 
                "schienen", "zugverspätung", "verkehrswende", "verkehrsprojekt", "radverkehr",
-               "verkehrspolitik") %>% 
+               "verkehrspolitik", "straßenbrücke", "verkehrsminister") %>% 
   paste0(collapse = "|")
 
 # topic 11
@@ -92,12 +98,13 @@ krimi <- c("rauschmittel", "steuerhinterziehung", "bnd", "bundesnachrichtendiens
            "gefängnis", "kindesmissbrauch", "kinderpornografie", "interpol", 
            "kindesentführung", "straftaten", "kriminalität", "sicherungsverwahrung",
            "tötungsdelikte", "haftbefehl", "bundeskriminalamt", "polizei", "gewalttaten",
-           "linksextrem", "rechtsextrem") %>% 
+           "linksextrem", "rechtsextrem", "ermittlungsverfahren", "gefährder") %>% 
   paste0(collapse = "|")
 
 # topic 12
 sozi <- c("arbeitslosengeld", "renten", "altersarmut", "pension", "armut", "tafel", "kindergeld",
-          "jobcenter", "sgb-ii", " rente ", "vermögensungleichheit", "einkommensungleichheit") %>% 
+          "jobcenter", "sgb-ii", " rente ", "vermögensungleichheit", "einkommensungleichheit",
+          "riester-rente") %>% 
   paste0(collapse = "|")
 
 # topic 13
@@ -107,7 +114,8 @@ wohn <- c("mietpreis", "miete", "wohnung", "obdachlos", "wohnhilfe", "wohnheim",
 
 # topic 14
 banken <- c("bank", "kartell", "finanzsektor", "verbraucherschutz", "tourismus", "patent", "urheberrecht",
-            "verbraucherschutz", "fluthilfe", "wettbewerbsbeschränkung", "katastrophenschutz") %>% 
+            "verbraucherschutz", "fluthilfe", "wettbewerbsbeschränkung", "katastrophenschutz",
+            "finanzmarkt", "kapitalmarkt") %>% 
   paste0(collapse = "|")
 
 # topic 15
@@ -116,16 +124,28 @@ verteidigung <- c("bundeswehr", "kriegseinsatz", "kriegseinsätze", "nato") %>%
 
 # topic 16
 tech_kom <- c("internet", "breitband", "telekommunikation", "gez", "rundfunk", "twitter", "facebook",
-              "digitalisierung", "raumfahrt") %>% 
+              "digitalisierung", "raumfahrt", "cybersicherheit") %>% 
   paste0(collapse = "|")
 
 # topic 17
 außenh <- c("handelsabkommen", "export", "import", "zölle", "einfuhrbeschränkung", 
-            "einfuhr", "steueroasen", "freihandel", "außenhandel", "export", "waffenexport") %>% 
+            "einfuhr", "steueroasen", "freihandel", "außenhandel", "export", "waffenexport",
+            "ceta", "ttip", "transatlantic trade") %>% 
   paste0(collapse = "|")
 
 # topic 18
 int_aus <- c("auslandshilfe", "entwicklungsländer", "menschenrecht", "humanitäre hilfe", "brexit") %>% 
+  paste0(collapse = "|")
+
+regierung <- c(" sanktionen ", "bürokratieentlastung", "bürokratieabbau", 
+               "bundesanstalt für immobilienaufgaben", "deutsch-georgische", "deutsch-türkischen",
+               "deutsch-indischen", "deutsch-montenegrinische", "deutsch-russische",
+               "deutsch-armenische", "deutsch-ukrainische", "deutschland und aserbaidschan",
+               "diplomat") %>% 
+  paste0(collapse = "|")
+
+# public goods muss raus, da es hierzu nahezu keinerlei Themen gibt
+public_goods <- c("denkmal", "denkmäler") %>% 
   paste0(collapse = "|")
 
 df_complete_clean %<>% 
@@ -148,8 +168,13 @@ df_complete_clean %<>%
     str_detect(title, tech_kom) ~ "Technologie & Kommunikation", #16
     str_detect(title, außenh) ~ "Außenhandel", #17
     str_detect(title, int_aus) ~ "Internationale Angelegenheiten & Auslandshilfe", #18
+    str_detect(title, regierung) ~ "Regierungsoperationen", #19
+    # str_detect(title, public_goods) ~ "Öffentliche Flächen", #20
     TRUE ~ "zSonstiges"
   ))
+
+df_complete_clean %>% 
+  filter(str_detect(title, "diplomat") == TRUE)
 
 df_complete_clean %>% 
   sjmisc::frq(thema)
@@ -195,11 +220,13 @@ df_overlap <- df_complete_clean %>%
   mutate(verteidigung = case_when(str_detect(title, verteidigung) ~ 1, TRUE ~ 0)) %>% 
   mutate(tech_kom = case_when(str_detect(title, tech_kom) ~ 1, TRUE ~ 0)) %>% 
   mutate(außenh = case_when(str_detect(title, außenh) ~ 1, TRUE ~ 0)) %>% 
-  mutate(int_aus = case_when(str_detect(title, int_aus) ~ 1, TRUE ~ 0)) %>% 
+  mutate(int_aus = case_when(str_detect(title, int_aus) ~ 1, TRUE ~ 0)) %>%
+  mutate(regierung = case_when(str_detect(title, regierung) ~ 1, TRUE ~ 0)) %>% 
+  mutate(public_good = case_when(str_detect(title, public_goods) ~ 1, TRUE ~ 0)) %>% 
   mutate(overlap = makroökonomie + buerger + gesundheit + agrar +
                        arbeit + bildung + umwelt + energie + einwanderung +
                        transport + krimi + sozi + wohn + banken + verteidigung +
-                       tech_kom + außenh + int_aus)
+                       tech_kom + außenh + int_aus + regierung + public_good)
 
 
 df_overlap %>% 
