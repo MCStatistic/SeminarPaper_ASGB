@@ -926,8 +926,6 @@ matrix <- VectorSource(df_complete_clean$content) %>%
 corpus <- tm_map(corpus, stripWhitespace)
 #dtm erstellen.
 mat <- DocumentTermMatrix(corpus)
-
-df_complete_clean$title
 ```
 
 
