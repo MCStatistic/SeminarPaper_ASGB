@@ -63,7 +63,9 @@ agrar <- c("agrar", "landwirtschaft", "landwirte", "pflanzenschutzmittel","glyph
 arbeit <- c("gewerkschaft", "elternzeit", "kinderbetreuung", "saisonarbeit", "arbeitsschutz", 
             "arbeitssicherheit", "mindestlohn", "mindestlöhne", "streik", "überstunden",
             "arbeitszeitgesetz", "fachkräftemangel", "arbeitszeit", "geringfügige beschäftigung",
-            "befristete beschäftigung") %>% 
+            "befristete beschäftigung", "arbeitsbedingungen", "befristeter beschäftigung",
+            "leiharbeit", "arbeit auf abruf", "arbeitsunfälle", "stellenabbau",
+            "niedriglöhne") %>% 
   paste0(collapse = "|")
 
 # topic 6
@@ -74,11 +76,13 @@ bildung <- c("studium", "lehrer", "schule", "universität", "weiterbildung",
 # topic 7 
 umwelt <- c("trinkwasser", "recycling", "müll", "luftverschmutzung", "plastik",
             "klimawandel", "emission", "artenschutz", "stickoxide", "wasserqualität", "umwelt",
-            "klimaschutz", "insekten", "co2-speicherung", "grundwasser", "tierschutz") %>% 
+            "klimaschutz", "insekten", "co2-speicherung", "grundwasser", "tierschutz",
+            "atomtransport", "ökologisch") %>% 
   paste0(collapse = "|")
 
 # topic 8
-energie <- c("kohle", "kohleausstieg", "energie", "atomkraft", "solar", "windenergie", "erneuerbare") %>% 
+energie <- c("kohle", "kohleausstieg", "energie", "atomkraft", "solar", "windenergie", "erneuerbare",
+             "atomstandort") %>% 
   paste0(collapse = "|")
 
 # topic 9
@@ -104,17 +108,17 @@ krimi <- c("rauschmittel", "steuerhinterziehung", "bnd", "bundesnachrichtendiens
 # topic 12
 sozi <- c("arbeitslosengeld", "renten", "altersarmut", "pension", "armut", "tafel", "kindergeld",
           "jobcenter", "sgb-ii", " rente ", "vermögensungleichheit", "einkommensungleichheit",
-          "riester-rente") %>% 
+          "riester-rente", "sozialgesetzbuch", "altersvorsorge") %>% 
   paste0(collapse = "|")
 
 # topic 13
 wohn <- c("mietpreis", "miete", "wohnung", "obdachlos", "wohnhilfe", "wohnheim",
-          "brachfläche") %>% 
+          "brachfläche", "wohnen") %>% 
   paste0(collapse = "|")
 
 # topic 14
 banken <- c("bank", "kartell", "finanzsektor", "verbraucherschutz", "tourismus", "patent", "urheberrecht",
-            "verbraucherschutz", "fluthilfe", "wettbewerbsbeschränkung", "katastrophenschutz",
+            "verbraucherschutz", "verbraucherrecht", "fluthilfe", "wettbewerbsbeschränkung", "katastrophenschutz",
             "finanzmarkt", "kapitalmarkt") %>% 
   paste0(collapse = "|")
 
@@ -134,7 +138,9 @@ außenh <- c("handelsabkommen", "export", "import", "zölle", "einfuhrbeschränk
   paste0(collapse = "|")
 
 # topic 18
-int_aus <- c("auslandshilfe", "entwicklungsländer", "menschenrecht", "humanitäre hilfe", "brexit") %>% 
+int_aus <- c("auslandshilfe", "entwicklungsländer", "menschenrecht", "humanitäre hilfe", "brexit",
+             "arbeitsbedingungen in schwellen und entwicklu", "islamischer staat", "terror",
+             "bürgerkrieg") %>% 
   paste0(collapse = "|")
 
 regierung <- c(" sanktionen ", "bürokratieentlastung", "bürokratieabbau", 
@@ -174,10 +180,12 @@ df_complete_clean %<>%
   ))
 
 df_complete_clean %>% 
-  filter(str_detect(title, "diplomat") == TRUE)
+  sjmisc::frq(thema) %>% 
+  kableExtra::kable()
 
 df_complete_clean %>% 
-  sjmisc::frq(thema)
+  filter(str_detect(title, "diplomat") == TRUE)
+
 
 View(df_complete_clean %>% 
        select(title, thema, file) %>% 
@@ -234,7 +242,7 @@ df_overlap %>%
   sjmisc::frq(overlap)
 
 View(df_overlap %>%
-  select(overlap, title, thema) %>% 
+  select(overlap, title, thema, file) %>% 
   filter(overlap == 2))
 
 View(df_overlap %>%
@@ -242,3 +250,60 @@ View(df_overlap %>%
 
 ```
 
+```{r}
+df_complete_clean %>% 
+  mutate(thema = case_when(
+    file == "1901255") ~ "bla bla",
+    file == "whfwh") ~ 
+  
+  
+```
+
+# little inspection
+```{r}
+plot_18_pre <- df_complete_clean %>%
+  filter(thema != "zSonstiges" & bt == "18") %>%
+  group_by(thema) %>%
+  summarise(n = n()) %>%
+  mutate(perc = (n/sum(n))*100) %>%
+  ggplot(aes(x = reorder(thema, +perc), y = perc)) +
+  geom_bar(position = "dodge", 
+           stat = "identity",
+           fill = "skyblue4") +
+  geom_text(aes(y = perc, 
+                label = round(perc, 1)),
+            size = 3.1,
+            color=rgb(100,100,100, maxColorValue=255),
+            hjust=-0.1) +
+  theme_bw() +
+  ggtitle("") +
+  ylab("percentage") +
+  xlab("") +
+  coord_flip()
+
+plot_19_pre <- df_complete_clean %>%
+  filter(thema != "zSonstiges" & bt == "19") %>%
+  group_by(thema) %>%
+  summarise(n = n()) %>%
+  mutate(perc = (n/sum(n))*100) %>%
+  ggplot(aes(x = reorder(thema, +perc), y = perc)) +
+  geom_bar(position = "dodge", 
+           stat = "identity",
+           fill = "skyblue4") +
+  geom_text(aes(y = perc, 
+                label = round(perc, 1)),
+            size = 3.1,
+            color=rgb(100,100,100, maxColorValue=255),
+            hjust=-0.1)+
+  theme_bw() +
+  ggtitle("") +
+  ylab("percentage") +
+  xlab("") +
+  coord_flip()
+
+library(ggpubr)
+figure_1 <- ggarrange(plot_18_pre, plot_19_pre,
+          labels = c("18. Bundestag", "19. Bundestag"),
+          ncol = 1, nrow = 2)
+ggsave("figure_1.png", figure_1, width = 10, height = 8)
+```
