@@ -250,13 +250,43 @@ View(df_overlap %>%
 
 ```
 
+# Falsches Matching korrigieren
 ```{r}
+# für alle matches mit 3 overlaps
+View(df_overlap %>%
+       select(overlap, title, thema, file) %>%
+       filter(overlap == 3))
+
 df_complete_clean %>% 
   mutate(thema = case_when(
-    file == "1901255") ~ "bla bla",
-    file == "whfwh") ~ 
+    # wenn file == xy, dann soll x-thema zugewiesen werden
+    file == "1900907" ~ "Internationale Angelegenheiten & Auslandshilfe", # terror
+    file == "1903371" ~ "Außenhandel", # Waffenexporte
+    file == "1902085" ~ "zSonstiges", # viel zu unspezifisch!
+    file == "1800584" ~ "Außenhandel", # Handelsabkommen...
+    file == "1808522" ~ "Internationale Angelegenheiten & Auslandshilfe", # steueroasen (int. Finanzm.)
+    file == "1811759" ~ "Internationale Angelegenheiten & Auslandshilfe", # terror
+    file == "1813162" ~ "Außenhandel", # handelsabkommen
+    TRUE ~ thema)) # alle restlichen anfragen erhalten die bereits zugeordnete themen
+
+right_matches_3 <- c("1800521")
+
+# alle anfragen mit overlap von 2
+View(df_overlap %>%
+  select(overlap, title, thema, file) %>% 
+  filter(overlap == 2))
+
+df_complete_clean %>% 
+  mutate(thema = case_when(
+    # wenn file == xy, dann soll x-thema zugewiesen werden
+    file == "xxxx" ~ "xxxx", 
+    file == "whfwh" ~ "real topic",
+    file == "xx" ~ "real topic",
+    TRUE ~ thema)) # alle restlichen anfragen erhalten die bereits zugeordnete themen
   
-  
+# richtige Matches, jedoch dennoch vorhandener overlap
+right_matches_2 <- c("file1", "file2", "file3")
+
 ```
 
 # little inspection
