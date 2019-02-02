@@ -257,7 +257,7 @@ View(df_overlap %>%
        select(overlap, title, thema, file) %>%
        filter(overlap == 3))
 
-df_complete_clean %>% 
+df_complete_clean <- df_complete_clean %>% 
   mutate(thema = case_when(
     # wenn file == xy, dann soll x-thema zugewiesen werden
     file == "1900907" ~ "Internationale Angelegenheiten & Auslandshilfe", # terror
@@ -276,12 +276,73 @@ View(df_overlap %>%
   select(overlap, title, thema, file) %>% 
   filter(overlap == 2))
 
-df_complete_clean %>% 
+df_complete_clean <- df_complete_clean %>% 
   mutate(thema = case_when(
     # wenn file == xy, dann soll x-thema zugewiesen werden
-    file == "xxxx" ~ "xxxx", 
-    file == "whfwh" ~ "real topic",
-    file == "xx" ~ "real topic",
+    file == "1901063" ~ "Energie", #primäres Energiethema
+    file == "1802295" ~ "Außenhandel", #Wirtschaftsfolgen von Subventionen in der Landwirtschaft
+    file == "1808135" ~ "Außenhandel", # Zollabbau im Zuge von ttip
+    file == "1808485" ~ "Umwelt", # Klimaschutz in der Landwirtschaft
+    file == "1803623" ~ "Kriminalität & Familienprobleme", #Arbeitsbedingungen für polizisten im Ausland
+    file == "1805772" ~ "Internationale Angelegenheiten & Auslandshilfe", # Einfluss von d. Markt auf                                                                                    Entwicklungsländer
+    file == "1808498" ~ "Soziale Wohlfahrt", #höhe von Mindestlohn zur Bekämpfung von Armut
+    file == "1806954" ~ "Verteidigung", # Bundeswehrfragen
+    file == "1901953" ~ "Technologie & Kommunikation", #Netzausbau
+    file == "1902213" ~ "Einwanderung", #Bildungsförderung von Einwanderern
+    file == "1800031" ~ "Verteidigung", # Werbung von Bundeswehr an Schulen
+    file == "1800032" ~ "Verteidigung", # Ausmaß von Werbung der Bundesweh an Schulen
+    file == "1801088" ~ "Verteidigung", #Bundeswehr und Schule (keine zusätzlichen Infos)
+    file == "1902627" ~ "Umwelt", #Mikroplastik 
+    file == "1801037" ~ "Kriminalität & Familienprobleme", #deutsch amerikanische zusammenarbeit vs Crime
+    file == "1810683" ~ "Kriminalität & Familienprobleme", # irgendwas mit ppolizei
+    file == "1900195" ~ "Internationale Angelegenheiten & Auslandshilfe", #Terrorismusprävention bei                                                                                   Flüchtlingen
+    file == "1900564" ~ "Kriminalität & Familienprobleme", #Nutzung von interpol vs. Terrorismus 
+    file == "1900606" ~ "Kriminalität & Familienprobleme", #Öffnung der Polizei gegenüber Migranten
+    file == "1900783" ~ "Internationale Angelegenheiten & Auslandshilfe", #Nachklapp zu 1900195
+    file == "1903675" ~ "Kriminalität & Familienprobleme", #Kriminalität von Migranten
+    file == "1903824" ~ "Verteidigung", #Natoübung 
+    file == "1903994" ~ "Soziale Wohlfahrt", #Renteneinstieg von Flüchtlingen 
+    file == "1904307" ~ "Internationale Angelegenheiten & Auslandshilfe", # Bericht über Abschiebungen in                                                                              Madrid
+    file == "1906230" ~ "Kriminalität & Familienprobleme", #Statistiken über Kriminalität von Flüchtlingen
+    file == "1806872" ~ "Soziale Wohlfahrt", #Altersarmut von jüdischen Einwanderern aus der UdSSR
+    file == "1811197" ~ "Verteidigung", #Bundeswehreinsatz im Libanon
+    file == "1813196" ~ "Regierungsoperationen", #Kommentar zu Tschetschenien
+    file == "1902876" ~ "Kriminalität & Familienprobleme", #Waffenkontrolle
+    file == "1903998" ~ "Regierungsoperationen", #Twitternutzung von Regierungsmitgliedern
+    file == "1904174" ~ "Gemeindeentwicklung & Wohnungsprobleme", # Wohnungspolitik
+    file == "1904417" ~ "Internationale Angelegenheiten & Auslandshilfe", #Brexitfolgen
+    file == "1906346" ~ "Makroökonomie", #Rundertisch zu Steuerpolitik
+    file == "1900274" ~ "Transport", #Schienenpflege
+    file == "1900690" ~ "Einwanderung", #Altersfeststellung von Flüchtlingen
+    file == "1903065" ~ "Umwelt", #Umweltfolgen von Amalgamnutzung
+    file == "1903084" ~ "Technologie & Kommunikation", #Internet in Altersheimen
+    file == "1903961" ~ "Gemeindeentwicklung & Wohnungsprobleme", #eig öffentliche Flächen
+    file == "1904271" ~ "Einwanderung", #Abschiebungsverzögerung durch Krankheit
+    file == "1904363" ~ "Soziale Wohlfahrt", #Verschuldung durch Krankenversicherung
+    file == "1806739" ~ "Transport", # Schienenpflege
+    file == "1800078" ~ "Verteidigung", #Rauschmittel bei Auslandseinsätzen der Bundeswehr
+    file == "1809998" ~ "Verteidigung", #Rauschmitte bei Auslandseinsätzen der Bundeswehr
+    file == "1901782" ~ "Außenhandel", #Rentensteuer von Portugal
+    file == "1902279" ~ "Außenhandel", #Steuerfolgen von Brexit
+    file == "1905973" ~ "Regierungsoperationen", #Einflussnahme von Lobbyisten
+    file == "1906354" ~ "Regierungsoperationen", #Einflussnahme von Lobbyisten
+    file == "1801004" ~ "Bürgerrechte", #Steuerliche Gleichstellung von Homoehen
+    file == "1804029" ~ "Regierungsoperationen", #Fischerei in Südostasien
+    file == "1806230" ~ "Kriminalität & Familienprobleme", #Steuerhinterziehung
+    file == "1809904" ~ "Arbeit & Beschäftigung", #Arbeitsbedingungen in der Fleischindustrie
+    file == "1813367" ~ "Regierungsoperationen", #Wissenstand der Regierung über Kartellbildung
+    file == "1805719" ~ "Verteidigung", #Werbung von Bundeswehr
+    file == "1901455" ~ "Kriminalität & Familienprobleme", #Crime at trainstation
+    file == "1901589" ~ "Kriminalität & Familienprobleme", #Crime at trainstation
+    file == "1901937" ~ "Kriminalität & Familienprobleme", #Crime at trainstation
+    file == "1901976" ~ "Kriminalität & Familienprobleme", #Crime in trains
+    file == "1902289" ~ "Technologie & Kommunikation", #Internet in der Bahn
+    file == "1903499" ~ "Kriminalität & Familienprobleme", #Crime in trains
+    file == "1905695" ~ "Technologie & Kommunikation", #Internet in der Bahn
+    file == "1809376" ~ "Verteidigung", # Flugshows der Bundeswehr
+    file == "1812190" ~ "Kriminalität & Familienprobleme", #Crime at trainstation
+    file == "1813229" ~ "Kriminalität & Familienprobleme", #Crime at trainstation
+    file == "1807315" ~ "Banken, Finanzen & Binnenhandel", #Tourismusfolgen aus Klimawandel
     TRUE ~ thema)) # alle restlichen anfragen erhalten die bereits zugeordnete themen
   
 # richtige Matches, jedoch dennoch vorhandener overlap
@@ -336,4 +397,183 @@ figure_1 <- ggarrange(plot_18_pre, plot_19_pre,
           labels = c("18. Bundestag", "19. Bundestag"),
           ncol = 1, nrow = 2)
 ggsave("figure_1.png", figure_1, width = 10, height = 8)
+
+ggpreview(figure_1, width = 10, height = 8)
+
+# testing facet_grid() again
+# creating labels
+labs <- c("18. Bundestag", "19. Bundestag")
+levels(df_complete_clean$bt) <- rev(labs)
+df_complete_clean$bt_f <- factor(df_complete_clean$bt, labels = c("18. Bundestag", "19. Bundestag"))
+
+df_complete_clean %>%
+  filter(thema != "zSonstiges") %>%
+  group_by(bt_f, thema) %>%
+  summarise(n = n()) %>%
+  mutate(perc = (n/sum(n))*100) %>%
+  ggplot(aes(x = reorder(thema, +perc), y = perc)) +
+  geom_bar(position = "dodge", 
+           stat = "identity",
+           fill = "skyblue4") +
+  facet_wrap(~bt_f, labeller = label_value) +
+  geom_text(aes(y = perc, 
+                label = round(perc, 1)),
+            size = 3.1,
+            color=rgb(255,255,255, maxColorValue=255),
+            hjust=+1.1) +
+  theme_bw() +
+  ggtitle("") +
+  ylab("") +
+  xlab("") +
+  coord_flip()
+  
+ggsave("figure_1.png", figure_1, width = 10, height = 8)
+
 ```
+
+
+# supervised machine
+```{r}
+install.packages("RTextTools")
+library(RTextTools)
+
+df_training <- df_complete_clean %>% 
+  filter(thema != "zSonstiges") %>% 
+  sample_n(2978)
+
+# nrow(df_training)
+
+# creating df with topic and content
+x <- data.frame(thema = df_training$thema , content = df_training$content)
+#alle Labels anzeigen
+unique(x$thema)
+
+# Erstellung einer VectorSource
+source <- VectorSource(x$content)
+
+# corpus erstellen
+corpus <- Corpus(source)
+
+# zufallsverteilung funktioniert
+# corpus[[1]]$content
+
+corpus <- tm_map(corpus, stripWhitespace)
+
+# creating a documenttermmatrix
+mat <- DocumentTermMatrix(corpus)
+
+# train size: 80% = 2978*0.8 = 2383
+container <- create_container(mat, x$thema, 
+                              trainSize=1:2383,
+                              testSize=2384:2978, 
+                              virgin=FALSE)
+
+model <- train_model(algorithm = "SVM", 
+                     container,
+                     kernel='linear')
+
+#das Model wird auf die übrigen 20% angewendet und in results gespeichert.
+results <- classify_model(container, model)
+
+tabelle_accuracy<-table(as.character(x$thema[2384:2978]), as.character(results[,"SVM_LABEL"]))
+tabelle_accuracy
+
+recall_accuracy(x$thema[2384:2978], results[,"SVM_LABEL"])
+
+test_tibble<-df_training[2384:2978,]
+test_tibble$thema_test<-results$SVM_LABEL
+test_tibble$prob<-results$SVM_PROB
+
+length(which(test_tibble$thema==test_tibble$thema_test))/length(test_tibble$thema)
+#ohne filter 0.687, N= 595
+
+ggplot(test_tibble, aes(prob))+
+  geom_histogram()+
+  geom_vline(xintercept=mean(test_tibble$prob, na.rm = T), color="red")+
+  geom_vline(xintercept = median(test_tibble$prob, na.rm = T), color = "blue")+
+  geom_vline(xintercept = 0.6, color = "black")
+```
+
+# again but a bit better
+```{r}
+df_training$thema_f <- factor(df_training$thema)
+doc_matrix <- create_matrix(df_training$content)
+container <- create_container(doc_matrix, 
+                              df_training$thema, 
+                              trainSize=1:2383,
+                              testSize=2384:2978, 
+                              virgin=FALSE)
+
+container_f <- create_container(doc_matrix, 
+                              as.numeric(df_training$thema_f), 
+                              trainSize=1:2383,
+                              testSize=2384:2978, 
+                              virgin=FALSE)
+
+# SVM Algortihm
+SVM <- train_model(container,"SVM")
+svm_classify <- classify_model(container, SVM)
+
+# creating df with real topics, predicted topic and probability
+test_svm <- df_training[2384:2978,]
+test_svm$thema_test <- svm_classify$SVM_LABEL
+test_svm$prob <- svm_classify$SVM_PROB
+
+length(which(test_svm$thema==test_svm$thema_test))/length(test_svm$thema)
+#ohne filter 0.687, N= 595
+
+# looking for probabilities
+test_svm_04<- test_svm %>%
+  filter(prob >= 0.4)%>%
+  arrange((prob))
+length(which(test_svm_04$thema==test_svm_04$thema_test))/length(test_svm_04$thema)
+# 81.9; n = 420 -> 70.6%
+
+test_svm_05 <- test_svm %>%
+  filter(prob >= 0.5)%>%
+  arrange((prob))
+length(which(test_svm_05$thema==test_svm_05$thema_test))/length(test_svm_05$thema)
+# 86.2; n = 364 -> 61.2% (von 595)
+
+test_svm_06<- test_svm %>%
+  filter(prob >= 0.6)%>%
+  arrange((prob))
+length(which(test_svm_06$thema==test_svm_06$thema_test))/length(test_svm_06$thema)
+# 90.3; n = 310 -> 52% (von 595)
+
+
+test_svm_07<- test_svm %>%
+  filter(prob >= 0.7)%>%
+  arrange((prob))
+length(which(test_svm_07$thema==test_svm_07$thema_test))/length(test_svm_07$thema)
+# 92.7%; n = 263 -> 44% (von 595)
+
+
+test_svm_08<- test_svm %>%
+  filter(prob >= 0.8)%>%
+  arrange((prob))
+length(which(test_svm_08$thema==test_svm_08$thema_test))/length(test_svm_08$thema)
+# 94.1%; n = 190 -> 31.9% (von 595)
+
+test_svm_085<- test_tibble%>%
+  filter(prob>=0.85)%>%
+  arrange((prob))
+length(which(test_svm_085$thema==test_svm_085$thema_test))/length(test_svm_085$thema)
+# 95.7%; n = 186 -> 31.2% (von 595)
+
+
+test_svm_09 <- test_svm %>%
+  filter(prob >= 0.9)%>%
+  arrange((prob))
+length(which(test_svm_09$thema==test_svm_09$thema_test))/length(test_svm_09$thema)
+# 98,6% n = 146 -> 24,5% (von 595)
+
+MAXENT <- train_model(container,"MAXENT")
+SLDA <- train_model(container,"SLDA")
+BOOSTING <- train_model(container,"BOOSTING")
+BAGGING <- train_model(container,"BAGGING")
+RF <- train_model(container,"RF")
+NNET <- train_model(container,"NNET")
+TREE <- train_model(container,"TREE")
+```
+
