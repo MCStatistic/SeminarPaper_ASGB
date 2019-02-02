@@ -406,6 +406,7 @@ labs <- c("18. Bundestag", "19. Bundestag")
 levels(df_complete_clean$bt) <- rev(labs)
 df_complete_clean$bt_f <- factor(df_complete_clean$bt, labels = c("18. Bundestag", "19. Bundestag"))
 
+# percentage labeling
 df_complete_clean %>%
   filter(thema != "zSonstiges") %>%
   group_by(bt_f, thema) %>%
@@ -417,14 +418,40 @@ df_complete_clean %>%
            fill = "skyblue4") +
   facet_wrap(~bt_f, labeller = label_value) +
   geom_text(aes(y = perc, 
-                label = round(perc, 1)),
+                label = sprintf("%1.1f%%", round(perc, 1))),
             size = 3.1,
-            color=rgb(255,255,255, maxColorValue=255),
-            hjust=+1.1) +
+            color=rgb(100,100,100, maxColorValue=255),
+            hjust=-0.1) +
+  ylim(0, 22) +
+  theme_bw() +
+  ggtitle("") +
+  ylab("") + xlab("") +
+  theme(text=element_text(size = 12)) +
+  coord_flip()
+
+# with percentage labels on the y-axis, yay
+df_complete_clean %>%
+  filter(thema != "zSonstiges") %>%
+  group_by(bt_f, thema) %>%
+  summarise(n = n()) %>%
+  mutate(perc = (n/sum(n))) %>%
+  ggplot(aes(x = reorder(thema, +perc), y = perc)) +
+  geom_bar(position = "dodge", 
+           stat = "identity",
+           fill = "skyblue4") +
+  facet_wrap(~bt_f, labeller = label_value) +
+  geom_text(aes(y = perc, 
+                label = sprintf("%1.1f%%", round(100*perc, 1))),
+            size = 3.1,
+            color=rgb(100,100,100, maxColorValue=255),
+            hjust=-0.1) +
+  #ylim(0,0.22)
   theme_bw() +
   ggtitle("") +
   ylab("") +
   xlab("") +
+  theme(text=element_text(size = 12)) +
+  scale_y_continuous(labels = scales::percent_format(), limits=c(0,0.23)) +
   coord_flip()
   
 ggsave("figure_1.png", figure_1, width = 10, height = 8)
