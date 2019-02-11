@@ -350,6 +350,24 @@ right_matches_2 <- c("file1", "file2", "file3")
 
 ```
 
+# changing labels
+```{r}
+df_complete_clean %<>% 
+  mutate(thema = case_when(
+    thema == "Arbeit & Beschäftigung" ~ "Arbeit",
+    thema == "Kriminalität & Familienprobleme" ~ "Gesetz & Kriminalität",
+    thema == "Gemeindeentwicklung & Wohnungsprobleme" ~ "Wohnungsbau", 
+    thema == "Banken, Finanzen & Binnenhandel" ~ "Binnenhandel", 
+    thema == "Technologie & Kommunikation" ~ "Technologie", 
+    thema == "Internationale Angelegenheiten & Auslandshilfe" ~ "Int. Angelegenheiten",
+    thema == "Internationale Angelegenheiten" ~ "Int. Angelegenheiten",
+    # str_detect(title, public_goods) ~ "Öffentliche Flächen", #20
+    TRUE ~ thema
+  ))
+```
+
+
+
 # little inspection
 ```{r}
 plot_18_pre <- df_complete_clean %>%
@@ -524,7 +542,20 @@ ggplot(test_tibble, aes(prob))+
 # again but a bit better
 ```{r}
 df_training$thema_f <- factor(df_training$thema)
+df_training %<>% 
+  mutate(thema_t1 = case_when(
+    thema == "Energie" ~ "Energie & Umwelt",
+    thema == "Umwelt" ~ "Energie & Umwelt",
+    TRUE ~ thema
+  ))
+
+df_training_t2 <- df_training %>% 
+  filter(thema != "Wohnungsbau" & thema != "Regierungsoperationen")
+
+nrow(df_training_t2)
+
 doc_matrix <- create_matrix(df_training$content)
+doc_matrix_t2 <- create_matrix(df_training_t2$content)
 container <- create_container(doc_matrix, 
                               df_training$thema, 
                               trainSize=1:2383,
@@ -537,6 +568,32 @@ container_f <- create_container(doc_matrix,
                               testSize=2384:2978, 
                               virgin=FALSE)
 
+svm_f <- train_model(container_f,"SVM", kernel = "linear")
+svm_classify_f <- classify_model(container_f, svm_f)
+
+# creating df with real topics, predicted topic and probability
+test_svm_f <- df_training[2384:2978,]
+test_svm_f$thema_test <- svm_classify_f$SVM_LABEL
+test_svm_f$prob <- svm_classify_f$SVM_PROB
+
+length(which(test_svm_f$thema==test_svm_f$thema_test))/length(test_svm_f$thema)
+
+RTextTools::create_analytics(container_f, svm_classify_f)
+
+# schlechter
+container_t1 <- create_container(doc_matrix, 
+                                 df_training$thema_t1, 
+                                 trainSize=1:2383,
+                                 testSize=2384:2978, 
+                                 virgin=FALSE)
+
+# schlechter
+container_t2 <- create_container(doc_matrix_t2, 
+                                 df_training_t2$thema, 
+                                 trainSize=1:2383,
+                                 testSize=2350:2904, 
+                                 virgin=FALSE)
+
 # SVM Algortihm
 SVM <- train_model(container,"SVM")
 svm_classify <- classify_model(container, SVM)
@@ -547,7 +604,7 @@ test_svm$thema_test <- svm_classify$SVM_LABEL
 test_svm$prob <- svm_classify$SVM_PROB
 
 length(which(test_svm$thema==test_svm$thema_test))/length(test_svm$thema)
-#ohne filter 0.687, N= 595
+#ohne filter 0.687 (1), 0.744 (2), N= 595
 
 # looking for probabilities
 test_svm_04<- test_svm %>%
@@ -566,7 +623,9 @@ test_svm_06<- test_svm %>%
   filter(prob >= 0.6)%>%
   arrange((prob))
 length(which(test_svm_06$thema==test_svm_06$thema_test))/length(test_svm_06$thema)
+nrow(test_svm_06)
 # 90.3; n = 310 -> 52% (von 595)
+# 2. durchlauf: 0.912; n = 307 -> 52%...
 
 
 test_svm_07<- test_svm %>%
@@ -595,12 +654,113 @@ test_svm_09 <- test_svm %>%
 length(which(test_svm_09$thema==test_svm_09$thema_test))/length(test_svm_09$thema)
 # 98,6% n = 146 -> 24,5% (von 595)
 
-MAXENT <- train_model(container,"MAXENT")
-SLDA <- train_model(container,"SLDA")
-BOOSTING <- train_model(container,"BOOSTING")
-BAGGING <- train_model(container,"BAGGING")
-RF <- train_model(container,"RF")
-NNET <- train_model(container,"NNET")
-TREE <- train_model(container,"TREE")
+
+RTextTools::create_analytics(container_f, svm_classify_f)
+levels(df_training$thema_f)
+
+svm_classify_f$SVM_PROB
+
+test_svm_f %>% 
+  select(thema_test, prob, thema_f, thema) %>% 
+  group_by(thema_f) %>% 
+  summarise(prob_m = mean(prob), n = n()) %>% 
+  arrange(desc(prob_m)) %>% 
+  ggplot(aes(x = n, y = prob_m)) +
+  geom_bar(position = "dodge",
+           stat = "identity") +
+  geom_smooth()+
+  theme_bw()
+
+```
+
+```{r}
+ggplot(df_complete_clean, aes(thema)) +
+  geom_bar(position="dodge")
+
+df_complete_clean %>%
+  filter(thema != "zSonstiges") %>%
+  group_by(party, thema) %>%
+  filter(party != "SPD" & party != "Union" & party != "NA") %>% 
+  summarise(n = n()) %>%
+  mutate(perc = (n/sum(n))) %>%
+  mutate(thema = fct_reorder2(thema, party, perc)) %>% 
+  ggplot(aes(x = thema, y = perc)) +
+  geom_bar(position = "dodge",
+           stat = "identity",
+           fill = "skyblue4") +
+  facet_wrap(~party, labeller = label_value) +
+  geom_text(aes(y = perc, 
+                label = sprintf("%1.1f%%", round(100*perc, 1))),
+            size = 3.1,
+            color=rgb(100,100,100, maxColorValue=255),
+            hjust=-0.1) +
+  #ylim(0,0.22)
+  theme_bw() +
+  theme(text=element_text(size = 12)) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  coord_flip()
+
+unique(df_complete_clean$party)
+
+
+df_complete_clean %>%
+  filter(thema != "zSonstiges" & party == "AfD") %>%
+  group_by(party, thema) %>%
+  summarise(n = n()) %>%
+  mutate(perc = (n/sum(n))) %>%
+  mutate(thema = fct_reorder(thema, perc)) %>% 
+  ggplot(aes(x = thema, y = perc)) +
+  geom_bar(position = "dodge",
+           stat = "identity",
+           fill = "skyblue4") +
+  facet_wrap(~party, labeller = label_value) +
+  geom_text(aes(y = perc, 
+                label = sprintf("%1.1f%%", round(100*perc, 1))),
+            size = 3.1,
+            color=rgb(100,100,100, maxColorValue=255),
+            hjust=-0.1) +
+  #ylim(0,0.22)
+  theme_bw() +
+  theme(text=element_text(size = 12)) +
+  scale_y_continuous(labels = scales::percent_format(), limits=c(0,0.50)) +
+  coord_flip()
+
+
+```
+
+## inspecting data again
+```{r}
+head(df_complete_clean$content, 30)
+
+added_stopwords <- as.data.frame(c("umso", "gilt", "inwiefern", "inwieweit", "ren", "wa", "len", 
+                                   "de", "nen", "lich", "jewei", "mach", "ten", "wel", "ches",
+                                   "wwwprintsystemdevertrieb", "be", "re"))
+
+colnames(added_stopwords) <- "word"
+added_stopwords <- as.character(added_stopwords$word)
+
+df_complete_clean$content %<>% 
+  removeWords(added_stopwords)
+
+View(df_complete_clean %>% 
+  select(thema, title, file) %>% 
+  filter(thema == "zSonstiges"))
+```
+
+## table 
+```{r}
+unique(df_complete_clean$thema)
+df_code_book_table <- data.frame(Thema = c("Makroökonomie", "Bürgerrechte", "Gesundheit", "Agrarwirtschaft",
+                                           "Arbeit & Beschäftigung", "Bildung", "Umwelt", "Energie",
+                                           "Einwanderung", "Transport", "Kriminalität & Familienprobleme",
+                                           "Soziale Wohlfahrt", "Gemeindeentwicklung & Wohnungsprobleme", 
+                                           "Banken, Finanzen & Binnenhandel", "Verteidigung",
+                                           "Technologie & Kommunikation", "Außenhandel", 
+                                           "Internationale Angelegenheiten & Auslandshilfe", "Regierungsoperationen",
+                                           "Öffentliche Flächen"), 
+                                 Inhalt = c("Arbeitslosenquote \n allgemeine inländische Haushaltsprobleme \n Inflation, Preise und Zinsrate \n nationales Budget und Schulden \n Steuern, Steuerpolitik und Steuerreform \n Industriepolitik \n Preiskontrolle und Stabilisierung", "Ethnische Minderheiten und Gruppendiskriminierung \n Geschlecht und Diskriminierung sexuelle Diskrimination \n Altersdiskriminierung \n Diskriminierung von Behinderten \n Wahlrechte, Partizipation und damit verbundene Probleme \n Meinungsfreiheit und Religion \n Recht auf Privatsphäre und Zugang zu Informationen der Regierung \n Aktivitäten gegen die Regierung", "Umfassende Gesundheitsreformen", "bla bla", "blup blup bla", "bli blu bla", "pussy", "pussy2", "ping", "pong"))
+
+library(xtable)
+print(xtable::xtable(df_code_book_table),floating = FALSE, include.rownmaes = FALSE, tabular.environment = "longtable")
 ```
 
