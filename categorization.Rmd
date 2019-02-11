@@ -366,57 +366,33 @@ df_complete_clean %<>%
   ))
 ```
 
+# ggpreview
+```{r}
+# thanks to andrewheiss
+ggpreview <- function(..., device = "png", cairo = FALSE) {
+fname <- tempfile(fileext = paste0(".", device))
+if (cairo & device == "pdf") {
+ggplot2::ggsave(filename = fname, device = cairo_pdf, ...)
+  } else if (cairo & device == "png") {
+ggplot2::ggsave(filename = fname, device = device, type = "cairo", ...)
+  } else {
+ggplot2::ggsave(filename = fname, device = device, ...)
+  }
+  system2("open", fname)
+invisible(NULL)
+}
+```
 
 
 # little inspection
 ```{r}
-plot_18_pre <- df_complete_clean %>%
-  filter(thema != "zSonstiges" & bt == "18") %>%
-  group_by(thema) %>%
-  summarise(n = n()) %>%
-  mutate(perc = (n/sum(n))*100) %>%
-  ggplot(aes(x = reorder(thema, +perc), y = perc)) +
-  geom_bar(position = "dodge", 
-           stat = "identity",
-           fill = "skyblue4") +
-  geom_text(aes(y = perc, 
-                label = round(perc, 1)),
-            size = 3.1,
-            color=rgb(100,100,100, maxColorValue=255),
-            hjust=-0.1) +
-  theme_bw() +
-  ggtitle("") +
-  ylab("percentage") +
-  xlab("") +
-  coord_flip()
-
-plot_19_pre <- df_complete_clean %>%
-  filter(thema != "zSonstiges" & bt == "19") %>%
-  group_by(thema) %>%
-  summarise(n = n()) %>%
-  mutate(perc = (n/sum(n))*100) %>%
-  ggplot(aes(x = reorder(thema, +perc), y = perc)) +
-  geom_bar(position = "dodge", 
-           stat = "identity",
-           fill = "skyblue4") +
-  geom_text(aes(y = perc, 
-                label = round(perc, 1)),
-            size = 3.1,
-            color=rgb(100,100,100, maxColorValue=255),
-            hjust=-0.1)+
-  theme_bw() +
-  ggtitle("") +
-  ylab("percentage") +
-  xlab("") +
-  coord_flip()
-
-library(ggpubr)
-figure_1 <- ggarrange(plot_18_pre, plot_19_pre,
-          labels = c("18. Bundestag", "19. Bundestag"),
-          ncol = 1, nrow = 2)
-ggsave("figure_1.png", figure_1, width = 10, height = 8)
-
-ggpreview(figure_1, width = 10, height = 8)
+# library(ggpubr)
+# figure_1 <- ggarrange(plot_18_pre, plot_19_pre,
+#           labels = c("18. Bundestag", "19. Bundestag"),
+#           ncol = 1, nrow = 2)
+# ggsave("figure_1.png", figure_1, width = 10, height = 8)
+# 
+# ggpreview(figure_1, width = 10, height = 8)
 
 # testing facet_grid() again
 # creating labels
@@ -424,31 +400,8 @@ labs <- c("18. Bundestag", "19. Bundestag")
 levels(df_complete_clean$bt) <- rev(labs)
 df_complete_clean$bt_f <- factor(df_complete_clean$bt, labels = c("18. Bundestag", "19. Bundestag"))
 
-# percentage labeling
-df_complete_clean %>%
-  filter(thema != "zSonstiges") %>%
-  group_by(bt_f, thema) %>%
-  summarise(n = n()) %>%
-  mutate(perc = (n/sum(n))*100) %>%
-  ggplot(aes(x = reorder(thema, +perc), y = perc)) +
-  geom_bar(position = "dodge", 
-           stat = "identity",
-           fill = "skyblue4") +
-  facet_wrap(~bt_f, labeller = label_value) +
-  geom_text(aes(y = perc, 
-                label = sprintf("%1.1f%%", round(perc, 1))),
-            size = 3.1,
-            color=rgb(100,100,100, maxColorValue=255),
-            hjust=-0.1) +
-  ylim(0, 22) +
-  theme_bw() +
-  ggtitle("") +
-  ylab("") + xlab("") +
-  theme(text=element_text(size = 12)) +
-  coord_flip()
-
 # with percentage labels on the y-axis, yay
-df_complete_clean %>%
+themen_gesamt_bt <- df_complete_clean %>%
   filter(thema != "zSonstiges") %>%
   group_by(bt_f, thema) %>%
   summarise(n = n()) %>%
@@ -472,6 +425,7 @@ df_complete_clean %>%
   scale_y_continuous(labels = scales::percent_format(), limits=c(0,0.23)) +
   coord_flip()
   
+ggpreview(themen_gesamt_bt, width = 8, height = 6)
 ggsave("figure_1.png", figure_1, width = 10, height = 8)
 
 ```
