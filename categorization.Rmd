@@ -7,7 +7,10 @@ output: html_document
 
 ```{r}
 library(pacman)
-p_load(dplyr, haven, readr, ggplot2, pdftools, stringr, lubridate, RColorBrewer, tm, ggthemes)
+p_load(dplyr, haven, readr, ggplot2, pdftools, stringr, lubridate, RColorBrewer, tm, ggthemes, RTextTools,
+       caret, randomForest, magrittr)
+
+library(forcats)
 ```
 
 
@@ -154,6 +157,7 @@ regierung <- c(" sanktionen ", "bürokratieentlastung", "bürokratieabbau",
 public_goods <- c("denkmal", "denkmäler") %>% 
   paste0(collapse = "|")
 
+library(magrittr)
 df_complete_clean %<>% 
   mutate(thema = case_when(
     str_detect(title, makroöko) ~ "Makroökonomie", #1
@@ -363,12 +367,16 @@ df_complete_clean %<>%
     thema == "Internationale Angelegenheiten" ~ "Int. Angelegenheiten",
     # str_detect(title, public_goods) ~ "Öffentliche Flächen", #20
     TRUE ~ thema
-  ))
+  )) %>% 
+  filter(file != 1903501)
+
+save(df_complete_clean, file = "df_complete_clean.RData")
+load("df_complete_clean.RData")
 ```
 
 # ggpreview
 ```{r}
-# thanks to andrewheiss
+# thanks to andrewheiss (rath; GitHub)
 ggpreview <- function(..., device = "png", cairo = FALSE) {
 fname <- tempfile(fileext = paste0(".", device))
 if (cairo & device == "pdf") {
@@ -401,7 +409,7 @@ levels(df_complete_clean$bt) <- rev(labs)
 df_complete_clean$bt_f <- factor(df_complete_clean$bt, labels = c("18. Bundestag", "19. Bundestag"))
 
 # with percentage labels on the y-axis, yay
-themen_gesamt_bt <- df_complete_clean %>%
+themen_gesamt_manual_matching <- df_complete_clean %>%
   filter(thema != "zSonstiges") %>%
   group_by(bt_f, thema) %>%
   summarise(n = n()) %>%
@@ -409,7 +417,8 @@ themen_gesamt_bt <- df_complete_clean %>%
   ggplot(aes(x = reorder(thema, +perc), y = perc)) +
   geom_bar(position = "dodge", 
            stat = "identity",
-           fill = "skyblue4") +
+           fill = "skyblue4",
+           alpha = 0.9) +
   facet_wrap(~bt_f, labeller = label_value) +
   geom_text(aes(y = perc, 
                 label = sprintf("%1.1f%%", round(100*perc, 1))),
@@ -425,8 +434,9 @@ themen_gesamt_bt <- df_complete_clean %>%
   scale_y_continuous(labels = scales::percent_format(), limits=c(0,0.23)) +
   coord_flip()
   
-ggpreview(themen_gesamt_bt, width = 8, height = 6)
-ggsave("figure_1.png", figure_1, width = 10, height = 8)
+ggpreview(themen_gesamt_manual_matching, width = 7, height = 5)
+ggsave("themen_gesamt_manual_matching.png", themen_gesamt_manual_matching, 
+       path = "./images/", width = 7, height = 7)
 
 ```
 
@@ -510,10 +520,10 @@ nrow(df_training_t2)
 
 doc_matrix <- create_matrix(df_training$content)
 doc_matrix_t2 <- create_matrix(df_training_t2$content)
-container <- create_container(doc_matrix, 
-                              df_training$thema, 
+container <- create_container(df_content_matrix, 
+                              df_training_forest$thema, 
                               trainSize=1:2383,
-                              testSize=2384:2978, 
+                              testSize=2384:2977, 
                               virgin=FALSE)
 
 container_f <- create_container(doc_matrix, 
@@ -534,26 +544,28 @@ length(which(test_svm_f$thema==test_svm_f$thema_test))/length(test_svm_f$thema)
 
 RTextTools::create_analytics(container_f, svm_classify_f)
 
-# schlechter
-container_t1 <- create_container(doc_matrix, 
-                                 df_training$thema_t1, 
-                                 trainSize=1:2383,
-                                 testSize=2384:2978, 
-                                 virgin=FALSE)
+df_training <- df_complete_clean %>% 
+  filter(thema != "zSonstiges") %>% 
+  sample_n(2977) 
 
-# schlechter
-container_t2 <- create_container(doc_matrix_t2, 
-                                 df_training_t2$thema, 
-                                 trainSize=1:2383,
-                                 testSize=2350:2904, 
-                                 virgin=FALSE)
+# creating document-term matrix
+df_content_matrix <- create_matrix(df_training$content)
+
+# remove sparse terms: In this case tokens are removed which are missing from more than 99% of the documents
+df_content_matrix <- removeSparseTerms(df_content_matrix, sparse = .99)
+
+container <- create_container(df_content_matrix, 
+                              df_training$thema, 
+                              trainSize=1:2383,
+                              testSize=2384:2977, 
+                              virgin=FALSE)
 
 # SVM Algortihm
-SVM <- train_model(container,"SVM")
-svm_classify <- classify_model(container, SVM)
+svm <- train_model(container,"SVM")
+svm_classify <- classify_model(container, svm)
 
 # creating df with real topics, predicted topic and probability
-test_svm <- df_training[2384:2978,]
+test_svm <- df_training[2384:2977,]
 test_svm$thema_test <- svm_classify$SVM_LABEL
 test_svm$prob <- svm_classify$SVM_PROB
 
@@ -577,7 +589,7 @@ test_svm_06<- test_svm %>%
   filter(prob >= 0.6)%>%
   arrange((prob))
 length(which(test_svm_06$thema==test_svm_06$thema_test))/length(test_svm_06$thema)
-nrow(test_svm_06)
+nrow(test_svm_06)/nrow(test_svm)
 # 90.3; n = 310 -> 52% (von 595)
 # 2. durchlauf: 0.912; n = 307 -> 52%...
 
@@ -586,6 +598,7 @@ test_svm_07<- test_svm %>%
   filter(prob >= 0.7)%>%
   arrange((prob))
 length(which(test_svm_07$thema==test_svm_07$thema_test))/length(test_svm_07$thema)
+nrow(test_svm_07)
 # 92.7%; n = 263 -> 44% (von 595)
 
 
@@ -608,24 +621,400 @@ test_svm_09 <- test_svm %>%
 length(which(test_svm_09$thema==test_svm_09$thema_test))/length(test_svm_09$thema)
 # 98,6% n = 146 -> 24,5% (von 595)
 
+# RF Algorithm
+rf <- train_model(container, "RF")
+rf_classify <- classify_model(container, rf)
 
-RTextTools::create_analytics(container_f, svm_classify_f)
-levels(df_training$thema_f)
+# creating df with real topics, predicted topic and probability
+test_rf <- df_training[2384:2977,]
+test_rf$thema_test <- rf_classify$FORESTS_LABEL
+test_rf$prob <- rf_classify$FORESTS_PROB
 
-svm_classify_f$SVM_PROB
+length(which(test_rf$thema==test_rf$thema_test))/length(test_rf$thema)
 
-test_svm_f %>% 
-  select(thema_test, prob, thema_f, thema) %>% 
-  group_by(thema_f) %>% 
-  summarise(prob_m = mean(prob), n = n()) %>% 
-  arrange(desc(prob_m)) %>% 
-  ggplot(aes(x = n, y = prob_m)) +
-  geom_bar(position = "dodge",
-           stat = "identity") +
-  geom_smooth()+
-  theme_bw()
+test_rf_05 <- test_rf  %>% 
+  filter(prob >= 0.5) %>% 
+  arrange((prob))
+length(which(test_rf_05$thema==test_rf_05$thema_test))/length(test_rf_05$thema)
+nrow(test_rf_05)/nrow(test_rf)
+
+test_rf_06 <- test_rf  %>% 
+  filter(prob >= 0.6) %>% 
+  arrange((prob))
+length(which(test_rf_06$thema==test_rf_06$thema_test))/length(test_rf_06$thema)
+nrow(test_rf_06)/nrow(test_rf)
+
+
+test_rf %>% 
+  group_by(thema) %>% 
+  summarise(prob_m = mean(prob)) %>% 
+  arrange(desc(prob_m))
+
+View(df_complete_clean %>% 
+  filter(thema == "Bürgerrechte") %>% 
+    select(title, file))
 
 ```
+
+# data correction
+```{r}
+# Bürgerrechte
+View(df_complete_clean %>% 
+  filter(thema == "Bürgerrechte") %>% 
+    select(title, file))
+
+df_complete_clean %<>% 
+  mutate(thema = case_when(
+    file == 1801391 ~ "Agrarwirtschaft", # Tierschutz (domestizierte Tiere)
+    file == 1807122 ~ "zSonstiges", # falsche Zuordnung
+    file == 1808719 ~ "zSonstiges",
+    file == 1809586 ~ "zSonstiges",
+    TRUE ~ thema
+  ))
+
+# Binnenhandel
+View(df_complete_clean %>% 
+  filter(thema == "Binnenhandel") %>% 
+    select(title, file))
+
+df_complete_clean %<>% 
+  mutate(thema = case_when(
+    file == 1904256 ~ "Int. Angelegenheiten", # türk. Kapitalmarkt
+    file == 1906264 ~ "Int. Angelegenheiten", # USA und lockerung Bankenaufsicht
+    file == 1801588 ~ "Int. Angelegenheiten", # palmöl, entwicklungsbank
+    file == 1804267 ~ "Gesetz & Kriminalität", # bankenraub
+    file == 1805648 ~ "Int. Angelegenheiten", # kasachstan uran-bank
+    file == 1808153 ~ "Gesetz & Kriminalität", # europol
+    TRUE ~ thema
+  ))
+
+# Regierungsoperationen
+View(df_complete_clean %>% 
+  filter(thema == "Regierungsoperationen") %>% 
+    select(title, file))
+
+df_complete_clean %<>% 
+  mutate(thema = case_when(
+    file == 1804029 ~ "Int. Angelegenheiten", # Menschenrechtsverletzungen
+    TRUE ~ thema
+  ))
+
+# Wohnungsbau
+View(df_complete_clean %>% 
+  filter(thema == "Wohnungsbau") %>% 
+    select(title, file))
+
+df_complete_clean %<>% 
+  mutate(thema = case_when(
+    file == 1903688 ~ "Gesetz & Kriminalität", # Gewalt gg Obdachlose
+    file == 1903961 ~ "Umwelt", # Klimawandel
+    file == 1801525 ~ "Regierungsoperationen", # bundesanstalt für immobilien
+    TRUE ~ thema
+  ))
+
+# Agrarwirtschaft
+View(df_complete_clean %>% 
+  filter(thema == "Agrarwirtschaft") %>% 
+    select(title, file))
+
+df_complete_clean %<>% 
+  mutate(thema = case_when(
+    file == 1900419 ~ "Int. Angelegenheiten", # Arbeitsbedingungen globaler Süden
+    file == 1904410 ~ "zSonstiges", # Brexit und Auswirkungen auf Landwirtschaft
+    file == 1803640 ~ "zSonstiges", # Netzbetreiber & Rückforderung
+    file == 1809006 ~ "Int. Angelegenheiten", # Agrarwirtschaft Iran
+    TRUE ~ thema
+  ))
+
+# Umwelt
+View(df_complete_clean %>% 
+  filter(thema == "Umwelt") %>% 
+    select(title, file))
+
+df_complete_clean %<>% 
+  mutate(thema = case_when(
+    file == 1900637 ~ "Transport", # Verzögerung Bau Autobahnen
+    file == 1901171 ~ "Agrarwirtschaft", # Schächtung -> Tierschutz domestiziert
+    file == 1902380 ~ "Int. Angelegenheiten", # Menschenrechte etc.
+    file == 1902636 ~ "zSonstiges", # nicht zu spezifizieren
+    file == 1902843 ~ "Energie", # Stromnetze...
+    file == 1905410 ~ "Int. Angelegenheiten", # tunesien etc. 
+    file == 1905966 ~ "Regierungsoperationen", # Einfluss Lobby auf Gesetz
+    file == 1802043 ~ "Int. Angelegenheiten", # außenwirtschaft, menschenrechte
+    file == 1803692 ~ "Energie", # veränderungen Energiewirtschaft
+    file == 1809393 ~ "Transport", # LKW -> eher Transport
+    file == 1810134 ~ "Transport", # Ausbau einer Bundesstraße
+    file == 1811148 ~ "Int. Angelegenheiten", # Nambia, Menschenrechte und etwas Umweltschutz
+    file == 1812228 ~ "Agrarwirtschaft", # Tierschutz von domestizierten Tieren
+    TRUE ~ thema
+  ))
+
+# Soziale Wohlfahrt
+View(df_complete_clean %>% 
+  filter(thema == "Soziale Wohlfahrt") %>% 
+    select(title, file))
+
+df_complete_clean %<>% 
+  mutate(thema = case_when(
+    file == 1902260 ~ "zSonstiges", # falsches Matching
+    file == 1902257 ~ "zSonstiges", # falsches Matching
+    file == 1812713 ~ "Gesundheit", # definitiv Gesundheit
+    TRUE ~ thema
+  ))
+
+# Makroökonomie -> hier dürfte einiges nicht ganz richtig sein
+View(df_complete_clean %>% 
+  filter(thema == "Makroökonomie") %>% 
+    select(title, file))
+
+df_complete_clean %<>% 
+  mutate(thema = case_when(
+    file == 1903237 ~ "zSonstiges", # flagschiffe...
+    file == 1904143 ~ "Gesundheit", # Pharma, Ärzte...Qualitätssicherung
+    file == 1805668 ~ "Energie", # Stromnetze
+    file == 1811916 ~ "zSonstiges", # Türkei und Panzer
+    TRUE ~ thema
+  )) # Überraschend wenig falsch
+
+# Energie
+View(df_complete_clean %>% 
+  filter(thema == "Energie") %>% 
+    select(title, file))
+# Nix, jedoch einige Themen, die man evtl. auch Umwelt zuordnen könnte
+
+# Bildung
+View(df_complete_clean %>% 
+  filter(thema == "Bildung") %>% 
+    select(title, file))
+
+df_complete_clean %<>% 
+  mutate(thema = case_when(
+    file == 1900617 ~ "Bürgerrechte", # antisemitismus
+    TRUE ~ thema
+  ))
+
+# zSonstiges (manuelles Matching zwecks Verbesserung)
+View(df_complete_clean %>% 
+  filter(thema == "zSonstiges") %>% 
+    select(title, file))
+
+df_complete_clean %<>% 
+  mutate(thema = case_when(
+    file == 1900065 ~ "Int. Angelegenheiten", # Terror
+    file == 1900129 ~ "Bürgerrechte", # Grundordnung Demokratie - Antifaschismus
+    file == 1900202 ~ "Int. Angelegenheiten", # Unabhängigkeit Katalonien 
+    file == 1900264 ~ "Umwelt", # Verpackungsabfallaufkommen
+    file == 1900290 ~ "Regierungsoperationen", # Staatsbesuche
+    file == 1900121 ~ "Umwelt", # Stickoxide
+    file == 1900369 ~ "Arbeit", # flexibles Arbeiten
+    file == 1900376 ~ "Transport", # S21
+    file == 1900627 ~ "Int. Angelegenheiten", # Libyen
+    file == 1900664 ~ "Int. Angelegenheiten", # Syrien
+    file == 1900782 ~ "Int. Angelegenheiten", # Entwicklungshilfe
+    file == 1900801 ~ "Transport", # S21
+    file == 1901122 ~ "Int. Angelegenheiten", # Brasilien
+    file == 1901251 ~ "Soziale Wohlfahrt", # Ruhestand
+    file == 1901324 ~ "Bürgerrechte", # gleichberechtigung
+    file == 1901387 ~ "Umwelt", # Kunststoffabfälle
+    file == 1901417 ~ "Transport", # Güterzüge
+    file == 1901444 ~ "Bürgerrechte", # Schwerbehinderte
+    file == 1901496 ~ "Makroökonomie", # Unternehmen
+    file == 1901525 ~ "Technologie", # KI
+    file == 1901579 ~ "Int. Angelegenheiten", # Türkei und Lage
+    file == 1901612 ~ "Int. Angelegenheiten", # Islamisten
+    file == 1901615 ~ "Technologie", # Satelliten
+    file == 1901619 ~ "Gesundheit", # Geburtshilfe
+    file == 1901652 ~ "Gesetz & Kriminalität", # Verdächtige G20
+    file == 1901864 ~ "Umwelt", # Luftschadstoffe und Allergien
+    file == 1901945 ~ "Transport", # Zukunft Berlin Tegel
+    file == 1901946 ~ "Makroökonomie", # Schiffahrtsmarkt
+    file == 1901975 ~ "Binnenhandel", # Regulierung Kryptowährungen
+    file == 1902031 ~ "Verteidigung", # militärische Übungsflüge
+    file == 1902065 ~ "Int. Angelegenheiten", # Lage Kosovo
+    file == 1902104 ~ "Soziale Wohlfahrt", # sgb ii
+    file == 1903656 ~ "Bürgerrechte", # Beteiligung
+    file == 1903876 ~ "Transport", # E-Mobilität
+    file == 1904065 ~ "Gesundheit", # gesundheitliche Versorgung
+    file == 1904111 ~ "Einwanderung", # Flüchtlinge
+    file == 1904315 ~ "Gesundheit", # korruption Gesundheitswesen
+    file == 1904652 ~ "Transport", # Luftverkehrskonzept
+    file == 1904683 ~ "Arbeit", # Lohnquote
+    file == 1904938 ~ "Gesetz & Kriminalität", # kriminelle Familienclans
+    file == 1905497 ~ "Einwanderung", # Geflüchtete
+    file == 1905708 ~ "Wohnungsbau", # Bauland und Leerstand
+    file == 1906259 ~ "Umwelt", # Lichtverschmutzung
+    file == 1906282 ~ "Technologie", # Mobilfunkstandard 5G
+    file == 1800696 ~ "Arbeit", # Befrsitung Arbeitsverträge
+    file == 1800730 ~ "Soziale Wohlfahrt", # Alterssicherung
+    file == 1800805 ~ "Transport", # Ausbau Bundesstraße 
+    file == 1800918 ~ "Int. Angelegenheiten", # Kambodscha
+    file == 1801001 ~ "Soziale Wohlfahrt", # Elterngeld
+    file == 1801138 ~ "Transport", # S21
+    file == 1801139 ~ "Transport", # S21
+    file == 1801150 ~ "Int. Angelegenheiten", # Piraterie Horn Afrika
+    file == 1801906 ~ "Transport", # Grostransporte, Infrastruktur
+    file == 1802044 ~ "Umwelt", # Bioabfall und Verwertung
+    file == 1802072 ~ "Transport", # autonomes Fahren
+    file == 1802718 ~ "Umwelt", # Überfischung
+    file == 1802801 ~ "Int. Angelegenheiten", # IS
+    file == 1803239 ~ "Umwelt", # Meeresschutz
+    file == 1805674 ~ "Agrarwirtschaft", # Fischerei
+    file == 1805749 ~ "Umwelt", # Gewässerbelastung
+    file == 1806429 ~ "Einwanderung", # geflüchtete Frauen i. Deutschland
+    file == 1807153 ~ "Int. Angelegenheiten", # Saudi Arabien und IS
+    file == 1807463 ~ "Transport", # Güterverkehr und Logistik
+    file == 1807506 ~ "Arbeit", # Minijobs
+    file == 1807507 ~ "Arbeit", # Beschäftigung
+    file == 1807631 ~ "Transport", # Verkehr und Infrastruktur
+    file == 1807745 ~ "Umwelt", # Gewässerqualität und Einhaltung
+    file == 1808329 ~ "Umwelt", # Gewässerqualität und Einhaltung
+    file == 1808330 ~ "Umwelt", # Gewässerqualität und Einhaltung
+    file == 1808465 ~ "Gesundheit", # Alkoholprävention
+    file == 1808792 ~ "Umwelt", # Gewässerqualität
+    file == 1808970 ~ "Einwanderung", # Geburtsurkunde Flüchtlingskinder
+    file == 1809361 ~ "Binnenhandel", # Fintechs
+    file == 1809426 ~ "Bürgerrechte", # Beteiligung von Behinderten
+    file == 1809468 ~ "Arbeit", # home office
+    file == 1810136 ~ "Transport", # Bundesstraße Ausbau
+    file == 1810834 ~ "Bürgerrechte", # Antisemitismus
+    file == 1811819 ~ "Gesetz & Kriminalität", # Fahrraddiebstahl
+    file == 1813112 ~ "Arbeit", # Minijobs
+    file == 1813524 ~ "Arbeit", # Lohntentwicklung
+    TRUE ~ thema
+  ))
+
+# Große Anfragen komplett raus
+df_complete_clean %<>% 
+  filter(type != "Große Anfrage")
+
+# saving new data
+df_complete_clean_v2 <- df_complete_clean
+
+save(df_complete_clean_v2, file = "df_complete_clean_v2.RData")
+load("df_complete_clean_v2.RData")
+```
+
+# train model again with new df
+```{r}
+load("df_complete_clean_v2.RData")
+
+df_training_v2 <- df_complete_clean_v2 %>% 
+  filter(thema != "zSonstiges") %>% 
+  sample_n(3047) 
+
+3047*0.75
+
+# creating document-term matrix
+df_content_matrix_v2 <- create_matrix(df_training_v2$content)
+
+# remove sparse terms: In this case tokens are removed which are missing from more than 99% of the documents
+df_content_matrix_v2 <- removeSparseTerms(df_content_matrix_v2, sparse = .99)
+
+container_v2 <- create_container(df_content_matrix_v2, 
+                              df_training_v2$thema, 
+                              trainSize=1:2300,
+                              testSize=2301:3047, 
+                              virgin=FALSE)
+
+# SVM Algortihm
+svm_v2 <- train_model(container_v2,"SVM")
+svm_classify_v2 <- classify_model(container_v2, svm_v2)
+
+# creating df with real topics, predicted topic and probability
+test_svm_v2 <- df_training_v2[2301:3047,]
+test_svm_v2$thema_test <- svm_classify_v2$SVM_LABEL
+test_svm_v2$prob <- svm_classify_v2$SVM_PROB
+
+length(which(test_svm_v2$thema==test_svm_v2$thema_test))/length(test_svm_v2$thema)
+# 70,9%
+
+# looking for probabilities
+test_svm_prob_v2 <- test_svm_v2 %>%
+  filter(prob >= 0.9)%>%
+  arrange((prob))
+length(which(test_svm_prob_v2$thema==test_svm_prob_v2$thema_test))/length(test_svm_prob_v2$thema)
+nrow(test_svm_prob_v2)/nrow(test_svm_v2)
+# 0.3: 0.7953 richtig / 0.8046 Matching
+# 0.4: 0.8475 richtig / 0.6760 Matching
+# 0.5: 0.8762 richtig / 0.5730 Matching
+# 0.6: 0.9008 richtig / 0.4859 Matching
+# 0.7: 0.9126 richtig / 0.4137 Matching
+# 0.8: 0.9333 richtig / 0.3414 Matching
+# 0.9: 0.9494 richtig / 0.2383 Matching
+
+
+# RF Algorithm
+rf_v2 <- train_model(container_v2, "RF")
+rf_classify_v2 <- classify_model(container_v2, rf_v2)
+
+# creating df with real topics, predicted topic and probability
+test_rf_v2 <- df_training_v2[2301:3047,]
+test_rf_v2$thema_test <- rf_classify_v2$FORESTS_LABEL
+test_rf_v2$prob <- rf_classify_v2$FORESTS_PROB
+
+length(which(test_rf_v2$thema==test_rf_v2$thema_test))/length(test_rf_v2$thema)
+# 71,88% 
+
+test_rf_200 <- test_rf_v2  %>% 
+  filter(prob >= 0.3) %>% 
+  arrange((prob))
+length(which(test_rf_200$thema==test_rf_200$thema_test))/length(test_rf_200$thema)
+nrow(test_rf_200)/nrow(test_rf_v2)
+# 0.3: 0.8389 richtig / 0.7483 Matching
+# 0.4: 0.9007 richtig / 0.5800 Matching
+# 0.5: 0.9421 richtig / 0.4163 Matching
+# 0.6: 0.9773 richtig / 0.2945 Matching
+# 0.7: 1 richtig / 0.1954 Matching
+# 0.8: 1 richtig / 0.1312 Matching
+# 0.9: 1 richtig / 0.0977 Matching
+
+rf_v2_500 <- train_model(container_v2, "RF", ntree = 500)
+rf_classify_v2_500 <- classify_model(container_v2, rf_v2_500)
+
+# creating df with real topics, predicted topic and probability
+test_rf_v2_500 <- df_training_v2[2301:3047,]
+test_rf_v2_500$thema_test <- rf_classify_v2_500$FORESTS_LABEL
+test_rf_v2_500$prob <- rf_classify_v2_500$FORESTS_PROB
+
+length(which(test_rf_v2_500$thema==test_rf_v2_500$thema_test))/length(test_rf_v2_500$thema)
+# 72,55
+
+test_rf_500 <- test_rf_v2_500  %>% 
+  filter(prob >= 0.3) %>% 
+  arrange((prob))
+length(which(test_rf_500$thema==test_rf_500$thema_test))/length(test_rf_500$thema)
+nrow(test_rf_500)/nrow(test_rf_v2_500)
+# 0.3: 0.8496 richtig / 0.7389 Matching
+# 0.4: 0.8947 richtig / 0.5850 Matching
+# 0.5: 0.9308 richtig / 0.4257 Matching
+# 0.6: 0.9733 richtig / 0.3012 Matching
+# 0.7: 0.9933 richtig / 0.1995 Matching
+# 0.8: 1 richtig / 0.1338 Matching
+# 0.9: 1 richtig / 0.0991 Matching
+
+rf_v2_800 <- train_model(container_v2, "RF", ntree = 800)
+rf_classify_v2_800 <- classify_model(container_v2, rf_v2_800)
+
+# creating df with real topics, predicted topic and probability
+test_rf_v2_800 <- df_training_v2[2301:3047,]
+test_rf_v2_800$thema_test <- rf_classify_v2_800$FORESTS_LABEL
+test_rf_v2_800$prob <- rf_classify_v2_800$FORESTS_PROB
+
+length(which(test_rf_v2_800$thema==test_rf_v2_800$thema_test))/length(test_rf_v2_800$thema)
+# 72,55
+
+test_rf_800 <- test_rf_v2_800  %>% 
+  filter(prob >= 0.9) %>% 
+  arrange((prob))
+length(which(test_rf_800$thema==test_rf_800$thema_test))/length(test_rf_800$thema)
+nrow(test_rf_800)/nrow(test_rf_v2_800)
+
+test_rf %>% 
+  group_by(thema) %>% 
+  summarise(prob_m = mean(prob)) %>% 
+  arrange(desc(prob_m))
+```
+
 
 ```{r}
 ggplot(df_complete_clean, aes(thema)) +
@@ -656,30 +1045,6 @@ df_complete_clean %>%
 
 unique(df_complete_clean$party)
 
-
-df_complete_clean %>%
-  filter(thema != "zSonstiges" & party == "AfD") %>%
-  group_by(party, thema) %>%
-  summarise(n = n()) %>%
-  mutate(perc = (n/sum(n))) %>%
-  mutate(thema = fct_reorder(thema, perc)) %>% 
-  ggplot(aes(x = thema, y = perc)) +
-  geom_bar(position = "dodge",
-           stat = "identity",
-           fill = "skyblue4") +
-  facet_wrap(~party, labeller = label_value) +
-  geom_text(aes(y = perc, 
-                label = sprintf("%1.1f%%", round(100*perc, 1))),
-            size = 3.1,
-            color=rgb(100,100,100, maxColorValue=255),
-            hjust=-0.1) +
-  #ylim(0,0.22)
-  theme_bw() +
-  theme(text=element_text(size = 12)) +
-  scale_y_continuous(labels = scales::percent_format(), limits=c(0,0.50)) +
-  coord_flip()
-
-
 ```
 
 ## inspecting data again
@@ -699,22 +1064,10 @@ df_complete_clean$content %<>%
 View(df_complete_clean %>% 
   select(thema, title, file) %>% 
   filter(thema == "zSonstiges"))
+
+df_complete_clean %>% 
+  group_by(bt) %>% 
+  summarise(n = n())
 ```
 
-## table 
-```{r}
-unique(df_complete_clean$thema)
-df_code_book_table <- data.frame(Thema = c("Makroökonomie", "Bürgerrechte", "Gesundheit", "Agrarwirtschaft",
-                                           "Arbeit & Beschäftigung", "Bildung", "Umwelt", "Energie",
-                                           "Einwanderung", "Transport", "Kriminalität & Familienprobleme",
-                                           "Soziale Wohlfahrt", "Gemeindeentwicklung & Wohnungsprobleme", 
-                                           "Banken, Finanzen & Binnenhandel", "Verteidigung",
-                                           "Technologie & Kommunikation", "Außenhandel", 
-                                           "Internationale Angelegenheiten & Auslandshilfe", "Regierungsoperationen",
-                                           "Öffentliche Flächen"), 
-                                 Inhalt = c("Arbeitslosenquote \n allgemeine inländische Haushaltsprobleme \n Inflation, Preise und Zinsrate \n nationales Budget und Schulden \n Steuern, Steuerpolitik und Steuerreform \n Industriepolitik \n Preiskontrolle und Stabilisierung", "Ethnische Minderheiten und Gruppendiskriminierung \n Geschlecht und Diskriminierung sexuelle Diskrimination \n Altersdiskriminierung \n Diskriminierung von Behinderten \n Wahlrechte, Partizipation und damit verbundene Probleme \n Meinungsfreiheit und Religion \n Recht auf Privatsphäre und Zugang zu Informationen der Regierung \n Aktivitäten gegen die Regierung", "Umfassende Gesundheitsreformen", "bla bla", "blup blup bla", "bli blu bla", "pussy", "pussy2", "ping", "pong"))
-
-library(xtable)
-print(xtable::xtable(df_code_book_table),floating = FALSE, include.rownmaes = FALSE, tabular.environment = "longtable")
-```
 

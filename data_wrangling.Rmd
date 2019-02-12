@@ -803,23 +803,24 @@ save(df_complete, file = "df_complete.RData")
 # year on x and party als filler
 df_complete_clean$bt
 
+unique(df_complete_clean$party)
+
 df_complete_clean %>% 
-  select(bt) %>% 
-  head()
-df_complete_clean %>% 
-  filter(party != "NA") %>% 
+  filter(party == "SPD" | party == "Union")
+
+plot_anfragen_18_19 <- df_complete_clean %>% 
+  filter(party != "NA" & party != "SPD" & party != "Union") %>% 
   mutate(date_n = as.Date(date, "%d.%m.%Y")) %>% 
   mutate(year = year(date_n),
          party = case_when(party == "Union" ~ "CDU/CSU",
                            TRUE ~ party)) %>% 
-  group_by(party, year) %>% 
-  summarise(n = n()) %>% 
   mutate(year = as.character(year)) %>% 
-  mutate(year = case_when(year == "2013" ~ "2013\nOkt-Dez",
-                          TRUE ~ year)) %>% 
+  group_by(party, year, bt_f) %>% 
+  summarise(n = n()) %>% 
   ggplot(aes(x = as.factor(year), fill = reorder(party, -n), y = n)) +
   geom_bar(position="dodge", 
-           stat="identity") +
+           stat="identity",
+           alpha = 0.9) +
   geom_text(position = position_dodge(width = 1), # positioning for grouped barplot
             aes(label = n), # n-value should be the label for each bar
             vjust = -0.5, # adjusting the vertical dimension (overlapping)
@@ -831,35 +832,15 @@ df_complete_clean %>%
   theme_hc() +
   scale_fill_manual(values = c("Grüne" = "#50822E", "Linke" = "#B61C3E", 
                      "CDU/CSU" = "#32372C", "SPD" = "#E3000F", "AfD" = "#0088FF", "FDP" = "#FFD600")) +
-  facet_wrap(~ as.integer(bt))
-  ggsave("AnfragenPartei_18_BT.png", path = "./images/", width = 6, height = 4.5)
+  facet_wrap(~ bt_f, 
+             strip.position = "top", # position of labels
+             dir = "v") +# positioning of plots 
+  scale_y_continuous(limits = c(0,700))
+
+ggpreview(plot_anfragen_18_19, width = 7.5, height = 8.5)
+ggsave("AnfragenPartei_18_19.png", path = "./images/", width = 7.5, height = 8.5)
   
-  df_complete_clean %>% 
-  filter(party != "NA", bt == "19") %>% 
-  mutate(date_n = as.Date(date, "%d.%m.%Y")) %>% 
-  mutate(year = year(date_n),
-         party = case_when(party == "Union" ~ "CDU/CSU",
-                           TRUE ~ party)) %>% 
-  group_by(party, year) %>% 
-  summarise(n = n()) %>% 
-  mutate(year = as.character(year)) %>% 
-  mutate(year = case_when(year == "2017" ~ "2017\nNov-Dez",
-                          TRUE ~ year)) %>% 
-  ggplot(aes(x = as.factor(year), fill = reorder(party, -n), y = n)) +
-  geom_bar(position="dodge", 
-           stat="identity") +
-  geom_text(position = position_dodge(width = 1), # positioning for grouped barplot
-            aes(label = n), # n-value should be the label for each bar
-            vjust = -0.5, # adjusting the vertical dimension (overlapping)
-            size = 3) + # setting the size of the label
-  xlab("") + 
-  ylab("") + 
-  labs(fill = "") +
-  theme(legend.position="bottom", plot.title = element_text(hjust = 0.5)) +
-  theme_hc() +
-  scale_fill_manual(values = c("Grüne" = "#50822E", "Linke" = "#B61C3E", 
-                     "CDU/CSU" = "#32372C", "SPD" = "#E3000F", "AfD" = "#0088FF", "FDP" = "#FFD600")) +
-    ggtitle("19. Bundestag")
+
   
 party <- c("Linke", "Grüne", "FDP", "CDU/CSU", "AfD", "SPD")
 sitze18 <- c(70, 63, 0, 255, 0, 193)

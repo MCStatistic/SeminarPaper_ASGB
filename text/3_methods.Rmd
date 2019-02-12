@@ -28,11 +28,17 @@ pacman::p_load(tidyverse, gridExtra)
 ```
 
 
-Im folgenden soll die methodische Vorgehensweise erläutert werden, welche die Datenbeschaffung, die Klassifizierung beschreiben sowie die anschließende Analyse beschreiben soll. Da es keinen Datensatz gibt, welcher sämtliche kleine Anfragen sowie deren thematische Klassifizierung anlehenend an @jones2004representation, mussten die Daten eigenständig erhoben und klassifiziert werden. Bei den klenen Anfragen handelt es sich um Drucksachen des deutschen Bundestages, welche öffentlich zugänglich sind. Ausgehend dessen wurden sämtliche Drucksachen des 18. und 19. Bundestages automatisiert heruntergeladen[^1]. Da der 19. Bundestag nach wie vor besteht, wurde ein Datum festgelegt, ab welchen keine weiteren Drucksachen berücksichtigt werden. Ausgehend dessen wurden sämtliche Drucksachen innerhalb des Zeitraumes 15. Oktober 2013 bis 31. Dezember 2018 heruntergleaden. 
+Im Folgenden soll die methodische Vorgehensweise erläutert werden, welche die Datenbeschaffung, die Klassifizierung sowie die anschließende Analyse beschreiben soll. Da es keinen Datensatz gibt, welcher sämtliche kleine Anfragen sowie deren thematische Klassifizierung anlehenend an @jones2004representation, mussten die Daten eigenständig erhoben und klassifiziert werden. Bei den klenen Anfragen handelt es sich um Drucksachen des deutschen Bundestages, welche durch das Dokumentations- und Informationssystem für Parlamentarische Vorgänge öffentlich zugänglich sind [vgl. @dip21]. Für sämtliche nachfolgend beschriebenen Schritte wurde die Programmiersprache R genutzt.[^1]
 
-Kurzes Zitätchen [@jones2004representation 17]
+## Datenbeschaffung
+Ausgehend der angeführten Punkte wurden sämtliche Drucksachen des 18. und 19. Bundestages automatisiert heruntergeladen.[^2] Da der 19. Bundestag nach wie vor besteht, musste ein Datum festgelegt werden, ab welchen keine weiteren Drucksachen mehr berücksichtigt werden.[^3] Für den 18. Bundestag wurden demnach 13.705 Drucksachen und für den 19. Bundestag (bis zum 31.12.2018) wurden 6.896 Drucksachen heruntergladen. Zusätzlich wurde die Trefferliste als CSV heruntergleaden, welche die Nummer der Drucksache sowie Titel und Datum der Drucksache enthält. Da jede Drucksache als PDF gespeichert wurde und ein standardisiertes Format aufweist, konnten die interessierten Bestandteile des Textes extrahiert werden.[^4] 
 
-[^1]: Hierfür wurde eine Funktion geschrieben, mit welcher jede Drucksache als PDF vom offiziellen Server heruntergeladen wurde.
+Zunächst wurde überprüft, ob es sich bei den Drucksachen um eine kleine Anfrage handelt. Sofern es sich um keine kleine Anfrage handelte, wurde die entsprechende Drucksache gelöscht. Im 18. Bundestag wurden 3.951 kleine Anfragen gestellt und im 19. Bundestag 2.399. Anschließend wurde die Partei für jede kleine Anfrage ermittelt, welche am Ende des Titels steht. Zudem wurde der Inhalt jeder Anfrage extrahiert, welcher für die spätere Kategorisierung herangezogen wird. Der hierdurch erstellte Datensatz wurde mit der heruntergeladen CSV-Datei mit Titel und Datum ergänzt. 
+
+[^1]: Der Code für sämtliche Auswertungen der Hausarbeit ist auf GitHub unter https://github.com/MCStatistic/SeminarPaper_ASGB einsehbar.
+[^2]: Hierfür wurde eine Funktion in R geschrieben, mit welcher jede Drucksache als PDF vom offiziellen Server heruntergeladen wurde. Die Dateien wurden dabei unter der Nummer der Drucksache sowie des jeweiligen Bundestags gespeichert.
+[^3]: Für den 18. Bundestag beläuft sich der Zeitraum vom 22. Oktober 2013 bis zum 24. Oktober 2017. Aufgrund der durchzuführenden Auswertungen wurde der zu analysierende Zeitraum für den 19. Bundestag vom 24. Oktober 2017 bis zum 31. Dezember 2018 festgelegt. 
+[^4]: Hierfür wurde das Package *pdftools* [vgl. @pdftools] genutzt.
 
 
 \begin{table}[]

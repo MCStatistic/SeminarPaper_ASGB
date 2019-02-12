@@ -10,7 +10,7 @@
       <name>Sebastian Karcher</name>
     </author>
     <contributor>
-      <name>Marlon Schumacher</name>
+      <name>Fabio Votta</name>
     </contributor>
     <category citation-format="author-date"/>
     <category field="social_science"/>
@@ -51,10 +51,10 @@
   <macro name="access">
     <choose>
       <if variable="URL">
-        <text value="Available at:" suffix=" "/>
+        <text value="verfügbar unter:" suffix=" "/>
         <text variable="URL"/>
         <group prefix=" [" suffix="]">
-          <text term="accessed" text-case="capitalize-first" suffix=" "/>
+          <text term="aufgerufen am" text-case="capitalize-first" suffix=" "/>
           <date variable="accessed">
             <date-part name="month" suffix=" "/>
             <date-part name="day" suffix=", "/>
@@ -67,10 +67,10 @@
   <macro name="title">
     <choose>
       <if type="bill book graphic legal_case legislation motion_picture report song thesis" match="any">
-        <text variable="title" font-style="italic"/>
+        <text variable="title" font-style="italic" text-case="title"/>
       </if>
       <else>
-        <text variable="title" quotes="false"/>
+        <text variable="title" quotes="false" text-case="title"/>
       </else>
     </choose>
   </macro>
@@ -162,7 +162,7 @@
           <group prefix=" " suffix=".">
             <text variable="container-title" font-style="italic"/>
             <text variable="volume" prefix=" "/>
-            <text variable="page" font-style="normal" prefix=", pp. "/>
+            <text variable="page" font-style="normal" prefix=", "/>
           </group>
         </else>
       </choose>
