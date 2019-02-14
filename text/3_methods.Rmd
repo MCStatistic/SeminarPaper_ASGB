@@ -35,6 +35,8 @@ Ausgehend der angeführten Punkte wurden sämtliche Drucksachen des 18. und 19. 
 
 Zunächst wurde überprüft, ob es sich bei den Drucksachen um eine Anfrage handelt. Sofern es sich um keine Anfrage handelte, wurde die entsprechende Drucksache gelöscht. Anschließend wurden zudem die großen Anfragen ebenso gelöscht, da sich die Gesamtanzahl dieser über den gesamten Zeitraum auf unter 30 beläuft. Im 18. Bundestag wurden 3.951 kleine Anfragen gestellt und im 19. Bundestag 2.398. Der Datensatz beinhaltet somit 6349 Dokumente. Anschließend wurde die Partei für jede kleine Anfrage ermittelt, welche stets am Ende des Titels steht. Zudem wurde der Inhalt jeder Anfrage extrahiert, welcher für die spätere Kategorisierung herangezogen wird. Der hierdurch erstellte Datensatz wurde mit der heruntergeladen CSV-Datei mit Titel und Datum ergänzt.
 
+In Tabelle \ref{TabCodeBook} sind die Themen, deren jeweiliger thematischer Inhalt sowie die genutzten Schlagwörter zwecks Kategoriersung ersichtlich.
+
 [^1]: Der Code für alle Auswertungen der Hausarbeit ist auf GitHub unter https://github.com/MCStatistic/SeminarPaper_ASGB einsehbar.
 [^2]: Hierfür wurde eine Funktion in R geschrieben, mit welcher jede Drucksache als PDF vom offiziellen Server heruntergeladen wurde. Die Dateien wurden dabei unter der Nummer der Drucksache sowie des jeweiligen Bundestags gespeichert um so eine klare Zuordnung gewährleisten zu können.
 [^3]: Für den 18. Bundestag beläuft sich der Zeitraum vom 22. Oktober 2013 bis zum 24. Oktober 2017. Aufgrund der durchzuführenden Auswertungen wurde der zu analysierende Zeitraum für den 19. Bundestag vom 24. Oktober 2017 bis zum 31. Dezember 2018 festgelegt. 
