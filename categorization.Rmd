@@ -8,9 +8,7 @@ output: html_document
 ```{r}
 library(pacman)
 p_load(dplyr, haven, readr, ggplot2, pdftools, stringr, lubridate, RColorBrewer, tm, ggthemes, RTextTools,
-       caret, randomForest, magrittr)
-
-library(forcats)
+       caret, randomForest, magrittr, forcats)
 ```
 
 
@@ -440,223 +438,7 @@ ggsave("themen_gesamt_manual_matching.png", themen_gesamt_manual_matching,
 
 ```
 
-
-# supervised machine
-```{r}
-install.packages("RTextTools")
-library(RTextTools)
-
-df_training <- df_complete_clean %>% 
-  filter(thema != "zSonstiges") %>% 
-  sample_n(2978)
-
-# nrow(df_training)
-
-# creating df with topic and content
-x <- data.frame(thema = df_training$thema , content = df_training$content)
-#alle Labels anzeigen
-unique(x$thema)
-
-# Erstellung einer VectorSource
-source <- VectorSource(x$content)
-
-# corpus erstellen
-corpus <- Corpus(source)
-
-# zufallsverteilung funktioniert
-# corpus[[1]]$content
-
-corpus <- tm_map(corpus, stripWhitespace)
-
-# creating a documenttermmatrix
-mat <- DocumentTermMatrix(corpus)
-
-# train size: 80% = 2978*0.8 = 2383
-container <- create_container(mat, x$thema, 
-                              trainSize=1:2383,
-                              testSize=2384:2978, 
-                              virgin=FALSE)
-
-model <- train_model(algorithm = "SVM", 
-                     container,
-                     kernel='linear')
-
-#das Model wird auf die übrigen 20% angewendet und in results gespeichert.
-results <- classify_model(container, model)
-
-tabelle_accuracy<-table(as.character(x$thema[2384:2978]), as.character(results[,"SVM_LABEL"]))
-tabelle_accuracy
-
-recall_accuracy(x$thema[2384:2978], results[,"SVM_LABEL"])
-
-test_tibble<-df_training[2384:2978,]
-test_tibble$thema_test<-results$SVM_LABEL
-test_tibble$prob<-results$SVM_PROB
-
-length(which(test_tibble$thema==test_tibble$thema_test))/length(test_tibble$thema)
-#ohne filter 0.687, N= 595
-
-ggplot(test_tibble, aes(prob))+
-  geom_histogram()+
-  geom_vline(xintercept=mean(test_tibble$prob, na.rm = T), color="red")+
-  geom_vline(xintercept = median(test_tibble$prob, na.rm = T), color = "blue")+
-  geom_vline(xintercept = 0.6, color = "black")
-```
-
-# again but a bit better
-```{r}
-df_training$thema_f <- factor(df_training$thema)
-df_training %<>% 
-  mutate(thema_t1 = case_when(
-    thema == "Energie" ~ "Energie & Umwelt",
-    thema == "Umwelt" ~ "Energie & Umwelt",
-    TRUE ~ thema
-  ))
-
-df_training_t2 <- df_training %>% 
-  filter(thema != "Wohnungsbau" & thema != "Regierungsoperationen")
-
-nrow(df_training_t2)
-
-doc_matrix <- create_matrix(df_training$content)
-doc_matrix_t2 <- create_matrix(df_training_t2$content)
-container <- create_container(df_content_matrix, 
-                              df_training_forest$thema, 
-                              trainSize=1:2383,
-                              testSize=2384:2977, 
-                              virgin=FALSE)
-
-container_f <- create_container(doc_matrix, 
-                              as.numeric(df_training$thema_f), 
-                              trainSize=1:2383,
-                              testSize=2384:2978, 
-                              virgin=FALSE)
-
-svm_f <- train_model(container_f,"SVM", kernel = "linear")
-svm_classify_f <- classify_model(container_f, svm_f)
-
-# creating df with real topics, predicted topic and probability
-test_svm_f <- df_training[2384:2978,]
-test_svm_f$thema_test <- svm_classify_f$SVM_LABEL
-test_svm_f$prob <- svm_classify_f$SVM_PROB
-
-length(which(test_svm_f$thema==test_svm_f$thema_test))/length(test_svm_f$thema)
-
-RTextTools::create_analytics(container_f, svm_classify_f)
-
-df_training <- df_complete_clean %>% 
-  filter(thema != "zSonstiges") %>% 
-  sample_n(2977) 
-
-# creating document-term matrix
-df_content_matrix <- create_matrix(df_training$content)
-
-# remove sparse terms: In this case tokens are removed which are missing from more than 99% of the documents
-df_content_matrix <- removeSparseTerms(df_content_matrix, sparse = .99)
-
-container <- create_container(df_content_matrix, 
-                              df_training$thema, 
-                              trainSize=1:2383,
-                              testSize=2384:2977, 
-                              virgin=FALSE)
-
-# SVM Algortihm
-svm <- train_model(container,"SVM")
-svm_classify <- classify_model(container, svm)
-
-# creating df with real topics, predicted topic and probability
-test_svm <- df_training[2384:2977,]
-test_svm$thema_test <- svm_classify$SVM_LABEL
-test_svm$prob <- svm_classify$SVM_PROB
-
-length(which(test_svm$thema==test_svm$thema_test))/length(test_svm$thema)
-#ohne filter 0.687 (1), 0.744 (2), N= 595
-
-# looking for probabilities
-test_svm_04<- test_svm %>%
-  filter(prob >= 0.4)%>%
-  arrange((prob))
-length(which(test_svm_04$thema==test_svm_04$thema_test))/length(test_svm_04$thema)
-# 81.9; n = 420 -> 70.6%
-
-test_svm_05 <- test_svm %>%
-  filter(prob >= 0.5)%>%
-  arrange((prob))
-length(which(test_svm_05$thema==test_svm_05$thema_test))/length(test_svm_05$thema)
-# 86.2; n = 364 -> 61.2% (von 595)
-
-test_svm_06<- test_svm %>%
-  filter(prob >= 0.6)%>%
-  arrange((prob))
-length(which(test_svm_06$thema==test_svm_06$thema_test))/length(test_svm_06$thema)
-nrow(test_svm_06)/nrow(test_svm)
-# 90.3; n = 310 -> 52% (von 595)
-# 2. durchlauf: 0.912; n = 307 -> 52%...
-
-
-test_svm_07<- test_svm %>%
-  filter(prob >= 0.7)%>%
-  arrange((prob))
-length(which(test_svm_07$thema==test_svm_07$thema_test))/length(test_svm_07$thema)
-nrow(test_svm_07)
-# 92.7%; n = 263 -> 44% (von 595)
-
-
-test_svm_08<- test_svm %>%
-  filter(prob >= 0.8)%>%
-  arrange((prob))
-length(which(test_svm_08$thema==test_svm_08$thema_test))/length(test_svm_08$thema)
-# 94.1%; n = 190 -> 31.9% (von 595)
-
-test_svm_085<- test_tibble%>%
-  filter(prob>=0.85)%>%
-  arrange((prob))
-length(which(test_svm_085$thema==test_svm_085$thema_test))/length(test_svm_085$thema)
-# 95.7%; n = 186 -> 31.2% (von 595)
-
-
-test_svm_09 <- test_svm %>%
-  filter(prob >= 0.9)%>%
-  arrange((prob))
-length(which(test_svm_09$thema==test_svm_09$thema_test))/length(test_svm_09$thema)
-# 98,6% n = 146 -> 24,5% (von 595)
-
-# RF Algorithm
-rf <- train_model(container, "RF")
-rf_classify <- classify_model(container, rf)
-
-# creating df with real topics, predicted topic and probability
-test_rf <- df_training[2384:2977,]
-test_rf$thema_test <- rf_classify$FORESTS_LABEL
-test_rf$prob <- rf_classify$FORESTS_PROB
-
-length(which(test_rf$thema==test_rf$thema_test))/length(test_rf$thema)
-
-test_rf_05 <- test_rf  %>% 
-  filter(prob >= 0.5) %>% 
-  arrange((prob))
-length(which(test_rf_05$thema==test_rf_05$thema_test))/length(test_rf_05$thema)
-nrow(test_rf_05)/nrow(test_rf)
-
-test_rf_06 <- test_rf  %>% 
-  filter(prob >= 0.6) %>% 
-  arrange((prob))
-length(which(test_rf_06$thema==test_rf_06$thema_test))/length(test_rf_06$thema)
-nrow(test_rf_06)/nrow(test_rf)
-
-
-test_rf %>% 
-  group_by(thema) %>% 
-  summarise(prob_m = mean(prob)) %>% 
-  arrange(desc(prob_m))
-
-View(df_complete_clean %>% 
-  filter(thema == "Bürgerrechte") %>% 
-    select(title, file))
-
-```
-
-# data correction
+### final data correction
 ```{r}
 # Bürgerrechte
 View(df_complete_clean %>% 
@@ -894,15 +676,14 @@ save(df_complete_clean_v2, file = "df_complete_clean_v2.RData")
 load("df_complete_clean_v2.RData")
 ```
 
-# train model again with new df
+# Supervised Machine Learning
+### train model - testing two algorithm
 ```{r}
 load("df_complete_clean_v2.RData")
 
 df_training_v2 <- df_complete_clean_v2 %>% 
   filter(thema != "zSonstiges") %>% 
   sample_n(3047) 
-
-3047*0.75
 
 # creating document-term matrix
 df_content_matrix_v2 <- create_matrix(df_training_v2$content)
@@ -1113,24 +894,9 @@ accuracy <- as.numeric(c(0.8063, 0.8548, 0.8807, 0.8947, 0.9115, 0.9295, 0.9647,
 
 algo_compare <- data.frame(model, prob, accuracy, matching)
 
-algo_compare %>% 
-  filter(prob != 0.3) %>% 
-  group_by(model) %>% 
-  ggplot(aes(y = accuracy, x = matching, col = model)) +
-  geom_point(size = 3, alpha = 0.6) +
-  theme_bw() +
-  ylab("Übereinstimmung") +
-  xlab("Genauigkeit") +
-  scale_y_continuous(labels = scales::percent_format()) +
-  scale_x_continuous(labels = scales::percent_format()) +
-  geom_hline(yintercept = 0.9, color = "red", alpha = 0.3) +
-  geom_hline(yintercept = 0.95, color = "green", alpha = 0.3) +
-  theme(legend.position="bottom", legend.title = element_blank()) +
-  facet_wrap(~ prob)
-
 ```
 
-# plotting probabilities of svm and rf
+### plotting probabilities of svm and rf (Testing)
 ```{r}
 # plotting the probabilities for each topic from svm_classify_v2
 svm_classify_v2 %>% 
@@ -1157,18 +923,126 @@ prob_plot_df <- rbind.data.frame(rf_200_plot_df, svm_plot_df)
 rf_svm_prob_boxplot <- prob_plot_df %>% 
   group_by(model) %>% 
   mutate(label = fct_reorder(label, prob)) %>% 
-  ggplot(aes(x = label, y = prob)) +
-  geom_boxplot(alpha = 0.7) +
+  ggplot(aes(x = label, y = prob, fill = label)) +
+  geom_boxplot(alpha = 0.2) +
   geom_jitter(width = 0.2, alpha = 0.2) +
   theme_bw() +
   xlab("") +
-  ylab("Probability") +
+  ylab("Wahrscheinlichkeit") +
   facet_wrap(~ model) +
+  theme(legend.position = "none") +
+  coord_flip() 
+
+prob_plot_df %>% 
+  group_by(model) %>% 
+  mutate(label = fct_reorder(label, prob)) %>% 
+  ggplot(aes(x = label, y = prob, col = model)) +
+  geom_boxplot(alpha = 0.7) +
+  theme_bw() +
+  xlab("") +
+  ylab("Wahrscheinlichkeit") +
   coord_flip()
 
-ggpreview(rf_svm_prob_boxplot, width = 6, height = 6.5)
+ggpreview(rf_svm_prob_boxplot, width = 7, height = 6.5)
 ggsave("rf_svm_prob_boxplot.png", rf_svm_prob_boxplot, 
-       path = "./images/", width = 6, height = 6.5)
+       path = "./images/", width = 7, height = 6.5)
+
+rf_svm_cutt_off_plot <- algo_compare %>% 
+  filter(prob != 0.3) %>% 
+  mutate(prob_f = case_when(
+    prob == 0.4 ~ "Probability (Cutt Off): 0.4",
+    prob == 0.5 ~ "Probability (Cutt Off): 0.5",
+    prob == 0.6 ~ "Probability (Cutt Off): 0.6",
+    prob == 0.7 ~ "Probability (Cutt Off): 0.7",
+    prob == 0.8 ~ "Probability (Cutt Off): 0.8",
+    prob == 0.9 ~ "Probability (Cutt Off): 0.9"
+  )) %>% 
+  group_by(model) %>% 
+  ggplot(aes(y = accuracy, x = matching, col = model)) +
+  geom_point(size = 3, alpha = 0.6) +
+  theme_bw() +
+  ylab("Übereinstimmung") +
+  xlab("Anteil kategorisierter Anfragen") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_x_continuous(labels = scales::percent_format()) +
+  geom_hline(yintercept = 0.9, alpha = 0.5) +
+  geom_hline(yintercept = 0.95, alpha = 0.5) +
+  theme(legend.position="bottom", legend.title = element_blank()) +
+  facet_wrap(~ prob_f)
+
+ggpreview(rf_svm_cutt_off_plot, width = 7, height = 5)
+ggsave("rf_svm_cutt_off_plot.png", rf_svm_cutt_off_plot, 
+       path = "./images/", width = 7, height = 5)
+```
+
+### real model (svm & rf)
+```{r}
+# selecting ONLY the cases with a topic
+df_labelled <- df_complete_clean_v2 %>% 
+  filter(thema != "zSonstiges") 
+
+# selecting only zSonstiges
+df_sonst <- df_complete_clean_v2 %>% 
+  filter(thema == "zSonstiges") 
+
+# row binding
+df_complete_predict <- rbind(df_labelled, df_sonst)
+
+df_complete_predict$thema[3047] # Wohnungsbau
+df_complete_predict$thema[3048] # zSonstgies -> row 3048 is the beginning of all cases with sonstiges
+
+# number of cases 
+nrow(df_complete_predict) #6349 cases 
+nrow(df_labelled) # 3047 labelled
+nrow(df_sonst) # 3302 need to be labelled
+
+# creating document-term-matrix using the "ordered" df
+df_matrix_full <- create_matrix(df_complete_predict$content) %>% 
+  removeSparseTerms(sparse = .99)
+
+# creating a container for the training and labelling
+container_full <- create_container(df_matrix_full, 
+                                   df_complete_predict$thema,
+                                   trainSize = 1:3047, # zugeordnete dokumente fürs training
+                                   testSize = 3048:6349, # zSonstiges ist alles testSize
+                                   virgin=FALSE)
+
+# random forest for classification
+# reason for 200 trees: 1. best classification while testing; 2. no big differences
+rf_model <- train_model(container_full, # container mit content
+                        "RF", # method
+                        ntree = 200) # number of trees
+
+# container muss daten fürs training sowie für die kategorisierung beinhalten
+rf_classes_full <- classify_model(container_full, rf_model)
+
+# including labels into the df_sonst
+df_sonst$thema_rf <- rf_classes_full$FORESTS_LABEL
+df_sonst$prob_rf <- rf_classes_full$FORESTS_PROB
+
+# creating a new df with the new labells <3
+df_complete_clean_v3 <- full_join(df_labelled, df_sonst)
+
+# inspecting just a bit
+df_complete_clean_v3 %>% 
+  select(thema, party, file, thema_rf, prob_rf) %>% 
+  filter(thema == "zSonstiges")
+
+# SVM classification
+svm_model <- train_model(container_full, "SVM", method = "linear")
+svm_classes_full <- classify_model(container_full, svm_model)
+
+# creating df with real topics, predicted topic and probability
+df_sonst$thema_svm <- svm_classes_full$SVM_LABEL
+df_sonst$prob_svm <- svm_classes_full$SVM_PROB
+
+# creating a new df with the new labells <3
+df_complete_clean_f <- full_join(df_labelled, df_sonst)
+
+# inspecting just a bit
+df_complete_clean_f %>% 
+  select(thema, party, file, thema_rf, prob_rf, thema_svm, prob_svm) %>% 
+  filter(thema == "zSonstiges")
 ```
 
 
@@ -1200,30 +1074,8 @@ df_complete_clean %>%
   coord_flip()
 
 unique(df_complete_clean$party)
-
 ```
 
-## inspecting data again
-```{r}
-head(df_complete_clean$content, 30)
 
-added_stopwords <- as.data.frame(c("umso", "gilt", "inwiefern", "inwieweit", "ren", "wa", "len", 
-                                   "de", "nen", "lich", "jewei", "mach", "ten", "wel", "ches",
-                                   "wwwprintsystemdevertrieb", "be", "re"))
-
-colnames(added_stopwords) <- "word"
-added_stopwords <- as.character(added_stopwords$word)
-
-df_complete_clean$content %<>% 
-  removeWords(added_stopwords)
-
-View(df_complete_clean %>% 
-  select(thema, title, file) %>% 
-  filter(thema == "zSonstiges"))
-
-df_complete_clean %>% 
-  group_by(bt) %>% 
-  summarise(n = n())
-```
 
 
