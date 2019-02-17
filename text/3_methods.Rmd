@@ -28,54 +28,47 @@ pacman::p_load(tidyverse, gridExtra)
 ```
 
 
-Im Folgenden soll die methodische Vorgehensweise erläutert werden, welche die Datenbeschaffung, die Klassifizierung sowie die anschließende Analyse beschreiben soll. Da es keinen Datensatz gibt, welcher sämtliche kleine Anfragen sowie deren thematische Klassifizierung anlehenend an @jones2004representation enthält, mussten die Daten eigenständig erhoben und klassifiziert werden. Bei den kleinen Anfragen handelt es sich um Drucksachen des deutschen Bundestages, welche durch das *Dokumentations- und Informationssystem für Parlamentarische Vorgänge* öffentlich zugänglich sind [vgl. @dip21]. Diese Datenbank wird folglich als Datenquelle fungieren. Für sämtliche nachfolgend beschriebenen Schritte wurde die Programmiersprache R genutzt.[^1]
+Im Folgenden soll die methodische Vorgehensweise erläutert werden, welche die Datenbeschaffung, die Klassifizierung sowie die anschließende Analyse beschreiben soll. Da es keinen Datensatz gibt, welcher sämtliche kleine Anfragen sowie deren thematische Klassifizierung enthält, mussten die Daten eigenständig erhoben und klassifiziert werden. Bei den kleinen Anfragen handelt es sich um Drucksachen des deutschen Bundestages, welche durch das *Dokumentations- und Informationssystem für Parlamentarische Vorgänge* öffentlich zugänglich sind [vgl. @dip21]. Diese Datenbank wird folglich als Datenquelle fungieren. Für sämtliche nachfolgend beschriebenen Schritte wurde die Programmiersprache R genutzt.[^1]
 
 ## Datenbeschaffung
 Ausgehend der angeführten Punkte wurden sämtliche Drucksachen des 18. und 19. Bundestages automatisiert heruntergeladen.[^2] Da der 19. Bundestag nach wie vor besteht, musste ein Datum festgelegt werden, ab welchen keine weiteren Drucksachen mehr berücksichtigt werden.[^3] Für den 18. Bundestag wurden demnach 13.705 Drucksachen und für den 19. Bundestag (bis zum 31.12.2018) wurden 6.896 Drucksachen heruntergladen. Zusätzlich wurde die Trefferliste als CSV heruntergleaden, welche die Nummer der Drucksache sowie Titel und Datum der Drucksache enthält. Da jede Drucksache als PDF gespeichert wurde und ein standardisiertes Format aufweist, konnten die interessierten Bestandteile des Textes extrahiert werden.[^4] 
 
-Zunächst wurde überprüft, ob es sich bei den Drucksachen um eine Anfrage handelt. Sofern es sich um keine Anfrage handelte, wurde die entsprechende Drucksache gelöscht. Anschließend wurden zudem die großen Anfragen ebenso gelöscht, da sich die Gesamtanzahl dieser über den gesamten Zeitraum auf unter 30 beläuft. Im 18. Bundestag wurden 3.951 kleine Anfragen gestellt und im 19. Bundestag 2.398. Der Datensatz beinhaltet somit 6349 Dokumente. Anschließend wurde die Partei für jede kleine Anfrage ermittelt, welche stets am Ende des Titels steht. Zudem wurde der Inhalt jeder Anfrage extrahiert, welcher für die spätere Kategorisierung herangezogen wird. Der hierdurch erstellte Datensatz wurde mit der heruntergeladen CSV-Datei mit Titel und Datum ergänzt.
+Zunächst wurde überprüft, ob es sich bei den Drucksachen um eine Anfrage handelt. Sofern es sich um keine Anfrage handelte, wurde die entsprechende Drucksache gelöscht. Anschließend wurden zudem die großen Anfragen ebenso gelöscht, da sich die Gesamtanzahl dieser über den gesamten Zeitraum auf unter 30 beläuft. Im 18. Bundestag wurden 3.951 kleine Anfragen gestellt und im 19. Bundestag 2.398. Der Datensatz beinhaltet somit 6349 kleine Anfragen. Anschließend wurde die Partei für jede kleine Anfrage ermittelt, welche stets am Ende des Titels steht. Zudem wurde der Inhalt jeder Anfrage extrahiert, welcher für die spätere Kategorisierung herangezogen wird. Der hierdurch erstellte Datensatz wurde mit der heruntergeladen CSV-Datei mit Titel und Datum ergänzt.
 
-In Tabelle \ref{TabCodeBook} sind die Themen, deren jeweiliger thematischer Inhalt sowie die genutzten Schlagwörter zwecks Kategoriersung ersichtlich.
+## Klassifizierung
+
+Im Hinblick auf die Forschungsfrage müssen die kleinen Anfragen[^5] nach Themen klassifiziert werden. Dabei müssen die Themen zuvor klar definiert werden, welche für die Klassifizierung herangezogen werden sollen. Hierbei soll sich verstärkt an der Arbeit von Baumgartner, Jones und Wilkerson orientiert werden, welche für die USA und der dortigen nationalen Politik ein Kodiersystem erstellt haben [vgl. @baumgartner2006comparative 970]. Neben dem Kodiersystem, welches für die US-Politik erstellt wurde, exisitert eine neuere Version, welches allgemeine Kodierrichtlinien beinhaltet [vgl. @cap]. Einerseits kann das Kodiersystem leicht auf verschiedene Länder angewendet werden. Andererseits ergibt sich durch die Verwendung dieses Kodiersystems die Möglichkeit der Vergleichbarkeit mit anderen Ländern, was jedoch in dieser Arbeit nicht näher von Interesse ist [vgl. @john2006policy 983].
+
+Anhand dieses Kodierungssystems werden die kleinen Anfragen in dieser Arbeit klassifiziert. Dabei enthält das Kodiersystem 21 Hauptthemen und 220 Subthemen. Zwischen den Subthemen wird bei der nachfolgenden Klassifizierung jedoch nicht differenziert. Diese Entscheidung ergibt sich aus zwei Gründen. Zum einen stellen die Hauptthemen bereits eine ausreichende Differenzierung zur Beantwortung der Forschungsfrage dar, wodurch eine zusätzliche Differenzierung zwischen den Subthemen zunächst keinen Mehrwert bringen würde. Zum anderen ist eine derart detaillierte Klassifizierung hinsichtlich der methodischen Vorgehensweise schwer zu realisieren, da es für einige der 220 Subthemen zu wenig Anfragen gibt. Eine Übersetzung der Kodierung ist im Anhang in Tabelle \ref{TabCodeBook} enthalten. Die Tabelle enthält die Hauptthemen sowie deren Subthemen. Ebenso sind in der Tabelle die Wörter enthalten, welche für den ersten Schritt der Klassifizierung herangezogen werden.
+
+Die Klassifizierung der Anfragen erfolgt in zwei Schritten. Im ersten Schritt werden diese anhand von Wörtern klassifiziert und anschließend erfolgt eine Validierung dieser Klassifizierung. Im zweiten Schritt erfolgt eine Klassifizierung der Anfragen, die nicht durch den ersten Schritt klassifiziert werden konnten. Hierfür werden zwei Verfahren des Supervised Machine Learnings verwendet. Auf diese beiden Schritte wird im folgenden detailliert eingegangen.
+
+### Klassifizierung mittels Wörter
+
+Anhand der Subthemen wurden für jedes Haupthema Wörter identifiziert, welche ausschließlich auf das jeweilige Haupthema zutreffen und sich thematisch von den übrigen Hauptthemen[^6] klar abgrenzen sollten. Dabei wurden die Wörter unter anderem auch durch das Querlesen einiger Anfragen ermittelt. Um mit Hilfe der Wörter eine zuverlässige Klassifizierung zu ermöglichen, wurde bei diesem Schritt lediglich der Titel der jeweiligen Anfrage herangezogen. Einerseits fungiert der Titel als eine Beschreibung des Inahlts, wodurch dieser entsprechend klar und prägnant formuliert sein muss. Daraus sollte sich eine hohe Wahrscheinlichkeit ergeben, dass hierbei ein Begriff enthalten ist, welcher auf das entsprechende Thema zu verorten ist. Andererseits ist davon auszugehen, dass im Inhalt der Anfrage ein Bezug zu anderen Themen vorkommen kann. Eine derartige Klassifizierung anhand der Inhalte würde folglich zu einem tendenziell unzuverlässigem Ergebnis führen.
+
+Da im zweiten Schritt die bereits klassifizierten Anfragen als Grundlage dienen, muss diese entsprechend valide sein. Daher muss die soeben beschriebene Klassifizierung validiert werden. Dabei wird zunächst überprüft, ob Anfragen mittels der verwendeten Klassifizierung zu mehreren Themen zugeordnet werden könnten. Anschließend müssen diese identifizierten Anfragen händisch klassifiziert werden. Zusätzlich werden die Anfragen, welche nur einem Thema zugeordnet werden, ebenso überprüft. Auf diese Weise soll eine hohe Validität der Klassifizierung gewährleistet werden.
+
+### Supervised Machine Learning
+
+Durch die Klassifizierung mittels themenspezifischer Wörter können leider nicht alle Anfragen klassifiziert werden, wodurch ein weiterer Schritt notwendig sein wird. Ausgehend der klassifizierten Anfragen ergibt sich die Möglichkeit Methoden des Supervised Machine Learnings heranzuziehen. Dabei soll das Klassifikationsverfahren *Radnom Forest* und eine *Support Vector Machine* herangezogen werden. Diese beiden Methoden sollen im Folgenden zunächst beschrieben werden, ehe auf die weitere Vorgehensweise eingegangen wird.
+
+\underline{Random Forest}
+
+Bla Bla bLa
+
+\underline{Support Vector Machine}
+
+Definition von Support Vector Machines...welche Kriterien muss eine Support Vector Machine erfüllen?
+
+Geschichte: Ursprünglich für binäre Klassen entwickelt -> heutzutage jedoch auch multiclass möglich
 
 [^1]: Der Code für alle Auswertungen der Hausarbeit ist auf GitHub unter https://github.com/MCStatistic/SeminarPaper_ASGB einsehbar.
 [^2]: Hierfür wurde eine Funktion in R geschrieben, mit welcher jede Drucksache als PDF vom offiziellen Server heruntergeladen wurde. Die Dateien wurden dabei unter der Nummer der Drucksache sowie des jeweiligen Bundestags gespeichert um so eine klare Zuordnung gewährleisten zu können.
 [^3]: Für den 18. Bundestag beläuft sich der Zeitraum vom 22. Oktober 2013 bis zum 24. Oktober 2017. Aufgrund der durchzuführenden Auswertungen wurde der zu analysierende Zeitraum für den 19. Bundestag vom 24. Oktober 2017 bis zum 31. Dezember 2018 festgelegt. 
 [^4]: Hierfür wurde das Package *pdftools* [vgl. @pdftools] genutzt.
-
-
-\begin{table}[]
-	\centering
-	\caption{Summary of Results}
-	\label{summaryy}
-	\resizebox{\textwidth}{!}{%
-		\begin{tabular}{@{}lccl@{}}
-			\toprule
-			\multicolumn{1}{c}{\textbf{Hypothesis}} & 
-			\textbf{Confirmed} & 
-			\textbf{\begin{tabular}[c]{@{}c@{}}Indications/\\  Tendencies\end{tabular}} &
-			\multicolumn{1}{c}{\textbf{Restrictions}} \\ 
-			\midrule
-			\textit{\begin{tabular}[c]{@{}l@{}}\textbf{H1:} The less economically fortunate \\(economic dissatisfaction, unemployment, \\ economic insecurity, living on welfare), \\the higher the probability of supporting \\ anti-establishment parties.\end{tabular}}                                  & Yes  & +                                                                          & \begin{tabular}[c]{@{}l@{}}Weak Effects \\ 
-			Welfare not signicant for \\
-			Traditionalist Populists\end{tabular}                           \\ \midrule
-			
-\textit{\begin{tabular}[c]{@{}l@{}}\textbf{H2:} The more culturally inclusive \\(values), the higher the probability of \\ supporting progressive populist parties.\end{tabular}}               & Yes                                                               & +                                                                          & \begin{tabular}[c]{@{}l@{}}Weak Effects \\ 
-			Openness not signicant for \\
-			Progressive Populists. \end{tabular}                                                                                      \\ \midrule
-			\textit{\begin{tabular}[c]{@{}l@{}}\textbf{H3:} The more culturally exclusive, \\the higher the probability of supporting \\a traditionalist populist party.\end{tabular}}             & Yes                                                                & +                                                                          & \begin{tabular}[c]{@{}l@{}}Weak Effects. \end{tabular} \\ \midrule
-			\textit{\begin{tabular}[c]{@{}l@{}}\textbf{H4:} When economic and cultural factors interact, \\ the support for populist parties is higher.\end{tabular}}               & No                                                                & \textbf{-}                                                                 & \begin{tabular}[c]{@{}l@{}}No significant effects \\
-			except for two \\
-			inconclusive evidence\end{tabular}                                                            \\ \bottomrule	\\[-1em]
-			\multicolumn{4}{l}{%
-				\begin{minipage}{19cm}%
-					\flushright
-					\scriptsize A "+" sign indicates at least some empirical evidence in favor of the hypothesis and a "-" sign stands for contradictory empirical evidence.%
-				\end{minipage}%
-			}
-		\end{tabular}
-}
-\end{table}
-
+[^5]: Da die großen Anfragen in dieser Arbeit nicht berücksichtigt werden, wird nachfolgend zwecks der Lesbarkeit von *Anfragen* geschrieben. Dieser Begriff wird in dieser Arbeit als äquivalent zu *kleinen Anfragen* genutzt.
+[^6]: Da keine Differenzierung zwischen den Subthemen erfolgt und nachfolgend nur noch eine Differenzierung zwischen den Hauptthemen relevant ist, wird ab sofort nur noch von Themen geschrieben. Die Begriffe *Hauptthema* und *Thema* werden in dieser Arbeit daher äquivalent genutzt.
 
 
 

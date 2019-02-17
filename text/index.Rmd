@@ -44,7 +44,6 @@ z <- 34.876
 
 <!-- \onehalfspacing -->
 \setstretch{1.5}
-
 \section{Einleitung} 
 
 ```{r child = '1_intro.Rmd'}
@@ -70,7 +69,7 @@ z <- 34.876
 ```
 
 
-\setstretch{1}
+\setstretch{1,5}
 
 \clearpage
 \newpage
