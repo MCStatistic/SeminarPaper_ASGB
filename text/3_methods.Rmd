@@ -43,6 +43,8 @@ Anhand dieses Kodierungssystems werden die kleinen Anfragen in dieser Arbeit kla
 
 Die Klassifizierung der Anfragen erfolgt in zwei Schritten. Im ersten Schritt werden diese anhand von Wörtern klassifiziert und anschließend erfolgt eine Validierung dieser Klassifizierung. Im zweiten Schritt erfolgt eine Klassifizierung der Anfragen, die nicht durch den ersten Schritt klassifiziert werden konnten. Hierfür werden zwei Verfahren des Supervised Machine Learnings verwendet. Auf diese beiden Schritte wird im folgenden detailliert eingegangen.
 
+\newpage
+
 ### Klassifizierung mittels Wörter
 
 Anhand der Subthemen wurden für jedes Haupthema Wörter identifiziert, welche ausschließlich auf das jeweilige Haupthema zutreffen und sich thematisch von den übrigen Hauptthemen[^6] klar abgrenzen sollten. Dabei wurden die Wörter unter anderem auch durch das Querlesen einiger Anfragen ermittelt. Um mit Hilfe der Wörter eine zuverlässige Klassifizierung zu ermöglichen, wurde bei diesem Schritt lediglich der Titel der jeweiligen Anfrage herangezogen. Einerseits fungiert der Titel als eine Beschreibung des Inahlts, wodurch dieser entsprechend klar und prägnant formuliert sein muss. Daraus sollte sich eine hohe Wahrscheinlichkeit ergeben, dass hierbei ein Begriff enthalten ist, welcher auf das entsprechende Thema zu verorten ist. Andererseits ist davon auszugehen, dass im Inhalt der Anfrage ein Bezug zu anderen Themen vorkommen kann. Eine derartige Klassifizierung anhand der Inhalte würde folglich zu einem tendenziell unzuverlässigem Ergebnis führen.
@@ -51,13 +53,24 @@ Da im zweiten Schritt die bereits klassifizierten Anfragen als Grundlage dienen,
 
 ### Supervised Machine Learning
 
-Durch die Klassifizierung mittels themenspezifischer Wörter können leider nicht alle Anfragen klassifiziert werden, wodurch ein weiterer Schritt notwendig sein wird. Ausgehend der klassifizierten Anfragen ergibt sich die Möglichkeit Methoden des Supervised Machine Learnings heranzuziehen. Dabei soll das Klassifikationsverfahren *Radnom Forest* und eine *Support Vector Machine* herangezogen werden. Diese beiden Methoden sollen im Folgenden zunächst beschrieben werden, ehe auf die weitere Vorgehensweise eingegangen wird.
+Durch die Klassifizierung mittels themenspezifischer Wörter können leider nicht alle Anfragen klassifiziert werden, wodurch ein weiterer Schritt notwendig sein wird. Ausgehend der klassifizierten Anfragen ergibt sich die Möglichkeit Methoden des Supervised Machine Learnings heranzuziehen. Dabei sollen zwei Klassifikationsverfahren verwendet werden. Hierbei handelt es sich um den Klassifikator *Radnom Forest* und um das Klassifikationsverfahren mittels einer *Support Vector Machine*. Diese beiden Methoden sollen zunächst beschrieben werden.
 
-\underline{Random Forest}
+Ein Random Forest wird nach Breiman [-@breiman2001random] wie folgt definiert:
 
-Bla Bla bLa
+> Ein Random Forest ist ein Klassifikator, welcher aus einer Menge von *Tree*-strukturierten Klassifikatoren besteht {$h(\textbf{x}, \Theta_{k}), k = 1,...$}. Dabei handelt es sich bei {$\Theta_{k}$} um unabhängige zufällige Vektoren, welche eine identische Verteilung aufweisen. Jeder *Tree* gibt dabei eine Stimme für die beliebteste Klasse für \textbf{x} ab [vgl. @breiman2001random 6].
 
-\underline{Support Vector Machine}
+\newpage
+
+Der Algorithmus, welcher beim Random Forest zum Einsatz kommt, kann dabei wie folgt beschrieben werden [vgl. @liaw2002classification 18; vgl. @friedman2017elements 588]:
+
+1. Aus dem Datensatz werden $n_{tree}$ Samples mittels Bootstrap gezogen.
+
+2. Für jedes dieser Bootstrap-Samples wird ein *unprunted Tree* erstellt.[^7] Für die Erstellung der *Trees* wird der Gini Index verwendet, wobei $T$ das Training Set, $C_{i}$ die Klassen und $f(C_{i}, T)/|T|$ die Wahrscheinlichkeit, dass ein Fall zu der Klasse $C_{i}$ gehört, darstellt [vgl. @pal2005random 218; vgl. @chan2008evaluation 3002]: 
+$$G = \sum \displaystyle\sum_{j \neq i}(f(C_{i}, T)/|T|)(f(C_{j}, T)/|T|)$$
+
+3. Abschließend können mit einem solchen trainiertem Modell neue Daten mittels Aggregierung den Vorhersagen der einzelnen $n_{tree}$ *Trees* klassifiziert werden. Wenn $\hat{C}_{b}(x)$ die Klassenvorhersage des *b*ten Random Forest Tree ist, so ist $\hat{C}_{rf}^{B}(x) = \text{Mehrheit der Stimmen}$ {$\hat{C}_{b}(x)$}$_{1}^{B}$.
+
+
 
 Definition von Support Vector Machines...welche Kriterien muss eine Support Vector Machine erfüllen?
 
@@ -69,8 +82,55 @@ Geschichte: Ursprünglich für binäre Klassen entwickelt -> heutzutage jedoch a
 [^4]: Hierfür wurde das Package *pdftools* [vgl. @pdftools] genutzt.
 [^5]: Da die großen Anfragen in dieser Arbeit nicht berücksichtigt werden, wird nachfolgend zwecks der Lesbarkeit von *Anfragen* geschrieben. Dieser Begriff wird in dieser Arbeit als äquivalent zu *kleinen Anfragen* genutzt.
 [^6]: Da keine Differenzierung zwischen den Subthemen erfolgt und nachfolgend nur noch eine Differenzierung zwischen den Hauptthemen relevant ist, wird ab sofort nur noch von Themen geschrieben. Die Begriffe *Hauptthema* und *Thema* werden in dieser Arbeit daher äquivalent genutzt.
+[^7]: Um ein Overfitting bei Decision Trees zu vermeiden, wird oftmals die Methodik des *Prunings* verwendet [siehe hierzu u.a. @bradford1998pruning; @mingers1989empirical; @mehta1995mdl]. Dies ist beim Random Forest jedoch nicht erforderlich, da durch das Bootstrapping (oder auch *Bagging*) der Fehler bereits signifikant reduziert wird [siehe hierzu @breiman1996decision; @prasad2006newer 184]. Die Gefahr eines Overfittings ist bei einem Random Forest daher kein Problem [vgl. @breiman2001random].
+
+
+\begin{table}[ht]
+\centering
+\caption{Klassenfehler nach $n_{tree}$ (Random Forest)}
+\begin{tabular}{rllllr}
+  \hline
+ & Klasse & Fehler $RF_{200}$ & Fehler $RF_{500}$ & Fehler $RF_{1500}$ & Anzahl \\ 
+  \hline
+1 & Gesetz \& Kriminalität & 5.88\% & 5.64\% & 5.88\% & 535 \\ 
+  2 & Transport & 9.59\% & 9.59\% & 9.96\% & 348 \\ 
+  3 & Verteidigung & 10.24\% & 9.64\% & 9.04\% & 206 \\ 
+  4 & Einwanderung & 12.35\% & 9.96\% & 11.95\% & 347 \\ 
+  5 & Außenhandel & 15.38\% & 13.46\% & 14.42\% & 137 \\ 
+  6 & Gesundheit & 21.55\% & 19.83\% & 18.97\% & 159 \\ 
+  7 & Energie & 27.91\% & 25.58\% & 25.58\% & 167 \\ 
+  8 & Arbeit & 28.95\% & 27.63\% & 31.58\% & 114 \\ 
+  9 & Soziale Wohlfahrt & 38.71\% & 29.03\% & 27.96\% & 121 \\ 
+  10 & Umwelt & 40.4\% & 36.42\% & 33.11\% & 197 \\ 
+  11 & Makroökonomie & 42.42\% & 41.41\% & 41.41\% & 135 \\ 
+  12 & Bildung & 53.66\% & 58.54\% & 56.1\% &  50 \\ 
+  13 & Technologie & 61.22\% & 61.22\% & 59.18\% & 123 \\ 
+  14 & Int. Angelegenheiten & 66.39\% & 67.21\% & 68.03\% & 170 \\ 
+  15 & Regierungsoperationen & 82.35\% & 73.53\% & 73.53\% &  47 \\ 
+  16 & Binnenhandel & 84.31\% & 78.43\% & 84.31\% &  71 \\ 
+  17 & Wohnungsbau & 91.67\% & 91.67\% & 95.83\% &  27 \\ 
+  18 & Agrarwirtschaft & 91.89\% & 94.59\% & 94.59\% &  51 \\ 
+  19 & Bürgerrechte & 100\% & 100\% & 100\% &  42 \\ 
+   \hline
+\end{tabular}
+\end{table}
 
 
 
-
-
+\begin{table}[ht]
+\centering
+\begin{tabular}{lllllllll}
+$p$   & \multicolumn{2}{c}{$RF_{200}$} & \multicolumn{2}{c}{$RF_{500}$} & \multicolumn{2}{c}{$RF_{1500}$} & \multicolumn{2}{c}{$SVM$} \\
+   \hline
+    & Richtig      & Anteil      & Richtig      & Anteil      & Richtig       & Anteil      & Richtig     & Anteil    \\
+   \hline
+0.3 &              &             &              &             &               &             &             &           \\
+0.4 &              &             &              &             &               &             &             &           \\
+0.5 &              &             &              &             &               &             &             &           \\
+0.6 &              &             &              &             &               &             &             &           \\
+0.7 &              &             &              &             &               &             &             &           \\
+0.8 &              &             &              &             &               &             &             &           \\
+0.9 &              &             &              &             &               &             &             &          \\
+   \hline
+\end{tabular}
+\end{table}

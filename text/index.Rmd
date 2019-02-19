@@ -56,11 +56,16 @@ z <- 34.876
 ```
 
 \newpage
-\section{Methode}  \label{theorie}
+\section{Methode}  \label{methods}
 
 ```{r child = '3_methods.Rmd'}
 ```
 
+\newpage
+\section{Ergebnisse}  \label{analysis}
+
+```{r child = '4_analysis.Rmd'}
+```
 
 \newpage
 \section{Fazit} \label{fazit}
@@ -76,7 +81,6 @@ z <- 34.876
 
 
 # Literaturverzeichnis
-
 \setlength{\parindent}{-0.2in}
 \setlength{\leftskip}{0.2in}
 \setlength{\parskip}{8pt}
