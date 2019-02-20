@@ -70,11 +70,18 @@ $$G = \sum \displaystyle\sum_{j \neq i}(f(C_{i}, T)/|T|)(f(C_{j}, T)/|T|)$$
 
 3. Abschließend können mit einem solchen trainiertem Modell neue Daten mittels Aggregierung den Vorhersagen der einzelnen $n_{tree}$ *Trees* klassifiziert werden. Wenn $\hat{C}_{b}(x)$ die Klassenvorhersage des *b*ten Random Forest Tree ist, so ist $\hat{C}_{rf}^{B}(x) = \text{Mehrheit der Stimmen}$ {$\hat{C}_{b}(x)$}$_{1}^{B}$.
 
+Neben dem Random Forest Ursprünglich wurden Support Vector Machines für die binäre Klassifikation entwickelt [vgl. @cortes1995support 290]. Prinzipiell können Support Vector Machines auch nur binäre Klassifikationsprobleme lösen, jedoch gibt es Ansätze, mit welchen eine Multiklassifikation umgesetzt werden kann. 
 
+Das grundlegende Konzept von Support Vector Machines soll anhand der Arbeit von @cortes1995support in Kürze dargelegt werden. 
 
-Definition von Support Vector Machines...welche Kriterien muss eine Support Vector Machine erfüllen?
-
-Geschichte: Ursprünglich für binäre Klassen entwickelt -> heutzutage jedoch auch multiclass möglich
+\begin{figure}[!h]
+	\caption{Visuelle Darstellung einer linearen Support Vector Machine}
+	\label{svm_theory}
+	\centering
+	\includegraphics[width = 0.8\textwidth]{images/svm_grafische_darstellung_theory.png}
+	\flushright
+	{\scriptsize Darstellung anlehndend an die Darstellung von Cortes \& Vapnik (vgl. Cortes \& Vapnik 1995: 275) \par}
+\end{figure}
 
 [^1]: Der Code für alle Auswertungen der Hausarbeit ist auf GitHub unter https://github.com/MCStatistic/SeminarPaper_ASGB einsehbar.
 [^2]: Hierfür wurde eine Funktion in R geschrieben, mit welcher jede Drucksache als PDF vom offiziellen Server heruntergeladen wurde. Die Dateien wurden dabei unter der Nummer der Drucksache sowie des jeweiligen Bundestags gespeichert um so eine klare Zuordnung gewährleisten zu können.
@@ -87,30 +94,30 @@ Geschichte: Ursprünglich für binäre Klassen entwickelt -> heutzutage jedoch a
 
 \begin{table}[ht]
 \centering
-\caption{Klassenfehler nach $n_{tree}$ (Random Forest)}
-\begin{tabular}{rllllr}
+\caption{Themenspezifischer Fehler nach $n_{tree}$ (Random Forest)}
+\begin{tabular}{llllr}
   \hline
- & Klasse & Fehler $RF_{200}$ & Fehler $RF_{500}$ & Fehler $RF_{1500}$ & Anzahl \\ 
+  Thema & Fehler $RF_{200}$ & Fehler $RF_{500}$ & Fehler $RF_{1500}$ & $N_{Anfragen}$ \\ 
   \hline
-1 & Gesetz \& Kriminalität & 5.88\% & 5.64\% & 5.88\% & 535 \\ 
-  2 & Transport & 9.59\% & 9.59\% & 9.96\% & 348 \\ 
-  3 & Verteidigung & 10.24\% & 9.64\% & 9.04\% & 206 \\ 
-  4 & Einwanderung & 12.35\% & 9.96\% & 11.95\% & 347 \\ 
-  5 & Außenhandel & 15.38\% & 13.46\% & 14.42\% & 137 \\ 
-  6 & Gesundheit & 21.55\% & 19.83\% & 18.97\% & 159 \\ 
-  7 & Energie & 27.91\% & 25.58\% & 25.58\% & 167 \\ 
-  8 & Arbeit & 28.95\% & 27.63\% & 31.58\% & 114 \\ 
-  9 & Soziale Wohlfahrt & 38.71\% & 29.03\% & 27.96\% & 121 \\ 
-  10 & Umwelt & 40.4\% & 36.42\% & 33.11\% & 197 \\ 
-  11 & Makroökonomie & 42.42\% & 41.41\% & 41.41\% & 135 \\ 
-  12 & Bildung & 53.66\% & 58.54\% & 56.1\% &  50 \\ 
-  13 & Technologie & 61.22\% & 61.22\% & 59.18\% & 123 \\ 
-  14 & Int. Angelegenheiten & 66.39\% & 67.21\% & 68.03\% & 170 \\ 
-  15 & Regierungsoperationen & 82.35\% & 73.53\% & 73.53\% &  47 \\ 
-  16 & Binnenhandel & 84.31\% & 78.43\% & 84.31\% &  71 \\ 
-  17 & Wohnungsbau & 91.67\% & 91.67\% & 95.83\% &  27 \\ 
-  18 & Agrarwirtschaft & 91.89\% & 94.59\% & 94.59\% &  51 \\ 
-  19 & Bürgerrechte & 100\% & 100\% & 100\% &  42 \\ 
+  Gesetz \& Kriminalität & 5.88\% & 5.64\% & 5.88\% & 535 \\ 
+   Transport & 9.59\% & 9.59\% & 9.96\% & 348 \\ 
+   Verteidigung & 10.24\% & 9.64\% & 9.04\% & 206 \\ 
+   Einwanderung & 12.35\% & 9.96\% & 11.95\% & 347 \\ 
+   Außenhandel & 15.38\% & 13.46\% & 14.42\% & 137 \\ 
+   Gesundheit & 21.55\% & 19.83\% & 18.97\% & 159 \\ 
+   Energie & 27.91\% & 25.58\% & 25.58\% & 167 \\ 
+   Arbeit & 28.95\% & 27.63\% & 31.58\% & 114 \\ 
+   Soziale Wohlfahrt & 38.71\% & 29.03\% & 27.96\% & 121 \\ 
+   Umwelt & 40.4\% & 36.42\% & 33.11\% & 197 \\ 
+   Makroökonomie & 42.42\% & 41.41\% & 41.41\% & 135 \\ 
+   Bildung & 53.66\% & 58.54\% & 56.1\% &  50 \\ 
+   Technologie & 61.22\% & 61.22\% & 59.18\% & 123 \\ 
+   Int. Angelegenheiten & 66.39\% & 67.21\% & 68.03\% & 170 \\ 
+   Regierungsoperationen & 82.35\% & 73.53\% & 73.53\% &  47 \\ 
+   Binnenhandel & 84.31\% & 78.43\% & 84.31\% &  71 \\ 
+   Wohnungsbau & 91.67\% & 91.67\% & 95.83\% &  27 \\ 
+   Agrarwirtschaft & 91.89\% & 94.59\% & 94.59\% &  51 \\ 
+   Bürgerrechte & 100\% & 100\% & 100\% &  42 \\ 
    \hline
 \end{tabular}
 \end{table}
