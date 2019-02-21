@@ -70,18 +70,26 @@ $$G = \sum \displaystyle\sum_{j \neq i}(f(C_{i}, T)/|T|)(f(C_{j}, T)/|T|)$$
 
 3. Abschließend können mit einem solchen trainiertem Modell neue Daten mittels Aggregierung den Vorhersagen der einzelnen $n_{tree}$ *Trees* klassifiziert werden. Wenn $\hat{C}_{b}(x)$ die Klassenvorhersage des *b*ten Random Forest Tree ist, so ist $\hat{C}_{rf}^{B}(x) = \text{Mehrheit der Stimmen}$ {$\hat{C}_{b}(x)$}$_{1}^{B}$.
 
-Neben dem Random Forest Ursprünglich wurden Support Vector Machines für die binäre Klassifikation entwickelt [vgl. @cortes1995support 290]. Prinzipiell können Support Vector Machines auch nur binäre Klassifikationsprobleme lösen, jedoch gibt es Ansätze, mit welchen eine Multiklassifikation umgesetzt werden kann. 
+Neben Random Forest gibt es neben anderen Klassfikationsmöglichkeiten noch die Support Vector Machines. Da diese eine etablierte und teils verbreiteten Methode der Klassifikation darstellen und zudem als äußerst genau gelten [vgl. @ben2010user 223], soll in dieser Arbeit ebenso diese Methode herangezogen werden. Ursprünglich wurden Support Vector Machines für die binäre Klassifikation entwickelt [vgl. @cortes1995support 290]. Prinzipiell können Support Vector Machines nur binäre Klassifikationsprobleme lösen, jedoch gibt es Möglichkeiten mit welchen auch eine Multiklassifikation umgesetzt werden kann. 
 
-Das grundlegende Konzept von Support Vector Machines soll anhand der Arbeit von @cortes1995support in Kürze dargelegt werden. 
+Das grundlegende Konzept von Support Vector Machines soll anhand der Arbeit von @cortes1995support in Kürze dargelegt werden. Dabei definiert sich eine Support Vector Machine über drei Eigenschaften:
+
+1. Es erfolgt eine Klassenseparierung durch das ermitteln einer *optimalen Hyperebene*. Bei einer binären Klassifikation und einem Input-Vektor von $x = (x_{1},...,x_{n})$ erfolgt die Zuweisung von $x$ zur positiven Klasse, wenn $f(x) \ge 0$ und zur negativen Klasse, wenn $f(x) < 0$. Dabei ist $f(x) = \displaystyle\sum_{i = 1}^{n}w_{i}x_{i}+b$, wobei $w$ der gewichtete Vektor und $b$ den Bias darstellt. Die Hyperebene definiert sich letztlich durch $\displaystyle\sum_{i = 1}^{n}w_{i}x_{i}+b = 0$ [vgl. @cristianini2000introduction 9 f.]. Die *optimale Hyperebene* separiert dabei die Daten mit der größtmöglichen bzw. der *optimalen Marge* zwischen den Klassen (siehe Abbildung \ref{svm_theory}). Fälle, welche auf den Grenzen der Marge liegen, stellen die *support vectors*  dar [vgl. @cortes1995support 275 ff.].
+
+2. Fälle, welche durch die optimale Hyperebene falsch separiert werden, werden mittels einer *soft margin Hyperbene* heruntergewichtet [vgl. @cortes1995support 280 f.]. 
+
+3. Sofern eine lineare Seperation der Daten im *Input Space* nicht möglich ist, erfolgt eine Ermittlung der Hyperebene auf einem höher dimensionalen *Feature Space*. Auf diese Weise werden die Daten auf einen anderen Raum projeziert, wodurch eine lineare Separierung ermöglicht wird. Dies wird durch Kernel-Techniken[^8] realisiert [vgl. @cortes1995support 282 ff.; @cristianini2000introduction 26 ff.].
+
 
 \begin{figure}[!h]
 	\caption{Visuelle Darstellung einer linearen Support Vector Machine}
 	\label{svm_theory}
 	\centering
-	\includegraphics[width = 0.8\textwidth]{images/svm_grafische_darstellung_theory.png}
-	\flushright
-	{\scriptsize Darstellung anlehndend an die Darstellung von Cortes \& Vapnik (vgl. Cortes \& Vapnik 1995: 275) \par}
+	\includegraphics[width = 0.80\textwidth]{images/svm_grafische_darstellung_theory4.png}
+	\caption*{\scriptsize Anmerkung: Darstellung anlehndend an Cortes \& Vapnik 1995 (S. 275)}
 \end{figure}
+
+Nachdem das grundlegende Konzept von Support Vector Machines aufgezeigt wurde, wird deutlich weshalb prinzipiell nur eine binäre Klassifikation möglich ist. Für eine Multiklassifikation wurden jedoch Methoden entwickelt, wodurch Support Vector Machines ebenso für solche Klassifikationen verwendet werden können. 
 
 [^1]: Der Code für alle Auswertungen der Hausarbeit ist auf GitHub unter https://github.com/MCStatistic/SeminarPaper_ASGB einsehbar.
 [^2]: Hierfür wurde eine Funktion in R geschrieben, mit welcher jede Drucksache als PDF vom offiziellen Server heruntergeladen wurde. Die Dateien wurden dabei unter der Nummer der Drucksache sowie des jeweiligen Bundestags gespeichert um so eine klare Zuordnung gewährleisten zu können.
@@ -89,7 +97,8 @@ Das grundlegende Konzept von Support Vector Machines soll anhand der Arbeit von 
 [^4]: Hierfür wurde das Package *pdftools* [vgl. @pdftools] genutzt.
 [^5]: Da die großen Anfragen in dieser Arbeit nicht berücksichtigt werden, wird nachfolgend zwecks der Lesbarkeit von *Anfragen* geschrieben. Dieser Begriff wird in dieser Arbeit als äquivalent zu *kleinen Anfragen* genutzt.
 [^6]: Da keine Differenzierung zwischen den Subthemen erfolgt und nachfolgend nur noch eine Differenzierung zwischen den Hauptthemen relevant ist, wird ab sofort nur noch von Themen geschrieben. Die Begriffe *Hauptthema* und *Thema* werden in dieser Arbeit daher äquivalent genutzt.
-[^7]: Um ein Overfitting bei Decision Trees zu vermeiden, wird oftmals die Methodik des *Prunings* verwendet [siehe hierzu u.a. @bradford1998pruning; @mingers1989empirical; @mehta1995mdl]. Dies ist beim Random Forest jedoch nicht erforderlich, da durch das Bootstrapping (oder auch *Bagging*) der Fehler bereits signifikant reduziert wird [siehe hierzu @breiman1996decision; @prasad2006newer 184]. Die Gefahr eines Overfittings ist bei einem Random Forest daher kein Problem [vgl. @breiman2001random].
+[^7]: Um ein Overfitting bei Decision Trees zu vermeiden, wird die Methodik des *Prunings* verwendet [siehe hierzu u.a. @bradford1998pruning; @mingers1989empirical; @mehta1995mdl]. Dies ist beim Random Forest jedoch nicht erforderlich, da durch das Bootstrapping (oder auch *Bagging*) der Fehler bereits signifikant reduziert wird [siehe hierzu @breiman1996decision; @prasad2006newer 184]. Die Gefahr eines Overfittings ist bei einem Random Forest daher kein Problem [vgl. @breiman2001random].
+[^8]: Hierbei soll vorerst nicht näher eingegangen werden, da es viele verschiedene Kernel-Techniken gibt. Für eine allgemeine detaillierte Übersicht diverser Kernel-Techniken bietet sich die Arbeit von @cristianini2000introduction an, auf welche sich bereits bezogen wurde.
 
 
 \begin{table}[ht]
