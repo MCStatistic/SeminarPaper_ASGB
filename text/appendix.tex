@@ -239,12 +239,43 @@ Kultur &
 \end{ThreePartTable}
 
 
+\begin{table}[ht]
+\centering
+\caption{Themenspezifischer Fehler nach $n_{tree}$ (Random Forest)}
+\begin{tabular}{llllr}
+  \hline
+  Thema & Fehler $RF_{200}$ & Fehler $RF_{500}$ & Fehler $RF_{1500}$ & $N_{Anfragen}$ \\ 
+  \hline
+  Gesetz \& Kriminalität & 5.88\% & 5.64\% & 5.88\% & 535 \\ 
+   Transport & 9.59\% & 9.59\% & 9.96\% & 348 \\ 
+   Verteidigung & 10.24\% & 9.64\% & 9.04\% & 206 \\ 
+   Einwanderung & 12.35\% & 9.96\% & 11.95\% & 347 \\ 
+   Außenhandel & 15.38\% & 13.46\% & 14.42\% & 137 \\ 
+   Gesundheit & 21.55\% & 19.83\% & 18.97\% & 159 \\ 
+   Energie & 27.91\% & 25.58\% & 25.58\% & 167 \\ 
+   Arbeit & 28.95\% & 27.63\% & 31.58\% & 114 \\ 
+   Soziale Wohlfahrt & 38.71\% & 29.03\% & 27.96\% & 121 \\ 
+   Umwelt & 40.4\% & 36.42\% & 33.11\% & 197 \\ 
+   Makroökonomie & 42.42\% & 41.41\% & 41.41\% & 135 \\ 
+   Bildung & 53.66\% & 58.54\% & 56.1\% &  50 \\ 
+   Technologie & 61.22\% & 61.22\% & 59.18\% & 123 \\ 
+   Int. Angelegenheiten & 66.39\% & 67.21\% & 68.03\% & 170 \\ 
+   Regierungsoperationen & 82.35\% & 73.53\% & 73.53\% &  47 \\ 
+   Binnenhandel & 84.31\% & 78.43\% & 84.31\% &  71 \\ 
+   Wohnungsbau & 91.67\% & 91.67\% & 95.83\% &  27 \\ 
+   Agrarwirtschaft & 91.89\% & 94.59\% & 94.59\% &  51 \\ 
+   Bürgerrechte & 100\% & 100\% & 100\% &  42 \\ 
+   \hline
+\end{tabular}
+\end{table}
+
 \begin{figure}[!h]
-	\caption{Marginal Effects of Left-Right Scale}
-	\label{lrscale_probs}
-	\includegraphics[width=\textwidth]{images/lrscale_probs.png}
+	\caption{Genaugikeit in Abhängigkeit von C (SVM)}
+	\label{c_values}
+	\centering
+	\includegraphics[width=\textwidth]{images/c_values Kopie.png}
 	\flushright
-	{\scriptsize Based on Model 4. Source: ESS Data Round 5 - 8; N = 68403. \par}
+	{\scriptsize Anmerkung: Für jeden C-Wert wurden jeweils 5 Iterationen durchgeführt \par}
 \end{figure}
 
 

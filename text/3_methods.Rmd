@@ -53,7 +53,7 @@ Da im zweiten Schritt die bereits klassifizierten Anfragen als Grundlage dienen,
 
 ### Supervised Machine Learning
 
-Durch die Klassifizierung mittels themenspezifischer Wörter können leider nicht alle Anfragen klassifiziert werden, wodurch ein weiterer Schritt notwendig sein wird. Ausgehend der klassifizierten Anfragen ergibt sich die Möglichkeit Methoden des Supervised Machine Learnings heranzuziehen. Dabei sollen zwei Klassifikationsverfahren verwendet werden. Hierbei handelt es sich um den Klassifikator *Radnom Forest* und um das Klassifikationsverfahren mittels einer *Support Vector Machine*. Diese beiden Methoden sollen zunächst beschrieben werden.
+Durch die Klassifizierung mittels themenspezifischer Wörter können leider nicht alle Anfragen klassifiziert werden, wodurch ein weiterer Schritt notwendig sein wird. Ausgehend der klassifizierten Anfragen ergibt sich die Möglichkeit Methoden des Supervised Machine Learnings heranzuziehen. Dabei sollen zwei Klassifikationsverfahren verwendet werden. Es handelt sich um den Klassifikator *Random Forest* und um das Klassifikationsverfahren mittels *Support Vector Machines*. Die grundlegenden Konzepte beider Verfahren sollen dabei zunächst beschrieben werden. 
 
 Ein Random Forest wird nach Breiman [-@breiman2001random] wie folgt definiert:
 
@@ -61,25 +61,35 @@ Ein Random Forest wird nach Breiman [-@breiman2001random] wie folgt definiert:
 
 \newpage
 
-Der Algorithmus, welcher beim Random Forest zum Einsatz kommt, kann dabei wie folgt beschrieben werden [vgl. @liaw2002classification 18; vgl. @friedman2017elements 588]:
+Der Algorithmus, welcher beim Random Forest[^7] zum Einsatz kommt, kann dabei wie folgt beschrieben werden [vgl. @liaw2002classification 18; vgl. @friedman2017elements 588]:
 
 1. Aus dem Datensatz werden $n_{tree}$ Samples mittels Bootstrap gezogen.
 
-2. Für jedes dieser Bootstrap-Samples wird ein *unprunted Tree* erstellt.[^7] Für die Erstellung der *Trees* wird der Gini Index verwendet, wobei $T$ das Training Set, $C_{i}$ die Klassen und $f(C_{i}, T)/|T|$ die Wahrscheinlichkeit, dass ein Fall zu der Klasse $C_{i}$ gehört, darstellt [vgl. @pal2005random 218; vgl. @chan2008evaluation 3002]: 
+2. Für jedes dieser Bootstrap-Samples wird ein *unprunted Tree* erstellt.[^8] Für die Erstellung der *Trees* wird der Gini Index $G$ verwendet, wobei $T$ das Training Set, $C_{i}$ die Klassen und $f(C_{i}, T)/|T|$ die Wahrscheinlichkeit, dass ein Fall zu der Klasse $C_{i}$ gehört, darstellt [vgl. @pal2005random 218; vgl. @chan2008evaluation 3002]: 
 $$G = \sum \displaystyle\sum_{j \neq i}(f(C_{i}, T)/|T|)(f(C_{j}, T)/|T|)$$
 
-3. Abschließend können mit einem solchen trainiertem Modell neue Daten mittels Aggregierung den Vorhersagen der einzelnen $n_{tree}$ *Trees* klassifiziert werden. Wenn $\hat{C}_{b}(x)$ die Klassenvorhersage des *b*ten Random Forest Tree ist, so ist $\hat{C}_{rf}^{B}(x) = \text{Mehrheit der Stimmen}$ {$\hat{C}_{b}(x)$}$_{1}^{B}$.
+3. Abschließend können mit einem solchen trainiertem Modell neue Daten mittels Aggregierung den Vorhersagen der einzelnen $n_{tree}$ *Trees* klassifiziert werden. Wenn $\hat{C}_{b}(x)$ die Klassenvorhersage des *b*ten Random Forest Tree ist, so ist für $\hat{C}_{rf}^{B}(x) = \text{Mehrheit der Stimmen}$ {$\hat{C}_{b}(x)$}$_{1}^{B}$ ($B = b_{1},..., b_{n}$).
+
+Der Vorteil von Random Forest gegenüber einzelnen Decision Trees ist eine signifikant bessere Performance. Zudem ist es weniger anfällig hinsichtlich *Rauschen* [vgl. @ali2012random 274]. Jedoch kann bei (stark) ungleicher Verteilung der Klassen ein Bias in Richtung der *Majority Class* vorliegen [vgl. @boulesteix2012overview 18 f.].[^9]
 
 Neben Random Forest gibt es neben anderen Klassfikationsmöglichkeiten noch die Support Vector Machines. Da diese eine etablierte und teils verbreiteten Methode der Klassifikation darstellen und zudem als äußerst genau gelten [vgl. @ben2010user 223], soll in dieser Arbeit ebenso diese Methode herangezogen werden. Ursprünglich wurden Support Vector Machines für die binäre Klassifikation entwickelt [vgl. @cortes1995support 290]. Prinzipiell können Support Vector Machines nur binäre Klassifikationsprobleme lösen, jedoch gibt es Möglichkeiten mit welchen auch eine Multiklassifikation umgesetzt werden kann. 
 
 Das grundlegende Konzept von Support Vector Machines soll anhand der Arbeit von @cortes1995support in Kürze dargelegt werden. Dabei definiert sich eine Support Vector Machine über drei Eigenschaften:
 
-1. Es erfolgt eine Klassenseparierung durch das ermitteln einer *optimalen Hyperebene*. Bei einer binären Klassifikation und einem Input-Vektor von $x = (x_{1},...,x_{n})$ erfolgt die Zuweisung von $x$ zur positiven Klasse, wenn $f(x) \ge 0$ und zur negativen Klasse, wenn $f(x) < 0$. Dabei ist $f(x) = \displaystyle\sum_{i = 1}^{n}w_{i}x_{i}+b$, wobei $w$ der gewichtete Vektor und $b$ den Bias darstellt. Die Hyperebene definiert sich letztlich durch $\displaystyle\sum_{i = 1}^{n}w_{i}x_{i}+b = 0$ [vgl. @cristianini2000introduction 9 f.]. Die *optimale Hyperebene* separiert dabei die Daten mit der größtmöglichen bzw. der *optimalen Marge* zwischen den Klassen (siehe Abbildung \ref{svm_theory}). Fälle, welche auf den Grenzen der Marge liegen, stellen die *support vectors*  dar [vgl. @cortes1995support 275 ff.].
+1. Es erfolgt eine Klassenseparierung durch das ermitteln einer *optimalen Hyperebene*. Bei einer binären Klassifikation und einem Input-Vektor von $x = (x_{1},...,x_{n})$ erfolgt die Zuweisung von $x$ zur positiven Klasse, wenn $f(x) \ge 0$ und zur negativen Klasse, wenn $f(x) < 0$. Dabei ist $f(x) = \displaystyle\sum_{i = 1}^{n}w_{i}x_{i}+b$, wobei $w$ der gewichtete Vektor und $b$ den Bias darstellt. Die Hyperebene definiert sich letztlich durch $\displaystyle\sum_{i = 1}^{n}w_{i}x_{i}+b = 0$ [vgl. @cristianini2000introduction 9 f.]. Die *optimale Hyperebene* separiert dabei die Daten mit der größtmöglichen bzw. der *optimalen Marge* zwischen den Klassen (siehe Abbildung \ref{svm_theory}). Fälle, welche auf den Grenzen der Marge liegen, stellen die *support vectors*  dar [vgl. @cortes1995support 275 ff.]. 
 
-2. Fälle, welche durch die optimale Hyperebene falsch separiert werden, werden mittels einer *soft margin Hyperbene* heruntergewichtet [vgl. @cortes1995support 280 f.]. 
+2. Ein aus Punkt 1 resultierendes Problem ist, dass das Training Set nicht immer ohne Fehlklassifizierungen separiert werden kann. Bei einer harten Marge könnte auf diese Weise keine Modellierung erfolgen. Um eine Separation mit möglichst wenig Fehlern von $\xi_{i}$ zu ermöglichen, wird bei der C-Support Vector Klassifikation[^10] u.a. die Konstante $C$ verwendet. Auf diese Weise wird eine *soft margin Hyperplane* erstellt, wobei mit größerem $C$ die Marge kleiner wird. [vgl. @cortes1995support 280 ff.; @chang2011libsvm: 3]:[^11]
+\begin{equation*}
+\begin{aligned}
+& \underset{w, b, \xi}{\text{min}}
+& & \displaystyle\frac{1}{2}w^2+CF \sum_{i = 1}^{l} \xi_{i}^{\sigma} \\
+& \text{bezogen auf}
+& & y_{i}(w*x_{i}+b) \ge 1- \xi_{i}, \quad i = 1,...,l_{i}, \\
+&&& \xi_{i} \ge 0, \quad \quad \quad \quad \quad \quad \quad \quad i = 1,..., l.
+\end{aligned}
+\end{equation*}
 
-3. Sofern eine lineare Seperation der Daten im *Input Space* nicht möglich ist, erfolgt eine Ermittlung der Hyperebene auf einem höher dimensionalen *Feature Space*. Auf diese Weise werden die Daten auf einen anderen Raum projeziert, wodurch eine lineare Separierung ermöglicht wird. Dies wird durch Kernel-Techniken[^8] realisiert [vgl. @cortes1995support 282 ff.; @cristianini2000introduction 26 ff.].
-
+3. Sofern eine lineare Seperation der Daten im *Input Space* nicht möglich ist, erfolgt eine Ermittlung der Hyperebene auf einem höher dimensionalen *Feature Space*. Auf diese Weise werden die Daten auf einen anderen Raum projeziert, wodurch eine lineare Separierung ermöglicht wird. Dies wird durch Kernel-Techniken[^12] realisiert [vgl. @cortes1995support 282 ff.; @cristianini2000introduction 26 ff.]. 
 
 \begin{figure}[!h]
 	\caption{Visuelle Darstellung einer linearen Support Vector Machine}
@@ -89,7 +99,15 @@ Das grundlegende Konzept von Support Vector Machines soll anhand der Arbeit von 
 	\caption*{\scriptsize Anmerkung: Darstellung anlehndend an Cortes \& Vapnik 1995 (S. 275)}
 \end{figure}
 
-Nachdem das grundlegende Konzept von Support Vector Machines aufgezeigt wurde, wird deutlich weshalb prinzipiell nur eine binäre Klassifikation möglich ist. Für eine Multiklassifikation wurden jedoch Methoden entwickelt, wodurch Support Vector Machines ebenso für solche Klassifikationen verwendet werden können. 
+Nachdem das grundlegende Konzept von Support Vector Machines aufgezeigt wurde, wird deutlich weshalb prinzipiell nur eine binäre Klassifikation möglich ist. Für eine Multiklassifikation wurden jedoch Methoden entwickelt, wodurch Support Vector Machines ebenso für solche Klassifikationsprobleme verwendet werden können. In dieser Arbeit soll die Methode *one-against-one* genutzt werden. Hierbei werden für $k$-Klassen $k(k-1)/2$ Klassifikatoren bzw. Support Vector Machines erstellt. Ebenso wie beim Random Forest erfolgt die finale Zuweisung der Klasse mittels eines Votings, wobei $x$ zu der Klasse zugewiesen wird, für welche die größte Anzahl an Stimmen vorliegt [vgl. @chang2011libsvm 29 f.]. Darüber hinaus ist es möglich ebenso die Klassenwahrscheinlichkeit zu berechnen [siehe @wu2004probability].
+
+Die soeben beschriebenen Algorithmen können in R mit dem Package `RTextTools` [@RTextTools; @collingwood2013rtexttools] angewendet werden. Hierbei handelt es sich um ein Package, welches explizit für die Klassifikation von Texten entwickelt wurde und verschiedene Packages vereint. So ist für Random Forest das Package `randomForest` [@randomForest] und für Support Vector Machines das Package `e1071` [@e1071] implementiert.[^13] Für die Klassifikation werden die bereits klassifizierten Anfragen als Input herangezogen. Zugleich werden die Modelle mittels der Inhalte der Anfragen trainiert. Dabei müssen die Texte der Inhalte zuvor von den Stoppwörtern, den Punktuationen und den Wörtern, welche nur bei äußerst wenigen Dokumenten vorkommen, bereinigt werden, da dies für den Inhalt und/oder der Klassifikation nicht relevant ist. Zugleich müssen die Texte der Inhalte in ein strukturiertes Format umgewandelt werden, was durch die Erstellung einer Document-Term-Matrix erfolgt [vgl. @meyer2008text 5 \& 23]. Vor der richtigen Klassifikation soll anhand der bereits klassifizierten Anfragen die Perfromance beider Klassifikationsverfahren verglichen und abgeschätzt werden.
+
+Im Anschluss der Klassifizierung kann untersucht werden in welcher Weise sich die Parteien hinsichtlich der thematischen Schwerpunkte voneinander unterscheiden. Ebenso können die Unterschiede zwischen dem 18. und 19. Bundestag herausgearbeitet werden. Hierbei wird primär deskritpiv vorgegangen. ABSATZ SOLLTE NOCH ANGEPASST WERDEN
+
+### Sentiment Analyse
+
+Da davon auszugehen ist, dass die Parteien hinsichtlich der Themen unterschiedliche Sentiments aufweisen könnten, soll ebenso eine Sentiment Analyse durchgeführt werden. Mittels eines Wörterbuchs soll das durchschnittliche Sentiment der einzelnen Anfragen ermittelt werden. Hierbei wird das öffentlich zugängliche deutsche Wörterbuch *SentiWS* verwendet werden [@sentiws]. Eine detaillierte Beschreibung dieses Wörterbuchs sowie der verwendeten Methoden zwecks Erstellung ist in @remus2010sentiws und @goldhahn12building vorzufinden. Für die Sentiment Analyse wird das Package `SentimentAnalysis` genutzt [vgl. @sentimentanalysis]. Aufgrund der hohen Anzahl der Themen soll die Analyse dabei auf die am häufigsten aufkommenden Themen beschränkt werden. 
 
 [^1]: Der Code für alle Auswertungen der Hausarbeit ist auf GitHub unter https://github.com/MCStatistic/SeminarPaper_ASGB einsehbar.
 [^2]: Hierfür wurde eine Funktion in R geschrieben, mit welcher jede Drucksache als PDF vom offiziellen Server heruntergeladen wurde. Die Dateien wurden dabei unter der Nummer der Drucksache sowie des jeweiligen Bundestags gespeichert um so eine klare Zuordnung gewährleisten zu können.
@@ -97,56 +115,33 @@ Nachdem das grundlegende Konzept von Support Vector Machines aufgezeigt wurde, w
 [^4]: Hierfür wurde das Package *pdftools* [vgl. @pdftools] genutzt.
 [^5]: Da die großen Anfragen in dieser Arbeit nicht berücksichtigt werden, wird nachfolgend zwecks der Lesbarkeit von *Anfragen* geschrieben. Dieser Begriff wird in dieser Arbeit als äquivalent zu *kleinen Anfragen* genutzt.
 [^6]: Da keine Differenzierung zwischen den Subthemen erfolgt und nachfolgend nur noch eine Differenzierung zwischen den Hauptthemen relevant ist, wird ab sofort nur noch von Themen geschrieben. Die Begriffe *Hauptthema* und *Thema* werden in dieser Arbeit daher äquivalent genutzt.
-[^7]: Um ein Overfitting bei Decision Trees zu vermeiden, wird die Methodik des *Prunings* verwendet [siehe hierzu u.a. @bradford1998pruning; @mingers1989empirical; @mehta1995mdl]. Dies ist beim Random Forest jedoch nicht erforderlich, da durch das Bootstrapping (oder auch *Bagging*) der Fehler bereits signifikant reduziert wird [siehe hierzu @breiman1996decision; @prasad2006newer 184]. Die Gefahr eines Overfittings ist bei einem Random Forest daher kein Problem [vgl. @breiman2001random].
-[^8]: Hierbei soll vorerst nicht näher eingegangen werden, da es viele verschiedene Kernel-Techniken gibt. Für eine allgemeine detaillierte Übersicht diverser Kernel-Techniken bietet sich die Arbeit von @cristianini2000introduction an, auf welche sich bereits bezogen wurde.
+[^7]: Grundlegend handelt es sich um eine Ansammlung von Descision Trees, welche hier jedoch nicht im Detail ausgeführt werden sollen. Dabei sei auf die Arbeit von @breiman1984tree und @banfield2007comparison verwiesen.
+[^8]: Um ein Overfitting bei Decision Trees zu vermeiden, wird die Methodik des *Prunings* verwendet [siehe hierzu u.a. @bradford1998pruning; @mingers1989empirical; @mehta1995mdl]. Dies ist beim Random Forest jedoch nicht erforderlich, da durch das Bootstrapping (oder auch *Bagging*) der Fehler bereits signifikant reduziert wird [siehe hierzu @breiman1996bagging; @prasad2006newer 184]. Die Gefahr eines Overfittings ist bei einem Random Forest daher kein Problem [vgl. @breiman2001random].
+[^9]: Zwar gibt es Möglichkeiten um diesem Problem entgegenzuwirken, jedoch soll stattdessen eine Kombination der beiden herangezogenen Klassifikationsverfahren verwendet werden, sofern dies erforderlich sein sollte.
+[^10]: C-Support Vector Klassifikatoren werden auch in dieser Arbeit herangezogen. Aus diesem Grund werden andere Lösungen für das angeführte Problem nicht thematisiert.
+[^11]: Für weitere Details siehe @cortes1995support 280 und @chang2011libsvm.
+[^12]: Hierbei soll vorerst nicht näher eingegangen werden, da es viele verschiedene Kernel-Techniken gibt. Für eine allgemeine detaillierte Übersicht diverser Kernel-Techniken bietet sich die Arbeit von @cristianini2000introduction an. Für diese Arbeit wird ein lineares Kernel verwendet.
+[^13]: Die detaillierten Algorithmen, welche bei den Packages zum Einsatz kommen, können für randomForest in @breiman2001random und für Support Vector Machines in @chang2011libsvm vorgefunden werden. 
 
 
 \begin{table}[ht]
 \centering
-\caption{Themenspezifischer Fehler nach $n_{tree}$ (Random Forest)}
-\begin{tabular}{llllr}
-  \hline
-  Thema & Fehler $RF_{200}$ & Fehler $RF_{500}$ & Fehler $RF_{1500}$ & $N_{Anfragen}$ \\ 
-  \hline
-  Gesetz \& Kriminalität & 5.88\% & 5.64\% & 5.88\% & 535 \\ 
-   Transport & 9.59\% & 9.59\% & 9.96\% & 348 \\ 
-   Verteidigung & 10.24\% & 9.64\% & 9.04\% & 206 \\ 
-   Einwanderung & 12.35\% & 9.96\% & 11.95\% & 347 \\ 
-   Außenhandel & 15.38\% & 13.46\% & 14.42\% & 137 \\ 
-   Gesundheit & 21.55\% & 19.83\% & 18.97\% & 159 \\ 
-   Energie & 27.91\% & 25.58\% & 25.58\% & 167 \\ 
-   Arbeit & 28.95\% & 27.63\% & 31.58\% & 114 \\ 
-   Soziale Wohlfahrt & 38.71\% & 29.03\% & 27.96\% & 121 \\ 
-   Umwelt & 40.4\% & 36.42\% & 33.11\% & 197 \\ 
-   Makroökonomie & 42.42\% & 41.41\% & 41.41\% & 135 \\ 
-   Bildung & 53.66\% & 58.54\% & 56.1\% &  50 \\ 
-   Technologie & 61.22\% & 61.22\% & 59.18\% & 123 \\ 
-   Int. Angelegenheiten & 66.39\% & 67.21\% & 68.03\% & 170 \\ 
-   Regierungsoperationen & 82.35\% & 73.53\% & 73.53\% &  47 \\ 
-   Binnenhandel & 84.31\% & 78.43\% & 84.31\% &  71 \\ 
-   Wohnungsbau & 91.67\% & 91.67\% & 95.83\% &  27 \\ 
-   Agrarwirtschaft & 91.89\% & 94.59\% & 94.59\% &  51 \\ 
-   Bürgerrechte & 100\% & 100\% & 100\% &  42 \\ 
-   \hline
-\end{tabular}
-\end{table}
-
-
-
-\begin{table}[ht]
-\centering
+\caption{Richtig kategorisierte Anfragen und Anteil der Klassifikationen}
 \begin{tabular}{lllllllll}
-$p$   & \multicolumn{2}{c}{$RF_{200}$} & \multicolumn{2}{c}{$RF_{500}$} & \multicolumn{2}{c}{$RF_{1500}$} & \multicolumn{2}{c}{$SVM$} \\
+$p$   & \multicolumn{2}{c}{$RF_{200}$} & \multicolumn{2}{c}{$RF_{500}$} & \multicolumn{2}{c}{$RF_{1500}$} & \multicolumn{2}{c}{$SVM_{C = 10}$} \\
    \hline
     & Richtig      & Anteil      & Richtig      & Anteil      & Richtig       & Anteil      & Richtig     & Anteil    \\
    \hline
-0.3 &              &             &              &             &               &             &             &           \\
-0.4 &              &             &              &             &               &             &             &           \\
-0.5 &              &             &              &             &               &             &             &           \\
-0.6 &              &             &              &             &               &             &             &           \\
-0.7 &              &             &              &             &               &             &             &           \\
-0.8 &              &             &              &             &               &             &             &           \\
-0.9 &              &             &              &             &               &             &             &          \\
-   \hline
+ 0.3 &   83,89    &    74,83  &    84,96    &   73,89   &   85,08     &   72,69   &  80,91   &   76,45  \\
+ 0.4 &   90,07    &    58,00  &    89,47    &   58,50   &   90,42     &   57,29   &  85,54   &   64,79  \\
+ 0.5 &   94,21    &    41,63  &    93,08    &   42,57   &   93,13     &   42,84   &  88,30   &   52,61  \\
+ 0.6 &   97,73    &    29,45  &    97,33    &   30,12   &   96,77     &   29,05   &  89,02   &   46,32  \\
+ 0.7 &   100      &    19,54  &    99,33    &   19,95   &   100       &   19,14   &  91,75   &   40,56 \\
+ 0.8 &   100      &    13,12  &    100      &   13,38   &   100       &   12,58   &  92,68   &   32,93  \\
+ 0.9 &   100      &     9,77  &    100      &    9,91   &   100       &    9,91   &  95,43   &   23,43  \\
+ \hline
+mean   & 95,40    &   34,56   &    94,73    &   36,37   &   95,06     &   34,79   &  89,09   &   48,16  \\
+  \hline
 \end{tabular}
+\caption*{\scriptsize Anmerkung: Angaben in Prozent; $p$ stellt den Cutt Off der Klassenwahrscheinlichkeit dar}
 \end{table}

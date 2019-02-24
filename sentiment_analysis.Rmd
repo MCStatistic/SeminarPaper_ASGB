@@ -1,0 +1,67 @@
+---
+title: "Untitled"
+author: "Marlon Schumacher"
+date: "22 2 2019"
+output: html_document
+---
+
+
+## some packages
+```{r}
+install.packages("SentimentAnalysis")
+p_load(dplyr, haven, readr, ggplot2, pdftools, stringr, lubridate, RColorBrewer, tm, ggthemes, RTextTools,
+       caret, randomForest, magrittr, forcats, SentimentAnalysis)
+```
+
+
+
+```{r}
+sentiment <- analyzeSentiment(df_complete_clean_f$content[1:10], language = "german")
+
+sentiment$SentimentQDAP
+```
+
+## importing SentiWS
+```{r}
+neg_df <- read_tsv("./SentiWS_v2/SentiWS_v2.0_Negative.txt", col_names = FALSE)
+names(neg_df) <- c("Wort_POS", "Wert", "Inflektionen")
+
+neg_df %<>% 
+  mutate(Wort = str_sub(Wort_POS, 1, regexpr("\\|", .$Wort_POS)-1),
+         POS = str_sub(Wort_POS, start = regexpr("\\|", .$Wort_POS)+1)) %>% 
+  select(-Wort_POS)
+
+glimpse(neg_df)
+
+pos_df <- read_tsv("./SentiWS_v2/SentiWS_v2.0_Positive.txt", col_names = FALSE)
+names(pos_df) <- c("Wort_POS", "Wert", "Inflektionen")
+
+pos_df %<>% 
+  mutate(Wort = str_sub(Wort_POS, 1, regexpr("\\|", .$Wort_POS)-1),
+         POS = str_sub(Wort_POS, start = regexpr("\\|", .$Wort_POS)+1))
+
+glimpse(pos_df)
+
+sentiment_df <- bind_rows("neg" = neg_df, "pos" = pos_df, .id = "neg_pos") %>% 
+  select(neg_pos, Wort, Wert, Inflektionen, -Wort_POS) %>% 
+  mutate(Wort = tolower(Wort),
+         Inflektionen = tolower(Inflektionen))
+
+
+sentiment_df_2 <- sentiment_df %>% 
+  mutate(duplicate = duplicated(Wort)) %>% 
+  filter(duplicate != TRUE)
+
+nrow(sentiment_df_2)
+
+duplicated(sentiment_df$Wort) %>% 
+  filter()
+```
+
+## creating sentiment dictonary
+```{r}
+sentiment_dictionary <- SentimentDictionaryWeighted(sentiment_df_2$Wort, sentiment_df_2$Wert)
+
+nrow(sentiment_dictionary)
+```
+

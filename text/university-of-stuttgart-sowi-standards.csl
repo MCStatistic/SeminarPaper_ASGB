@@ -114,7 +114,7 @@
       </group>
     </layout>
   </citation>
-  <bibliography et-al-min="4" et-al-use-first="1" hanging-indent="true">
+  <bibliography et-al-min="5" et-al-use-first="1" hanging-indent="true">
     <sort>
       <key macro="author"/>
       <key variable="title"/>

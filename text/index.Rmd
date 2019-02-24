@@ -56,7 +56,7 @@ z <- 34.876
 ```
 
 \newpage
-\section{Methode}  \label{methods}
+\section{Methode} \label{methods}
 
 ```{r child = '3_methods.Rmd'}
 ```

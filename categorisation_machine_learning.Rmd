@@ -1,0 +1,571 @@
+---
+title: "Supervised Machine Learning"
+author: "Marlon Schumacher"
+date: "13 2 2019"
+output: html_document
+---
+
+```{r}
+library(pacman)
+p_load(dplyr, haven, readr, ggplot2, pdftools, stringr, lubridate, RColorBrewer, tm, ggthemes, RTextTools, caret, randomForest, magrittr, forcats, tidyr)
+```
+
+
+## Testing
+### data preparation
+```{r}
+load("df_complete_clean_v2.RData")
+
+df_training_v2 <- df_complete_clean_v2 %>% 
+  filter(thema != "zSonstiges") %>% 
+  sample_n(3047) 
+
+# creating document-term matrix
+df_content_matrix_v2 <- create_matrix(df_training_v2$content)
+
+# remove sparse terms: In this case tokens are removed which are missing from more than 99% of the documents
+df_content_matrix_v2 <- removeSparseTerms(df_content_matrix_v2, sparse = .99)
+
+container_v2 <- create_container(df_content_matrix_v2, 
+                              df_training_v2$thema, 
+                              trainSize=1:2300,
+                              testSize=2301:3047, 
+                              virgin=FALSE)
+
+```
+
+### SVM
+```{r}
+cParameterValues <- c(1, 3, 5, 7, 10, 15, 20, 30, 50, 100)
+mean <- NULL
+min <- NULL
+max <- NULL
+diff <- NULL
+
+for (cost_value in cParameterValues){
+  print(paste0("C = ", cost_value))
+  measure <- cross_validate(container_v2, 5, "SVM", kernel = "linear", cost = cost_value)
+  mean <- c(mean, measure$meanAccuracy)
+  min <- c(min, min(measure[[1]]))
+  max <- c(max, max(measure[[1]]))
+}
+
+ploty_df <- data_frame(cParameterValues, mean, min, max) %>% 
+  rename(C = cParameterValues,
+         Genauigkeit = mean) %>% 
+  filter(C != 80) %>% 
+  mutate(c = as.character(C),
+         g = "1") %>% 
+  ggplot(aes(x = as.factor(C), y = Genauigkeit, group = g)) +
+  geom_line(aes(colour = "Mittelwert")) +
+  geom_point(aes(colour = "Mittelwert")) +
+  geom_ribbon(aes(ymax = max, ymin = min, fill = "Range"), alpha = 0.4) +
+  xlab("C-Parameter") +
+  scale_colour_manual("",values="gray4") +
+  scale_fill_manual("",values="skyblue4") +
+  theme_bw() +
+  theme(axis.title = element_text(size=10), legend.position = "bottom")
+  
+ggpreview(ploty_df, height = 4, width = 6)
+ggsave("c_values.png", ploty_df, 
+       path = "./images/", width = 6, height = 4)
+
+
+# linear
+svm_v2 <- train_model(container_v2,"SVM", kernel = "linear", cost = 10)
+svm_classify_v2 <- classify_model(container_v2, svm_v2)
+
+# creating df with real topics, predicted topic and probability
+test_svm <- df_training_v2[2301:3047,]  %>% 
+  select(-content, -bt, -party, -type, -bt_f, -title, -date)
+test_svm$thema_svm <- svm_classify_v2$SVM_LABEL
+test_svm$prob_svm <- svm_classify_v2$SVM_PROB
+
+length(which(test_svm$thema==test_svm$thema_svm))/length(test_svm$thema)
+# 71.35
+
+# looking for probabilities
+test_svm_prob_v2 <- test_svm %>%
+  filter(prob_svm >= 0.3) %>%
+  arrange((prob_svm))
+length(which(test_svm_prob_v2$thema==test_svm_prob_v2$thema_svm))/length(test_svm_prob_v2$thema)
+nrow(test_svm_prob_v2)/nrow(test_svm_v2)
+# 0.3: 0.8091 richtig / 0.7645 Matching
+# 0.4: 0.8554 richtig / 0.6479 Matching
+# 0.5: 0.8830 richtig / 0.5261 Matching
+# 0.6: 0.8902 richtig / 0.4632 Matching
+# 0.7: 0.9175 richtig / 0.4056 Matching
+# 0.8: 0.9268 richtig / 0.3293 Matching
+# 0.9: 0.9543 richtig / 0.2343 Matching
+```
+
+
+### RF
+```{r}
+# RF Algorithm
+rf_v2 <- train_model(container_v2, "RF")
+rf_classify_v2 <- classify_model(container_v2, rf_v2)
+
+# creating df with real topics, predicted topic and probability
+test_rf_v2_200 <- df_training_v2[2301:3047,] %>% 
+  select(-content, -bt, -party, -type, -bt_f, -title, -date)
+test_rf_v2_200$thema_rf_200 <- rf_classify_v2$FORESTS_LABEL
+test_rf_v2_200$prob_rf_200 <- rf_classify_v2$FORESTS_PROB
+
+# first join for additional analysis
+test_full <- full_join(test_rf_v2_200, test_svm, by = "file", copy = FALSE) %>% 
+  rename(thema = thema.x) %>% 
+  select(-thema.y)
+head(test_full)
+
+
+length(which(test_rf_v2$thema==test_rf_v2$thema_test))/length(test_rf_v2$thema)
+# 71,88% 
+
+test_rf_200 <- test_rf_v2  %>% 
+  filter(prob >= 0.3) %>% 
+  arrange((prob))
+length(which(test_rf_200$thema==test_rf_200$thema_test))/length(test_rf_200$thema)
+nrow(test_rf_200)/nrow(test_rf_v2)
+# 0.3: 0.8389 richtig / 0.7483 Matching
+# 0.4: 0.9007 richtig / 0.5800 Matching
+# 0.5: 0.9421 richtig / 0.4163 Matching
+# 0.6: 0.9773 richtig / 0.2945 Matching
+# 0.7: 1 richtig / 0.1954 Matching
+# 0.8: 1 richtig / 0.1312 Matching
+# 0.9: 1 richtig / 0.0977 Matching
+
+# if you take into account the matching between svm and rf_200, the accuracy decreases!
+test_full %>% 
+  mutate(thema_rf_200 = as.character(thema_rf_200),
+         thema_svm = as.character(thema_svm)) %>% 
+  mutate(r_thema_rf200 = case_when(
+    prob_rf_200 >= 0.4 ~ thema_rf_200,
+    thema_svm == thema_rf_200 ~ thema_rf_200,
+    TRUE ~ thema
+  )) %>% 
+  mutate(correct = case_when(
+    thema_rf_200 == thema ~ 1,
+    TRUE ~ 0
+  )) %>% 
+  group_by(correct) %>% 
+  summarise(n = n()) %>% 
+  mutate(perc = n/(sum(n)))
+
+# checking the accuracy of matching svm and rf only
+# 0.4681529 correct -> reicht wohl das lediglich für den fall svm & rf_200 zu erwähnen...
+# auch mit 1500 trees wird der spaß definitiv nicht besser
+test_full %>% 
+  mutate(thema_rf_200 = as.character(thema_rf_200),
+         thema_svm = as.character(thema_svm)) %>% 
+  filter(prob_rf_200 < 0.4) %>% 
+  mutate(r_thema_rf200 = case_when(
+    thema_svm == thema_rf_200 ~ thema_rf_200,
+    TRUE ~ thema
+  )) %>% 
+  mutate(correct = case_when(
+    thema_rf_200 == thema ~ 1,
+    TRUE ~ 0
+  )) %>% 
+  group_by(correct) %>% 
+  summarise(n = n()) %>% 
+  mutate(perc = n/(sum(n)))
+
+rf_v2_500 <- train_model(container_v2, "RF", ntree = 500)
+rf_classify_v2_500 <- classify_model(container_v2, rf_v2_500)
+
+# creating df with real topics, predicted topic and probability
+test_rf_v2_500 <- df_training_v2[2301:3047,]
+test_rf_v2_500$thema_rf_500 <- rf_classify_v2_500$FORESTS_LABEL
+test_rf_v2_500$prob_rf_500 <- rf_classify_v2_500$FORESTS_PROB
+
+length(which(test_rf_v2_500$thema==test_rf_v2_500$thema_test))/length(test_rf_v2_500$thema)
+# 72,55
+
+test_rf_500 <- test_rf_v2_500  %>% 
+  filter(prob >= 0.3) %>% 
+  arrange((prob))
+length(which(test_rf_500$thema==test_rf_500$thema_test))/length(test_rf_500$thema)
+nrow(test_rf_500)/nrow(test_rf_v2_500)
+# 0.3: 0.8496 richtig / 0.7389 Matching
+# 0.4: 0.8947 richtig / 0.5850 Matching
+# 0.5: 0.9308 richtig / 0.4257 Matching
+# 0.6: 0.9733 richtig / 0.3012 Matching
+# 0.7: 0.9933 richtig / 0.1995 Matching
+# 0.8: 1 richtig / 0.1338 Matching
+# 0.9: 1 richtig / 0.0991 Matching
+
+rf_v2_800 <- train_model(container_v2, "RF", ntree = 800)
+rf_classify_v2_800 <- classify_model(container_v2, rf_v2_800)
+
+# creating df with real topics, predicted topic and probability
+test_rf_v2_800 <- df_training_v2[2301:3047,]
+test_rf_v2_800$thema_test <- rf_classify_v2_800$FORESTS_LABEL
+test_rf_v2_800$prob <- rf_classify_v2_800$FORESTS_PROB
+
+length(which(test_rf_v2_800$thema==test_rf_v2_800$thema_test))/length(test_rf_v2_800$thema)
+# 0.7255
+
+test_rf_800 <- test_rf_v2_800  %>% 
+  filter(prob >= 0.9) %>% 
+  arrange((prob))
+length(which(test_rf_800$thema==test_rf_800$thema_test))/length(test_rf_800$thema)
+nrow(test_rf_800)/nrow(test_rf_v2_800)
+# 0.3: 0.8560886 right / 0.7255689 matching
+# 0.4: 0.896789 right / 0.583668 matching
+# 0.5: 0.930303 rigth / 0.4417671 matching
+# 0.6: 0.9735683 right / 0.3038822 matching
+# 0.7: 0.9930556 right / 0.1927711 matching
+# 0.8: 1 right / 0.1298527 matching
+# 0.9: 1 right / 0.09772423 matching
+
+rf_v2_1000 <- train_model(container_v2, "RF", ntree = 1000)
+rf_classify_v2_1000 <- classify_model(container_v2, rf_v2_1000)
+
+# creating df with real topics, predicted topic and probability
+test_rf_v2_1000 <- df_training_v2[2301:3047,]
+test_rf_v2_1000$thema_test <- rf_classify_v2_1000$FORESTS_LABEL
+test_rf_v2_1000$prob <- rf_classify_v2_1000$FORESTS_PROB
+
+length(which(test_rf_v2_1000$thema==test_rf_v2_1000$thema_test))/length(test_rf_v2_1000$thema)
+# 0.7228916
+
+test_rf_1000 <- test_rf_v2_1000  %>% 
+  filter(prob >= 0.9) %>% 
+  arrange((prob))
+length(which(test_rf_1000$thema==test_rf_1000$thema_test))/length(test_rf_1000$thema)
+nrow(test_rf_1000)/nrow(test_rf_v2_1000)
+# 0.3: 0.8553114 right / 0.7309237 matching
+# 0.4: 0.8993135 right / 0.5850067 matching
+# 0.5: 0.9376947 right / 0.4297189 matching
+# 0.6: 0.9634703 right / 0.2931727 matching
+# 0.7: 0.9931507 right / 0.1954485 matching
+# 0.8: 1 right / 0.1298527 matching
+# 0.9: 1 right / 0.09906292 matching
+
+rf_v2_1500 <- train_model(container_v2, "RF", ntree = 1500)
+rf_classify_v2_1500 <- classify_model(container_v2, rf_v2_1500)
+
+# creating df with real topics, predicted topic and probability
+test_rf_v2_1500 <- df_training_v2[2301:3047,]
+test_rf_v2_1500$thema_test <- rf_classify_v2_1500$FORESTS_LABEL
+test_rf_v2_1500$prob <- rf_classify_v2_1500$FORESTS_PROB
+
+length(which(test_rf_v2_1500$thema==test_rf_v2_1500$thema_test))/length(test_rf_v2_1500$thema)
+# 0.7161981
+
+test_rf_1500 <- test_rf_v2_1500  %>% 
+  filter(prob >= 0.9) %>% 
+  arrange((prob))
+length(which(test_rf_1500$thema==test_rf_1500$thema_test))/length(test_rf_1500$thema)
+nrow(test_rf_1500)/nrow(test_rf_v2_1500)
+# 0.3: 0.8508287 right / 0.7269076 matching
+# 0.4: 0.9042056 right / 0.5729585 matching
+# 0.5: 0.93125 right / 0.4283802 matching
+# 0.6: 0.9677419 right / 0.2904953 matching
+# 0.7: 1 right / 0.1914324
+# 0.8: 1 right / 0.1258367
+# 0.9: 1 rigth / 0.09906292
+
+model <- as.character(c("SVM", "SVM", "SVM", "SVM", "SVM", "SVM", "SVM",
+           "RF_200", "RF_200", "RF_200", "RF_200", "RF_200", "RF_200", "RF_200",
+           "RF_500", "RF_500", "RF_500", "RF_200", "RF_500", "RF_500", "RF_500",
+           "RF_1500", "RF_1500", "RF_1500", "RF_1500", "RF_1500", "RF_1500", "RF_1500"))
+
+prob <- as.numeric(c(0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
+          0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
+          0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
+          0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9))
+
+
+matching <- as.numeric(c(0.7671, 0.6452, 0.5274, 0.4578, 0.4090, 0.3226, 0.2276,
+              0.7483, 0.5800, 0.4163, 0.2945, 0.1954, 0.1312, 0.0977,
+              0.7389, 0.5850, 0.4257, 0.3012, 0.1995, 0.1338, 0.0991,
+              0.7269, 0.5729, 0.4284, 0.2905, 0.1914, 0.1258, 0.0991))
+
+accuracy <- as.numeric(c(0.8063, 0.8548, 0.8807, 0.8947, 0.9115, 0.9295, 0.9647,
+              0.8389, 0.9007, 0.9421, 0.9773, 1, 1, 1,
+              0.8496, 0.8947, 0.9308, 0.9733, 0.9933, 1, 1,
+              0.8508, 0.9042, 0.9313, 0.9677, 1, 1, 1))
+
+algo_compare <- data.frame(model, prob, accuracy, matching)
+
+algo_compare %>% 
+  group_by(model) %>% 
+  summarise(mean_accu = mean(accuracy),
+            mean_match = mean(matching))
+
+# joining df for n
+df_merge_confusion <- df_training_v2 %>% 
+  group_by(thema) %>% 
+  summarise(n = n()) %>% 
+  rename(Klasse = thema)
+
+df_join_rf_500 <- as.data.frame(rf_v2_500$confusion) %>% 
+  select(class.error) %>% 
+  add_rownames("Klasse") %>% 
+  mutate(class.error = round((class.error*100), 2)) %>% 
+  mutate(class.error = paste0(as.character(class.error), "%")) %>% 
+  rename("Fehler RF 500" = class.error) 
+  
+df_join_rf_1500 <- as.data.frame(rf_v2_1500$confusion) %>% 
+  select(class.error) %>% 
+  add_rownames("Klasse") %>% 
+  mutate(class.error = round((class.error*100), 2)) %>% 
+  mutate(class.error = paste0(as.character(class.error), "%")) %>% 
+  rename("Fehler RF 1500" = class.error) 
+
+# creating table for class errors (all models)
+as.data.frame(rf_v2$confusion) %>% 
+  select(class.error) %>% 
+  add_rownames("Klasse") %>% 
+  arrange(class.error) %>% 
+  mutate(class.error = round((class.error*100), 2)) %>% 
+  left_join(., df_join_rf_500, by = "Klasse") %>% 
+  left_join(., df_join_rf_1500, by = "Klasse") %>% 
+  left_join(., df_merge_confusion, by = "Klasse") %>% 
+  mutate(class.error = paste0(as.character(class.error), "%")) %>% 
+  rename("Fehler RF 200" = class.error) %>% 
+  rename(Anzahl = n) %>% 
+  xtable::xtable()
+
+```
+
+### plotting probabilities of svm and rf (Testing)
+```{r}
+# plotting the probabilities for each topic from svm_classify_v2
+svm_classify_v2 %>% 
+  mutate(SVM_LABEL = fct_reorder(SVM_LABEL, SVM_PROB)) %>% 
+  ggplot(aes(x = SVM_LABEL, y = SVM_PROB)) +
+  geom_boxplot(alpha = 0.8) +
+  theme_bw() +
+  xlab("") +
+  ylab("Probability") +
+  coord_flip()
+
+rf_500_plot_df <- rf_classify_v2_500 %>% 
+  mutate(model = as.factor("Random Forest")) %>% 
+  rename(prob = FORESTS_PROB,
+         label = FORESTS_LABEL)
+
+svm_plot_df <- svm_classify_v2 %>% 
+  mutate(model = as.factor("Super Vector Machine")) %>% 
+  rename(prob = SVM_PROB,
+         label = SVM_LABEL)
+
+prob_plot_df <- rbind.data.frame(rf_500_plot_df, svm_plot_df)
+
+rf_svm_prob_boxplot <- prob_plot_df %>% 
+  group_by(model) %>% 
+  mutate(label = fct_reorder(label, prob)) %>% 
+  ggplot(aes(x = label, y = prob, fill = label)) +
+  geom_boxplot(alpha = 0.2) +
+  geom_jitter(width = 0.2, alpha = 0.2) +
+  theme_bw() +
+  xlab("") +
+  ylab("Klassenwahrscheinlichkeit") +
+  facet_wrap(~ model) +
+  theme(legend.position = "none") +
+  coord_flip() 
+
+ggpreview(rf_svm_prob_boxplot, width = 7, height = 6.5)
+ggsave("rf_svm_prob_boxplot.png", rf_svm_prob_boxplot, 
+       path = "./images/", width = 7, height = 6.5)
+
+rf_svm_cutt_off_plot <- algo_compare %>% 
+  filter(prob != 0.3) %>% 
+  mutate(prob_f = case_when(
+    prob == 0.4 ~ "Probability (Cutt Off): 0.4",
+    prob == 0.5 ~ "Probability (Cutt Off): 0.5",
+    prob == 0.6 ~ "Probability (Cutt Off): 0.6",
+    prob == 0.7 ~ "Probability (Cutt Off): 0.7",
+    prob == 0.8 ~ "Probability (Cutt Off): 0.8",
+    prob == 0.9 ~ "Probability (Cutt Off): 0.9"
+  )) %>% 
+  group_by(model) %>% 
+  ggplot(aes(y = accuracy, x = matching, col = model)) +
+  geom_point(size = 3, alpha = 0.6) +
+  theme_bw() +
+  ylab("Übereinstimmung") +
+  xlab("Anteil kategorisierter Anfragen") +
+  scale_y_continuous(labels = scales::percent_format()) +
+  scale_x_continuous(labels = scales::percent_format()) +
+  geom_hline(yintercept = 0.9, alpha = 0.5) +
+  geom_hline(yintercept = 0.95, alpha = 0.5) +
+  theme(legend.position="bottom", legend.title = element_blank()) +
+  facet_wrap(~ prob_f)
+
+ggpreview(rf_svm_cutt_off_plot, width = 7, height = 5)
+ggsave("rf_svm_cutt_off_plot.png", rf_svm_cutt_off_plot, 
+       path = "./images/", width = 7, height = 5)
+```
+
+## real model (svm & rf)
+```{r}
+# selecting ONLY the cases with a topic
+df_labelled <- df_complete_clean_v2 %>% 
+  filter(thema != "zSonstiges") 
+
+# selecting only zSonstiges
+df_sonst <- df_complete_clean_v2 %>% 
+  filter(thema == "zSonstiges") 
+
+# row binding
+df_complete_predict <- rbind(df_labelled, df_sonst)
+
+df_complete_predict$thema[3047] # Wohnungsbau
+df_complete_predict$thema[3048] # zSonstgies -> row 3048 is the beginning of all cases with sonstiges
+
+# number of cases 
+nrow(df_complete_predict) #6349 cases 
+nrow(df_labelled) # 3047 labelled
+nrow(df_sonst) # 3302 need to be labelled
+
+# creating document-term-matrix using the "ordered" df
+df_matrix_full <- create_matrix(df_complete_predict$content) %>% 
+  removeSparseTerms(sparse = .99)
+
+# creating a container for the training and labelling
+container_full <- create_container(df_matrix_full, 
+                                   df_complete_predict$thema,
+                                   trainSize = 1:3047, # zugeordnete dokumente fürs training
+                                   testSize = 3048:6349, # zSonstiges ist alles testSize
+                                   virgin=FALSE)
+
+# random forest for classification
+# reason for 200 trees: 1. best classification while testing; 2. no big differences
+rf_model <- train_model(container_full, # container mit content
+                        "RF", # method
+                        ntree = 500) # number of trees
+
+xtable::xtable(rf_model$confusion %>% round(digits = 0))
+
+df_merge_confusion <- df_labelled %>% 
+  group_by(thema) %>% 
+  summarise(n = n()) %>% 
+  rename(Klasse = thema)
+
+as.data.frame(rf_model$confusion) %>% 
+  select(class.error) %>% 
+  add_rownames("Klasse") %>% 
+  arrange(class.error) %>% 
+  rename(Klassenfehler = class.error) %>% 
+  mutate(Klassenfehler = round((Klassenfehler*100), 2)) %>% 
+  left_join(., df_merge_confusion, by = "Klasse") %>% 
+  mutate(Klassenfehler = paste0(as.character(Klassenfehler), "%")) %>% 
+  rename(Anzahl = n) %>% 
+  xtable::xtable()
+
+# container muss daten fürs training sowie für die kategorisierung beinhalten
+rf_classes_full <- classify_model(container_full, rf_model)
+
+# including labels into the df_sonst
+df_sonst$thema_rf <- rf_classes_full$FORESTS_LABEL
+df_sonst$prob_rf <- rf_classes_full$FORESTS_PROB
+
+# creating a new df with the new labells <3
+df_complete_clean_v3 <- full_join(df_labelled, df_sonst)
+
+# inspecting just a bit
+df_complete_clean_v3 %>% 
+  select(thema, party, file, thema_rf, prob_rf) %>% 
+  filter(thema == "zSonstiges")
+
+# SVM classification
+svm_model <- train_model(container_full, "SVM", method = "linear", cost = 10)
+svm_classes_full <- classify_model(container_full, svm_model)
+
+# creating df with real topics, predicted topic and probability
+df_sonst$thema_svm <- svm_classes_full$SVM_LABEL
+df_sonst$prob_svm <- svm_classes_full$SVM_PROB
+
+# creating a new df with the new labells <3
+df_complete_clean_f <- full_join(df_labelled, df_sonst)
+
+# inspecting just a bit 
+df_complete_clean_f %>% 
+  select(thema, party, file, thema_rf, prob_rf, thema_svm, prob_svm) %>% 
+  filter(thema == "zSonstiges")
+
+# saving df
+save(df_complete_clean_f, file = "df_complete_clean_f.RData")
+load("df_complete_clean_f.RData")
+```
+
+### Boxplot Probabilities (real model)
+```{r}
+prob_boxplot_real <- df_complete_clean_f %>% 
+  select(file, thema_rf, thema_svm, prob_rf, prob_svm) %>% 
+  filter(!is.na(thema_rf)) 
+
+nrow(prob_boxplot_real)
+
+prob_boxplot_real %<>% 
+  gather(model, probability, prob_rf:prob_svm) %>% # transform df for boxplot
+  mutate(model = case_when(
+    model == "prob_rf" ~ "rf",
+    model == "prob_svm" ~ "svm"
+  )) %>% 
+  mutate(label = case_when( 
+    model == "rf" ~ thema_rf,
+    model == "svm" ~ thema_svm
+  )) %>% 
+  select(-thema_rf, -thema_svm) %>% # no need anymore
+  mutate(model = case_when(
+    model == "rf" ~ "Random Forest",
+    model == "svm" ~ "Super Vector Machine"
+    ))
+
+prob_boxplot_real[1,]
+prob_boxplot_real[3303,]
+  
+  
+  
+prob_boxplot_real_mod <- prob_boxplot_real %>% 
+  group_by(model) %>% 
+  mutate(label = fct_reorder(label, probability)) %>% 
+  ggplot(aes(x = label, y = probability, fill = label)) +
+  geom_boxplot(alpha = 0.2) +
+  geom_jitter(width = 0.2, alpha = 0.1) +
+  theme_bw() +
+  xlab("") +
+  ylab("Klassenwahrscheinlichkeit") +
+  facet_wrap(~ model) +
+  theme(legend.position = "none") +
+  coord_flip() 
+
+ggpreview(prob_boxplot_real_mod, width = 7, height = 6.5)
+ggsave("prob_boxplot_real_mod.png", prob_boxplot_real_mod, 
+       path = "./images/", width = 7, height = 6.5)
+```
+
+
+```{r}
+ggplot(df_complete_clean, aes(thema)) +
+  geom_bar(position="dodge")
+
+df_complete_clean_f %>%
+  group_by(party, thema_rf) %>%
+  filter(party != "SPD" & party != "Union" & party != "NA") %>% 
+  summarise(n = n()) %>%
+  mutate(perc = (n/sum(n))) %>%
+  mutate(thema_rf = fct_reorder2(thema_rf, party, perc)) %>% 
+  ggplot(aes(x = thema_rf, y = perc)) +
+  geom_bar(position = "dodge",
+           stat = "identity",
+           fill = "skyblue4") +
+  facet_wrap(~party, labeller = label_value) +
+  geom_text(aes(y = perc, 
+                label = sprintf("%1.1f%%", round(100*perc, 1))),
+            size = 3.1,
+            color=rgb(100,100,100, maxColorValue=255),
+            hjust=-0.1) +
+  #ylim(0,0.22)
+  theme_bw() +
+  theme(text=element_text(size = 12)) +
+  scale_y_continuous(labels = scales::percent_format()) +
+  coord_flip()
+
+unique(df_complete_clean$party)
+
+```
