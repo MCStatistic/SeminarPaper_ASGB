@@ -810,7 +810,7 @@ df_complete_clean %>%
   filter(party == "SPD" | party == "Union")
 
 plot_anfragen_18_19 <- df_complete_clean %>% 
-  filter(party != "NA" & party != "SPD" & party != "Union") %>% 
+  filter(party != "NA") %>% 
   mutate(date_n = as.Date(date, "%d.%m.%Y")) %>% 
   mutate(year = year(date_n),
          party = case_when(party == "Union" ~ "CDU/CSU",
@@ -839,16 +839,12 @@ plot_anfragen_18_19 <- df_complete_clean %>%
   scale_y_continuous(limits = c(0,700))
 
 ggpreview(plot_anfragen_18_19, width = 7.5, height = 8.5)
-ggsave("AnfragenPartei_18_19.png", path = "./images/", width = 7.5, height = 8.5)
+ggsave("AnfragenPartei_18_19_complete.png", path = "./images/", width = 7.5, height = 8.5)
   
-
-  
-party <- c("Linke", "Grüne", "FDP", "CDU/CSU", "AfD", "SPD")
-sitze18 <- c(70, 63, 0, 255, 0, 193)
-sitze19 <- c(69, 67, 80, 246, 91, 152)
-  
-sitze <- cbind(party, sitze18, sitze19) %>% 
-  as.data.frame() 
+# checking reasons for union and SPD
+df_complete_clean %>% 
+  filter(party == "SPD" | party == "Union")
+# SPD & Union anfragen -> "politisch motivierte Straftaten in Deutschland Monat Jahr..."
 ```
 
 

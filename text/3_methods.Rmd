@@ -95,7 +95,7 @@ Das grundlegende Konzept von Support Vector Machines soll anhand der Arbeit von 
 	\caption{Visuelle Darstellung einer linearen Support Vector Machine}
 	\label{svm_theory}
 	\centering
-	\includegraphics[width = 0.80\textwidth]{images/svm_grafische_darstellung_theory4.png}
+	\includegraphics[width = 0.80\textwidth]{images/svm_grafische_darstellung_theory.png}
 	\caption*{\scriptsize Anmerkung: Darstellung anlehndend an Cortes \& Vapnik 1995 (S. 275)}
 \end{figure}
 
