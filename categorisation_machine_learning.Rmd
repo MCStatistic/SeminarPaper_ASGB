@@ -103,14 +103,14 @@ nrow(test_svm_prob_v2)/nrow(test_svm_v2)
 ### RF
 ```{r}
 # RF Algorithm
-rf_v2 <- train_model(container_v2, "RF")
-rf_classify_v2 <- classify_model(container_v2, rf_v2)
+rf_200 <- train_model(container_v2, "RF", ntree = 200)
+rf_classify_200 <- classify_model(container_v2, rf_200)
 
 # creating df with real topics, predicted topic and probability
 test_rf_v2_200 <- df_training_v2[2301:3047,] %>% 
   select(-content, -bt, -party, -type, -bt_f, -title, -date)
-test_rf_v2_200$thema_rf_200 <- rf_classify_v2$FORESTS_LABEL
-test_rf_v2_200$prob_rf_200 <- rf_classify_v2$FORESTS_PROB
+test_rf_v2_200$thema_rf_200 <- rf_classify_200$FORESTS_LABEL
+test_rf_v2_200$prob_rf_200 <- rf_classify_200$FORESTS_PROB
 
 # first join for additional analysis
 test_full <- full_join(test_rf_v2_200, test_svm, by = "file", copy = FALSE) %>% 
@@ -118,15 +118,14 @@ test_full <- full_join(test_rf_v2_200, test_svm, by = "file", copy = FALSE) %>%
   select(-thema.y)
 head(test_full)
 
-
-length(which(test_rf_v2$thema==test_rf_v2$thema_test))/length(test_rf_v2$thema)
+length(which(test_rf_v2_200$thema==test_rf_v2_200$thema_rf_200))/length(test_rf_v2_200$thema)
 # 71,88% 
 
-test_rf_200 <- test_rf_v2  %>% 
-  filter(prob >= 0.3) %>% 
-  arrange((prob))
-length(which(test_rf_200$thema==test_rf_200$thema_test))/length(test_rf_200$thema)
-nrow(test_rf_200)/nrow(test_rf_v2)
+test_rf_200 <- test_rf_v2_200  %>% 
+  filter(prob_rf_200 >= 0.5) %>% 
+  arrange((prob_rf_200))
+length(which(test_rf_200$thema==test_rf_200$thema_rf_200))/length(test_rf_200$thema)
+nrow(test_rf_200)/nrow(test_rf_v2_200)
 # 0.3: 0.8389 richtig / 0.7483 Matching
 # 0.4: 0.9007 richtig / 0.5800 Matching
 # 0.5: 0.9421 richtig / 0.4163 Matching
@@ -183,7 +182,7 @@ length(which(test_rf_v2_500$thema==test_rf_v2_500$thema_test))/length(test_rf_v2
 # 72,55
 
 test_rf_500 <- test_rf_v2_500  %>% 
-  filter(prob >= 0.3) %>% 
+  filter(prob >= 0.45) %>% 
   arrange((prob))
 length(which(test_rf_500$thema==test_rf_500$thema_test))/length(test_rf_500$thema)
 nrow(test_rf_500)/nrow(test_rf_v2_500)
@@ -343,13 +342,13 @@ svm_classify_v2 %>%
   ylab("Probability") +
   coord_flip()
 
-rf_500_plot_df <- rf_classify_v2_500 %>% 
+rf_200_plot_df <- rf_classify_200 %>% 
   mutate(model = as.factor("Random Forest")) %>% 
   rename(prob = FORESTS_PROB,
          label = FORESTS_LABEL)
 
 svm_plot_df <- svm_classify_v2 %>% 
-  mutate(model = as.factor("Super Vector Machine")) %>% 
+  mutate(model = as.factor("Support Vector Machine")) %>% 
   rename(prob = SVM_PROB,
          label = SVM_LABEL)
 
@@ -400,6 +399,74 @@ ggsave("rf_svm_cutt_off_plot.png", rf_svm_cutt_off_plot,
        path = "./images/", width = 7, height = 5)
 ```
 
+### combination of SVM & RF
+```{r}
+# SVM Model
+svm_v2 <- train_model(container_v2,"SVM", kernel = "linear", cost = 10)
+svm_classify_v2 <- classify_model(container_v2, svm_v2)
+
+# creating df with real topics, predicted topic and probability
+test_svm_rf <- df_training_v2[2301:3047,]  %>% 
+  select(-content, -bt, -party, -type, -bt_f, -title, -date)
+test_svm_rf$thema_svm <- svm_classify_v2$SVM_LABEL
+test_svm_rf$prob_svm <- svm_classify_v2$SVM_PROB
+
+length(which(test_svm$thema==test_svm$thema_svm))/length(test_svm$thema)
+# 71.35
+
+# probabilities
+test_svm_prob <- test_svm_rf %>%
+  filter(prob_svm >= 0.75) %>%
+  arrange((prob_svm))
+length(which(test_svm_prob$thema==test_svm_prob$thema_svm))/length(test_svm_prob$thema)
+nrow(test_svm_prob)/nrow(test_svm_rf)
+# 91.1% right matching // 37,6% total match
+
+# RF Model
+rf_200 <- train_model(container_v2, "RF", ntree = 200)
+rf_classify_200 <- classify_model(container_v2, rf_200)
+
+# adding topic and prob RF
+test_svm_rf$thema_rf_200 <- rf_classify_200$FORESTS_LABEL
+test_svm_rf$prob_rf_200 <- rf_classify_200$FORESTS_PROB
+
+test_svm_rf
+
+length(which(test_svm_rf$thema==test_svm_rf$thema_test))/length(test_svm_rf$thema)
+# 72,55
+
+test_rf_prob <- test_svm_rf %>%
+  filter(prob_rf_200 >= 0.5) %>%
+  arrange((prob_rf_200))
+length(which(test_rf_prob$thema==test_rf_prob$thema_rf_500))/length(test_rf_prob$thema)
+nrow(test_rf_prob)/nrow(test_svm_rf)
+# 95.5% right matching // 44% total match
+
+# combining svm and rf 
+test_total <- test_svm_rf %>% 
+  mutate(thema_f = case_when(
+    prob_rf_200 >= 0.5 ~ as.character(thema_rf_200),
+    prob_svm >= 0.8 ~ as.character(thema_svm),
+    TRUE ~ "nope"
+  )) %>% 
+  filter(thema_f != "nope")
+
+# checking matching regarding svm + rf
+length(which(test_total$thema==test_total$thema_f))/length(test_total$thema)
+nrow(test_total)/nrow(test_svm_rf)  
+# 91.54% right // 52.2% total match
+
+test_total <- test_svm_rf %>% 
+  mutate(thema_f = case_when(
+    prob_rf_500 >= 0.5 ~ as.character(thema_rf_500),
+    prob_svm >= 0.8 ~ as.character(thema_svm),
+    TRUE ~ thema
+  )) %>% 
+  filter()
+```
+
+
+
 ## real model (svm & rf)
 ```{r}
 # selecting ONLY the cases with a topic
@@ -436,7 +503,7 @@ container_full <- create_container(df_matrix_full,
 # reason for 200 trees: 1. best classification while testing; 2. no big differences
 rf_model <- train_model(container_full, # container mit content
                         "RF", # method
-                        ntree = 500) # number of trees
+                        ntree = 200) # number of trees
 
 xtable::xtable(rf_model$confusion %>% round(digits = 0))
 
@@ -479,12 +546,15 @@ svm_classes_full <- classify_model(container_full, svm_model)
 df_sonst$thema_svm <- svm_classes_full$SVM_LABEL
 df_sonst$prob_svm <- svm_classes_full$SVM_PROB
 
+df_sonst %>% 
+  filter(thema_svm == "Bürgerrechte")
+
 # creating a new df with the new labells <3
 df_complete_clean_f <- full_join(df_labelled, df_sonst)
 
 # inspecting just a bit 
 df_complete_clean_f %>% 
-  select(thema, party, file, thema_rf, prob_rf, thema_svm, prob_svm) %>% 
+  select(file, bt, thema, party, file, thema_rf, prob_rf, thema_svm, prob_svm) %>% 
   filter(thema == "zSonstiges")
 
 # saving df
@@ -494,12 +564,12 @@ load("df_complete_clean_f.RData")
 
 ### Boxplot Probabilities (real model)
 ```{r}
+# creating df for plotting
 prob_boxplot_real <- df_complete_clean_f %>% 
   select(file, thema_rf, thema_svm, prob_rf, prob_svm) %>% 
-  filter(!is.na(thema_rf)) 
+  filter(!is.na(thema_rf) | !is.na(thema_svm)) 
 
-nrow(prob_boxplot_real)
-
+# manipulating df for plot
 prob_boxplot_real %<>% 
   gather(model, probability, prob_rf:prob_svm) %>% # transform df for boxplot
   mutate(model = case_when(
@@ -513,14 +583,18 @@ prob_boxplot_real %<>%
   select(-thema_rf, -thema_svm) %>% # no need anymore
   mutate(model = case_when(
     model == "rf" ~ "Random Forest",
-    model == "svm" ~ "Super Vector Machine"
-    ))
-
-prob_boxplot_real[1,]
-prob_boxplot_real[3303,]
+    model == "svm" ~ "Support Vector Machine"
+    )) %>% 
+  mutate(label = as.character(label))
   
+# little issue with label "Bürgerrechte"...
+prob_boxplot_real %<>% 
+  mutate(label = case_when(
+    is.na(label) ~ "Bürgerrechte",
+    TRUE ~ label)) %>% 
+  mutate(label = as.factor(label))
   
-  
+# boxplots for all labels and models...
 prob_boxplot_real_mod <- prob_boxplot_real %>% 
   group_by(model) %>% 
   mutate(label = fct_reorder(label, probability)) %>% 
@@ -544,25 +618,27 @@ ggsave("prob_boxplot_real_mod.png", prob_boxplot_real_mod,
 ggplot(df_complete_clean, aes(thema)) +
   geom_bar(position="dodge")
 
+# little plot for RF labels...
 df_complete_clean_f %>%
   group_by(party, thema_rf) %>%
   filter(party != "SPD" & party != "Union" & party != "NA") %>% 
+  filter(!is.na(thema_rf)) %>% 
   summarise(n = n()) %>%
   mutate(perc = (n/sum(n))) %>%
   mutate(thema_rf = fct_reorder2(thema_rf, party, perc)) %>% 
-  ggplot(aes(x = thema_rf, y = perc)) +
+  ggplot(aes(x = thema_rf, y = perc, fill = party)) +
   geom_bar(position = "dodge",
            stat = "identity",
-           fill = "skyblue4") +
-  facet_wrap(~party, labeller = label_value) +
-  geom_text(aes(y = perc, 
-                label = sprintf("%1.1f%%", round(100*perc, 1))),
-            size = 3.1,
-            color=rgb(100,100,100, maxColorValue=255),
-            hjust=-0.1) +
+           alpha = 0.9) +
+  scale_fill_manual(values = c("Grüne" = "#50822E", "Linke" = "#B61C3E", 
+                     "CDU/CSU" = "#32372C", "SPD" = "#E3000F", "AfD" = "#0088FF", "FDP" = "#FFD600")) +
   #ylim(0,0.22)
   theme_bw() +
+  xlab("") +
+  ylab("") +
+  labs(fill = "") +
   theme(text=element_text(size = 12)) +
+  theme(legend.position="bottom") +
   scale_y_continuous(labels = scales::percent_format()) +
   coord_flip()
 

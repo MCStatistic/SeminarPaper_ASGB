@@ -107,7 +107,7 @@ Im Anschluss der Klassifizierung kann untersucht werden in welcher Weise sich di
 
 ### Sentiment Analyse
 
-Da davon auszugehen ist, dass die Parteien hinsichtlich der Themen unterschiedliche Sentiments aufweisen könnten, soll ebenso eine Sentiment Analyse durchgeführt werden. Mittels eines Wörterbuchs soll das durchschnittliche Sentiment der einzelnen Anfragen ermittelt werden. Hierbei wird das öffentlich zugängliche deutsche Wörterbuch *SentiWS* verwendet werden [@sentiws]. Eine detaillierte Beschreibung dieses Wörterbuchs sowie der verwendeten Methoden zwecks Erstellung ist in @remus2010sentiws und @goldhahn12building vorzufinden. Für die Sentiment Analyse wird das Package `SentimentAnalysis` genutzt [vgl. @sentimentanalysis]. Aufgrund der hohen Anzahl der Themen soll die Analyse dabei auf die am häufigsten aufkommenden Themen beschränkt werden. 
+Da davon auszugehen ist, dass die Parteien hinsichtlich der Themen unterschiedliche Sentiments aufweisen könnten, soll ebenso eine Sentiment Analyse durchgeführt werden. Mittels eines Wörterbuchs soll das durchschnittliche Sentiment der einzelnen Anfragen ermittelt werden. Hierbei wird das öffentlich zugängliche deutsche Wörterbuch *SentiWS* verwendet [@sentiws]. Dieses enthält Wörter mit positiven und negativen Scoring. Eine detaillierte Beschreibung dieses Wörterbuchs sowie der verwendeten Methoden zwecks Erstellung ist in @remus2010sentiws und @goldhahn12building vorzufinden. Für die Sentiment Analyse wird das Package `SentimentAnalysis` genutzt [@sentimentanalysis]. Aufgrund der hohen Anzahl der Themen soll die Analyse dabei auf die am häufigsten aufkommenden Themen beschränkt werden. 
 
 [^1]: Der Code für alle Auswertungen der Hausarbeit ist auf GitHub unter https://github.com/MCStatistic/SeminarPaper_ASGB einsehbar.
 [^2]: Hierfür wurde eine Funktion in R geschrieben, mit welcher jede Drucksache als PDF vom offiziellen Server heruntergeladen wurde. Die Dateien wurden dabei unter der Nummer der Drucksache sowie des jeweiligen Bundestags gespeichert um so eine klare Zuordnung gewährleisten zu können.
@@ -143,5 +143,5 @@ $p$   & \multicolumn{2}{c}{$RF_{200}$} & \multicolumn{2}{c}{$RF_{500}$} & \multi
 mean   & 95,40    &   34,56   &    94,73    &   36,37   &   95,06     &   34,79   &  89,09   &   48,16  \\
   \hline
 \end{tabular}
-\caption*{\scriptsize Anmerkung: Angaben in Prozent; $p$ stellt den Cutt Off der Klassenwahrscheinlichkeit dar}
+\caption*{\scriptsize Anmerkung: Angaben in Prozent; $p$ stellt den Cutt Off für die Klassenwahrscheinlichkeit dar}
 \end{table}

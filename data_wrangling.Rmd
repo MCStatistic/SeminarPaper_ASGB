@@ -796,6 +796,7 @@ View(df_complete)
 
 # saving merged df
 save(df_complete, file = "df_complete.RData")
+load("df_complete_clean.RData")
 ```
 
 ## complete distribution
