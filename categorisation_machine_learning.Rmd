@@ -53,7 +53,6 @@ for (cost_value in cParameterValues){
 ploty_df <- data_frame(cParameterValues, mean, min, max) %>% 
   rename(C = cParameterValues,
          Genauigkeit = mean) %>% 
-  filter(C != 80) %>% 
   mutate(c = as.character(C),
          g = "1") %>% 
   ggplot(aes(x = as.factor(C), y = Genauigkeit, group = g)) +
@@ -367,9 +366,9 @@ rf_svm_prob_boxplot <- prob_plot_df %>%
   theme(legend.position = "none") +
   coord_flip() 
 
-ggpreview(rf_svm_prob_boxplot, width = 7, height = 6.5)
+ggpreview(rf_svm_prob_boxplot, width = 7, height = 6)
 ggsave("rf_svm_prob_boxplot.png", rf_svm_prob_boxplot, 
-       path = "./images/", width = 7, height = 6.5)
+       path = "./images/", width = 7, height = 6)
 
 rf_svm_cutt_off_plot <- algo_compare %>% 
   filter(prob != 0.3) %>% 
@@ -446,7 +445,7 @@ nrow(test_rf_prob)/nrow(test_svm_rf)
 test_total <- test_svm_rf %>% 
   mutate(thema_f = case_when(
     prob_rf_200 >= 0.5 ~ as.character(thema_rf_200),
-    prob_svm >= 0.8 ~ as.character(thema_svm),
+    prob_svm >= 0.72 ~ as.character(thema_svm), # ab .71/72 it's above .9 right matching
     TRUE ~ "nope"
   )) %>% 
   filter(thema_f != "nope")
@@ -522,6 +521,7 @@ as.data.frame(rf_model$confusion) %>%
   mutate(Klassenfehler = paste0(as.character(Klassenfehler), "%")) %>% 
   rename(Anzahl = n) %>% 
   xtable::xtable()
+
 
 # container muss daten fürs training sowie für die kategorisierung beinhalten
 rf_classes_full <- classify_model(container_full, rf_model)
@@ -608,25 +608,55 @@ prob_boxplot_real_mod <- prob_boxplot_real %>%
   theme(legend.position = "none") +
   coord_flip() 
 
-ggpreview(prob_boxplot_real_mod, width = 7, height = 6.5)
+ggpreview(prob_boxplot_real_mod, width = 7, height = 6)
 ggsave("prob_boxplot_real_mod.png", prob_boxplot_real_mod, 
-       path = "./images/", width = 7, height = 6.5)
+       path = "./images/", width = 7, height = 6)
+```
+
+### final classification (RF + SVM)
+```{r}
+glimpse(df_complete_clean_f)
+
+df_complete_clean_f %>% 
+  filter(thema == "zSonstiges") %>% 
+  nrow()
+# 3302 unlabeled
+
+df_complete_clean_f %<>% 
+  mutate(label = case_when(
+    thema != "zSonstiges" ~ thema,
+    prob_rf >= 0.5 ~ as.character(thema_rf),
+    prob_svm >= 0.75 ~ as.character(thema_svm),
+    TRUE ~ "Sonstiges"
+  )) 
+
+df_complete_clean_f %>% 
+  filter(label == "Sonstiges") %>% 
+  nrow()
+# 2423 (.8)
+# 2375 (.75)
+
+save(df_complete_clean_f, file = "df_complete_clean_f.RData")
+load("df_complete_clean_f.RData")
 ```
 
 
+### results
 ```{r}
 ggplot(df_complete_clean, aes(thema)) +
   geom_bar(position="dodge")
 
 # little plot for RF labels...
 df_complete_clean_f %>%
-  group_by(party, thema_rf) %>%
+  filter(label != "Sonstiges") %>% 
+  mutate(label_f = as.factor(label)) %>% 
+  group_by(party, label_f) %>%
   filter(party != "SPD" & party != "Union" & party != "NA") %>% 
-  filter(!is.na(thema_rf)) %>% 
+  filter(!is.na(label_f)) %>% 
   summarise(n = n()) %>%
   mutate(perc = (n/sum(n))) %>%
-  mutate(thema_rf = fct_reorder2(thema_rf, party, perc)) %>% 
-  ggplot(aes(x = thema_rf, y = perc, fill = party)) +
+  mutate(label_f = fct_reorder2(label_f, party, perc)) %>% 
+  ggplot(aes(x = label_f, y = perc, fill = party)) +
   geom_bar(position = "dodge",
            stat = "identity",
            alpha = 0.9) +
@@ -643,5 +673,4 @@ df_complete_clean_f %>%
   coord_flip()
 
 unique(df_complete_clean$party)
-
 ```

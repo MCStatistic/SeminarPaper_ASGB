@@ -4,17 +4,70 @@ output: pdf_document
 
 ## Klassifikation
 
-Hier werden die Ergebnisse der Klassifikation berichtet. Und anbei gleich noch ein Figure Beispiel
+Hier werden die Ergebnisse der Klassifikation berichtet. 
 
 \begin{figure}[!h]
-	\caption{Probabilities nach Themen}
+	\caption{Verteilung der Themen nach Wortklassifikation}
 	\label{probs_real}
-	\includegraphics[width=\textwidth]{images/prob_boxplot_real_mod.png}
-	\flushright
-	{\scriptsize Hier kann eine extra Note stehen... \par}
+	\centering
+	\includegraphics[width=\textwidth]{images/themen_gesamt_manual_matching_2.png}
+	\caption*{\scriptsize }
+\end{figure}
+
+Anteil aller bla bla Test Datensatz blub
+
+\begin{table}[ht]
+\centering
+\caption{Richtig kategorisierte Anfragen und Anteil der Klassifikationen}
+\begin{tabular}{lllllllll}
+$p$   & \multicolumn{2}{c}{$RF_{200}$} & \multicolumn{2}{c}{$RF_{500}$} & \multicolumn{2}{c}{$RF_{1500}$} & \multicolumn{2}{c}{$SVM_{C = 10}$} \\
+   \hline
+    & Richtig      & Anteil      & Richtig      & Anteil      & Richtig       & Anteil      & Richtig     & Anteil    \\
+   \hline
+ 0.3 &   83,89    &    74,83  &    84,96    &   73,89   &   85,08     &   72,69   &  80,91   &   76,45  \\
+ 0.4 &   90,07    &    58,00  &    89,47    &   58,50   &   90,42     &   57,29   &  85,54   &   64,79  \\
+ 0.5 &   94,21    &    41,63  &    93,08    &   42,57   &   93,13     &   42,84   &  88,30   &   52,61  \\
+ 0.6 &   97,73    &    29,45  &    97,33    &   30,12   &   96,77     &   29,05   &  89,02   &   46,32  \\
+ 0.7 &   100      &    19,54  &    99,33    &   19,95   &   100       &   19,14   &  91,75   &   40,56 \\
+ 0.8 &   100      &    13,12  &    100      &   13,38   &   100       &   12,58   &  92,68   &   32,93  \\
+ 0.9 &   100      &     9,77  &    100      &    9,91   &   100       &    9,91   &  95,43   &   23,43  \\
+ \hline
+mean   & 95,40    &   34,56   &    94,73    &   36,37   &   95,06     &   34,79   &  89,09   &   48,16  \\
+  \hline
+\end{tabular}
+\caption*{\scriptsize Anmerkung: Angaben in Prozent; $p$ stellt den Cutt Off für die Klassenwahrscheinlichkeit dar}
+\end{table}
+
+Klassenwahrscheinlichkeiten im einzelnen...blub...aber Test blüb
+
+\begin{figure}[!h]
+	\caption{Klassenwahrscheinlichkeiten (Testklassifikation)}
+	\label{probs_real}
+	\centering
+	\includegraphics[width=\textwidth]{images/rf_svm_prob_boxplot_2.png}
+	\caption*{\scriptsize }
+\end{figure}
+
+Klassenwahrscheinlichkeiten für vollständige Klassifikation (Apendix, da kaum Unterschiede mit Testklassifikation...)
+
+\begin{figure}[!h]
+	\caption{Klassenwahrscheinlichkeiten (vollständige Klassifikation)}
+	\label{probs_real}
+	\centering
+	\includegraphics[width=\textwidth]{images/prob_boxplot_real_mod_2.png}
+	\caption*{\scriptsize }
 \end{figure}
 
 ## Deskriptive Analyse
+
+Darstellung der Anfragen nach Partei
+\begin{figure}[!h]
+	\caption{Anzahl gestellter Anfragen}
+	\label{anfragen_count}
+	\centering
+	\includegraphics[width=\textwidth]{images/AnfragenPartei_18_19_complete.png}
+	\caption*{\scriptsize Anmerkung: Anzahl der kleinen Anfragen nach Jahr und Legislaturperiode}
+\end{figure}
 
 ## Sentiment Analyse
 
