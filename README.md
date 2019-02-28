@@ -117,7 +117,7 @@ df_english %>%
   coord_flip()
 ```
 
-![](Readme_files/figure-markdown_github/unnamed-chunk-6-1.png)
+![ScreenShot](./images/READ_w_match.png)
 
 ### Supervised Machine Learning
 
@@ -164,7 +164,7 @@ df_rf_200_eng <- rf_classify_200 %>%
          label = FORESTS_LABEL)
 
 prob_plot_df <- rbind.data.frame(df_rf_200_eng, df_svm_eng)
-prob_plot_df %>% 
+rob_plot_df %>% 
   group_by(model) %>% 
   mutate(label = fct_reorder(label, prob)) %>% 
   ggplot(aes(x = label, y = prob, fill = label)) +
@@ -178,7 +178,7 @@ prob_plot_df %>%
   coord_flip() 
 ```
 
-![](Readme_files/figure-markdown_github/unnamed-chunk-8-1.png)
+![ScreenShot](./images/READ_rf_svm.png)
 
 After testing both algorithm the final categorization were made with a combination of RF and SVM. Moreover, cut off values for class probabilities were used. More details can be found in `categorisation_machine_learning.Rmd`.
 
@@ -218,7 +218,7 @@ df_english %>%
   scale_y_continuous(limits = c(0,800))
 ```
 
-![](Readme_files/figure-markdown_github/unnamed-chunk-9-1.png)
+![ScreenShot](./images/READ_by_party.png)
 
 ### Minor Interpellations by Topic & Legislature
 
@@ -248,7 +248,7 @@ df_english %>%
   coord_flip()
 ```
 
-![](Readme_files/figure-markdown_github/unnamed-chunk-11-1.png)
+![ScreenShot](./images/READ_by_legis.png)
 
 ### Minor Interpellations by Party & Topic
 
@@ -274,4 +274,4 @@ df_english %>%
   coord_flip()
 ```
 
-![](Readme_files/figure-markdown_github/unnamed-chunk-12-1.png)
+![ScreenShot](./images/READ_topic_party.png)
