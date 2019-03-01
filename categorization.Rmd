@@ -249,7 +249,10 @@ View(df_overlap %>%
 
 View(df_overlap %>%
   filter(overlap == 4))
+244 +9 +2726
 
+df_complete_clean_f %>%  
+  nrow()
 ```
 
 # Falsches Matching korrigieren
@@ -406,6 +409,11 @@ labs <- c("18. Bundestag", "19. Bundestag")
 levels(df_complete_clean$bt) <- rev(labs)
 df_complete_clean$bt_f <- factor(df_complete_clean$bt, labels = c("18. Bundestag", "19. Bundestag"))
 
+library(extrafont)
+font_import(pattern = "lmroman*")
+loadfonts()
+fonts()
+
 # with percentage labels on the y-axis, yay
 themen_gesamt_manual_matching <- df_complete_clean %>%
   filter(thema != "zSonstiges") %>%
@@ -416,7 +424,7 @@ themen_gesamt_manual_matching <- df_complete_clean %>%
   geom_bar(position = "dodge", 
            stat = "identity",
            fill = "skyblue4",
-           alpha = 0.9) +
+           alpha = 0.8) +
   facet_wrap(~bt_f, labeller = label_value) +
   geom_text(aes(y = perc, 
                 label = sprintf("%1.1f%%", round(100*perc, 1))),
@@ -425,16 +433,16 @@ themen_gesamt_manual_matching <- df_complete_clean %>%
             hjust=-0.1) +
   #ylim(0,0.22)
   theme_bw() +
-  ggtitle("") +
-  ylab("") +
-  xlab("") +
-  theme(text=element_text(size = 12)) +
+  theme(text=element_text(size = 12, family = "LM Roman 10"), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm"),
+        axis.title.x=element_blank(),
+        axis.title.y = element_blank()) +
   scale_y_continuous(labels = scales::percent_format(), limits=c(0,0.23)) +
   coord_flip()
   
-ggpreview(themen_gesamt_manual_matching, width = 7, height = 5)
-ggsave("themen_gesamt_manual_matching.png", themen_gesamt_manual_matching, 
-       path = "./images/", width = 7, height = 7)
+ggpreview(themen_gesamt_manual_matching, width = 7, height = 4)
+ggsave("themen_gesamt_manual_matching_test.png", themen_gesamt_manual_matching, 
+       path = "./images/", width = 6.5, height = 4)
 
 ```
 

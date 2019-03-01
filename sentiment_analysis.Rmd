@@ -16,6 +16,10 @@ p_load(dplyr, haven, readr, ggplot2, pdftools, stringr, lubridate, RColorBrewer,
 
 
 ```{r}
+load("df_complete_clean_v2.RData")
+load("df_complete_clean_f.RData")
+load("df_complete_clean.RData")
+
 sentiment <- analyzeSentiment(df_complete_clean_f$content[1:10], language = "german")
 
 sentiment$SentimentQDAP

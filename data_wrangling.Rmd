@@ -826,11 +826,13 @@ plot_anfragen_18_19 <- df_complete_clean %>%
             aes(label = n), # n-value should be the label for each bar
             vjust = -0.5, # adjusting the vertical dimension (overlapping)
             size = 3) + # setting the size of the label
-  xlab("") + 
-  ylab("") + 
   labs(fill = "") +
-  theme(legend.position="bottom") +
-  theme_hc() +
+  theme_bw() +
+  theme(legend.position="bottom",
+        text=element_text(size = 12, family = "LM Roman 10"), 
+        plot.margin = grid::unit(c(0,0,0,0), "mm"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank()) +
   scale_fill_manual(values = c("Grüne" = "#50822E", "Linke" = "#B61C3E", 
                      "CDU/CSU" = "#32372C", "SPD" = "#E3000F", "AfD" = "#0088FF", "FDP" = "#FFD600")) +
   facet_wrap(~ bt_f, 
@@ -838,8 +840,8 @@ plot_anfragen_18_19 <- df_complete_clean %>%
              dir = "v") +# positioning of plots 
   scale_y_continuous(limits = c(0,700))
 
-ggpreview(plot_anfragen_18_19, width = 7.5, height = 8.5)
-ggsave("AnfragenPartei_18_19_complete.png", path = "./images/", width = 7.5, height = 8.5)
+ggpreview(plot_anfragen_18_19, width = 5.5, height = 5.5)
+ggsave("AnfragenPartei_18_19_complete.png", path = "./images/", width = 5.5, height = 5.5)
   
 # checking reasons for union and SPD
 df_complete_clean %>% 

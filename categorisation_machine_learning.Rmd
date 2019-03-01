@@ -16,6 +16,10 @@ p_load(dplyr, haven, readr, ggplot2, pdftools, stringr, lubridate, RColorBrewer,
 ```{r}
 load("df_complete_clean_v2.RData")
 
+df_complete_clean_f %>% 
+  filter(thema == "zSonstiges") %>% 
+  nrow()
+
 df_training_v2 <- df_complete_clean_v2 %>% 
   filter(thema != "zSonstiges") %>% 
   sample_n(3047) 
@@ -63,7 +67,8 @@ ploty_df <- data_frame(cParameterValues, mean, min, max) %>%
   scale_colour_manual("",values="gray4") +
   scale_fill_manual("",values="skyblue4") +
   theme_bw() +
-  theme(axis.title = element_text(size=10), legend.position = "bottom")
+  theme(axis.title = element_text(size=10), legend.position = "bottom",
+        text = element_text(size = 12, family = "LM Roman 10"))
   
 ggpreview(ploty_df, height = 4, width = 6)
 ggsave("c_values.png", ploty_df, 
@@ -360,10 +365,10 @@ rf_svm_prob_boxplot <- prob_plot_df %>%
   geom_boxplot(alpha = 0.2) +
   geom_jitter(width = 0.2, alpha = 0.2) +
   theme_bw() +
-  xlab("") +
-  ylab("Klassenwahrscheinlichkeit") +
+  xlab("") + ylab("Klassenwahrscheinlichkeit") +
   facet_wrap(~ model) +
-  theme(legend.position = "none") +
+  theme(legend.position = "none",
+        text = element_text(size = 12, family = "LM Roman 10")) +
   coord_flip() 
 
 ggpreview(rf_svm_prob_boxplot, width = 7, height = 6)
@@ -390,7 +395,8 @@ rf_svm_cutt_off_plot <- algo_compare %>%
   scale_x_continuous(labels = scales::percent_format()) +
   geom_hline(yintercept = 0.9, alpha = 0.5) +
   geom_hline(yintercept = 0.95, alpha = 0.5) +
-  theme(legend.position="bottom", legend.title = element_blank()) +
+  theme(legend.position="bottom", legend.title = element_blank(),
+        text = element_text(size = 12, family = "LM Roman 10")) +
   facet_wrap(~ prob_f)
 
 ggpreview(rf_svm_cutt_off_plot, width = 7, height = 5)
@@ -602,10 +608,10 @@ prob_boxplot_real_mod <- prob_boxplot_real %>%
   geom_boxplot(alpha = 0.2) +
   geom_jitter(width = 0.2, alpha = 0.1) +
   theme_bw() +
-  xlab("") +
-  ylab("Klassenwahrscheinlichkeit") +
+  xlab("") + ylab("Klassenwahrscheinlichkeit") +
   facet_wrap(~ model) +
-  theme(legend.position = "none") +
+  theme(legend.position = "none", 
+        text=element_text(size = 12, family = "LM Roman 10")) +
   coord_flip() 
 
 ggpreview(prob_boxplot_real_mod, width = 7, height = 6)
@@ -664,10 +670,11 @@ df_complete_clean_f %>%
                      "CDU/CSU" = "#32372C", "SPD" = "#E3000F", "AfD" = "#0088FF", "FDP" = "#FFD600")) +
   #ylim(0,0.22)
   theme_bw() +
-  xlab("") +
-  ylab("") +
   labs(fill = "") +
-  theme(text=element_text(size = 12)) +
+  theme(text=element_text(size = 12, 
+                          family = "LM Roman 10"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank()) +
   theme(legend.position="bottom") +
   scale_y_continuous(labels = scales::percent_format()) +
   coord_flip()

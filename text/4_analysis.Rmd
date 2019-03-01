@@ -4,15 +4,17 @@ output: pdf_document
 
 ## Klassifikation
 
-Hier werden die Ergebnisse der Klassifikation berichtet. 
+Durch die Wortklassifizierung konnten 2726 Anfragen eindeutig klassifiziert werden. Weitere 253 Anfragen konnten durch die Wortklassifizierung zu 2 oder 3 Themen zugeordnet werden. Diese Anfragen wurden manuell richtig klassifiziert. Darüber hinaus wurden die Anfragen, welche durch die Wortklassifizierung nur einem Thema zugeordnet werden konnten, überprüft und bei wenigen Fällen korrigiert. Anschließend wurden weitere wenige Anfragen manuell kategorisiert um eine ausreichend große Datengrundlage für die nachfolgenden Schritte der Kategorisierung gewährleisten zu können. Auf diese Weise konnten insgesamt 3047 der insgesamt 6349 Anfragen kategorisiert werden. In Abbildung \ref{word_classification} ist die Verteilung der Themen ersichtlich.
 
 \begin{figure}[!h]
 	\caption{Verteilung der Themen nach Wortklassifikation}
-	\label{probs_real}
+	\label{word_classification}
 	\centering
-	\includegraphics[width=\textwidth]{images/themen_gesamt_manual_matching_2.png}
+	\includegraphics[width=\textwidth]{images/themen_gesamt_manual_matching_test.png}
 	\caption*{\scriptsize }
 \end{figure}
+
+Es ist ersichtlich, dass Themen wie Gesetz & Kriminalität sowie Einwanderung einen großen Anteil aller Themen ausmachen. Wohingegen Themen wie Wohnungsbau und auch Bürgerrechte einen sehr geringen Anteil ausmachen. 
 
 Anteil aller bla bla Test Datensatz blub
 
@@ -62,7 +64,7 @@ Klassenwahrscheinlichkeiten für vollständige Klassifikation (Apendix, da kaum 
 
 Darstellung der Anfragen nach Partei
 \begin{figure}[!h]
-	\caption{Anzahl gestellter Anfragen}
+	\caption{Anzahl gestellter Anfragen nach Partei}
 	\label{anfragen_count}
 	\centering
 	\includegraphics[width=\textwidth]{images/AnfragenPartei_18_19_complete.png}
