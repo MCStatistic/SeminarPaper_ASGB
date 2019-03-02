@@ -356,7 +356,7 @@ svm_plot_df <- svm_classify_v2 %>%
   rename(prob = SVM_PROB,
          label = SVM_LABEL)
 
-prob_plot_df <- rbind.data.frame(rf_500_plot_df, svm_plot_df)
+prob_plot_df <- rbind.data.frame(rf_200_plot_df, svm_plot_df)
 
 rf_svm_prob_boxplot <- prob_plot_df %>% 
   group_by(model) %>% 
@@ -368,7 +368,8 @@ rf_svm_prob_boxplot <- prob_plot_df %>%
   xlab("") + ylab("Klassenwahrscheinlichkeit") +
   facet_wrap(~ model) +
   theme(legend.position = "none",
-        text = element_text(size = 12, family = "LM Roman 10")) +
+        text = element_text(size = 12, family = "LM Roman 10"),
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
   coord_flip() 
 
 ggpreview(rf_svm_prob_boxplot, width = 7, height = 6)
@@ -611,7 +612,8 @@ prob_boxplot_real_mod <- prob_boxplot_real %>%
   xlab("") + ylab("Klassenwahrscheinlichkeit") +
   facet_wrap(~ model) +
   theme(legend.position = "none", 
-        text=element_text(size = 12, family = "LM Roman 10")) +
+        text=element_text(size = 12, family = "LM Roman 10"),
+        plot.margin=grid::unit(c(0,0,0,0), "mm")) +
   coord_flip() 
 
 ggpreview(prob_boxplot_real_mod, width = 7, height = 6)

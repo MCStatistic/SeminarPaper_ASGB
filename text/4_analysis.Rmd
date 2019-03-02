@@ -4,7 +4,7 @@ output: pdf_document
 
 ## Klassifikation
 
-Durch die Wortklassifizierung konnten 2726 Anfragen eindeutig klassifiziert werden. Weitere 253 Anfragen konnten durch die Wortklassifizierung zu 2 oder 3 Themen zugeordnet werden. Diese Anfragen wurden manuell richtig klassifiziert. Darüber hinaus wurden die Anfragen, welche durch die Wortklassifizierung nur einem Thema zugeordnet werden konnten, überprüft und bei wenigen Fällen korrigiert. Anschließend wurden weitere wenige Anfragen manuell kategorisiert um eine ausreichend große Datengrundlage für die nachfolgenden Schritte der Kategorisierung gewährleisten zu können. Auf diese Weise konnten insgesamt 3047 der insgesamt 6349 Anfragen kategorisiert werden. In Abbildung \ref{word_classification} ist die Verteilung der Themen ersichtlich.
+Durch die Wortklassifizierung konnten 2726 Anfragen eindeutig klassifiziert werden. Weitere 253 Anfragen konnten durch die Wortklassifizierung zu 2 oder 3 Themen zugeordnet werden. Diese Anfragen wurden manuell richtig klassifiziert. Darüber hinaus wurden die Anfragen, welche durch die Wortklassifizierung nur einem Thema zugeordnet werden konnten, überprüft und bei wenigen Fällen korrigiert. Anschließend wurden weitere wenige Anfragen manuell kategorisiert um die Datengrundlage für die nachfolgenden Schritte der Kategorisierung weiter vergößern zu können. Auf diese Weise wurden 3047 der insgesamt 6349 Anfragen kategorisiert. In Abbildung \ref{word_classification} ist die Verteilung der Themen ersichtlich.
 
 \begin{figure}[!h]
 	\caption{Verteilung der Themen nach Wortklassifikation}
@@ -14,17 +14,20 @@ Durch die Wortklassifizierung konnten 2726 Anfragen eindeutig klassifiziert werd
 	\caption*{\scriptsize }
 \end{figure}
 
-Es ist ersichtlich, dass Themen wie Gesetz & Kriminalität sowie Einwanderung einen großen Anteil aller Themen ausmachen. Wohingegen Themen wie Wohnungsbau und auch Bürgerrechte einen sehr geringen Anteil ausmachen. 
+Dabei wird ersichtlich, dass die Themen *Gesetz & Kriminalität*, *Einwanderung* und *Transport* jeweils einen Anteil von mindestens 10% der klassifizierten Themen aufweisen. Gleichzeitig liegen Themen wie *Wohnungsbau*, *Bürgerrechte* und *Regierungsoperationen* vor, welche jeweils nur einen Anteil von 0,6% bis gut 2,1% ausmachen. Diese Form der ungleichen Verteilung der Themenanteile kann bei den nachfolgenden Klassifikationsschritten unter Umständen dafür sorgen, dass die Themen unterschiedlich gut klassifiziert werden können.
 
-Anteil aller bla bla Test Datensatz blub
+Bevor eine Klassfikation anhand aller bereits klassifizierten Anfragen umgesetzt wird, soll zunächst die Performance beider Klassifikationsverfahren untersucht werden. Einerseits können auf diese Weise wichtige Paramter der jewiligen Modelle optimiert werden. Andererseits können so spezifische Grenzwerte festgelegt werden, die für eine zuverlässige Klassifizierung notwendig sind. Hierfür wurden mittels der 3047 klassifizierten Anfragen ein Testdatensatz erstellt, wobei 2300 dieser Anfragen für das Training der Modelle verwendet wurden und die übrigen 747 Anfragen zur Überprüfung genutzt wurden. Diese Einteilung erfolgte mit vorheriger Randomisierung des erstellten Testdatensatzes. 
+
+Da für Random Forest und Support Vector Machines jeweils Klassenwahrscheinlichkeiten berechnet werden, ist es möglich diese als Grenzwert heranziehen zu können. Bei einem hohen Grenzwert steigt zwar die Zuverlässigkeit der Klassifikation, jedoch sinkt ebenso der gesamte Anteil an klassifizierten Anfragen. In Tabelle \ref{kat_rf_svm} ist für jedes Modell der Anteil der richtig klassifizierten Anfragen sowie der Gesamtanteil der klassifizierten Anfragen ersichtlich. So zeigen sich keine bedeutenden Unterschiede hinsichtlich der genutzten Anzahl an *Trees* bei Random Forest. Für die Support Vector Machines wurden unterschiedliche C-Paramter getestet, wobei ein Wert von 10 die beste Performance erzielt hat (vgl. Abbildung \ref{c_values}).
 
 \begin{table}[ht]
 \centering
 \caption{Richtig kategorisierte Anfragen und Anteil der Klassifikationen}
+\label{kat_rf_svm}
 \begin{tabular}{lllllllll}
 $p$   & \multicolumn{2}{c}{$RF_{200}$} & \multicolumn{2}{c}{$RF_{500}$} & \multicolumn{2}{c}{$RF_{1500}$} & \multicolumn{2}{c}{$SVM_{C = 10}$} \\
    \hline
-    & Richtig      & Anteil      & Richtig      & Anteil      & Richtig       & Anteil      & Richtig     & Anteil    \\
+    & Richtig      & Anteil      & Richtig     & Anteil      & Richtig       & Anteil      & Richtig     & Anteil    \\
    \hline
  0.3 &   83,89    &    74,83  &    84,96    &   73,89   &   85,08     &   72,69   &  80,91   &   76,45  \\
  0.4 &   90,07    &    58,00  &    89,47    &   58,50   &   90,42     &   57,29   &  85,54   &   64,79  \\
@@ -40,15 +43,19 @@ mean   & 95,40    &   34,56   &    94,73    &   36,37   &   95,06     &   34,79 
 \caption*{\scriptsize Anmerkung: Angaben in Prozent; $p$ stellt den Cutt Off für die Klassenwahrscheinlichkeit dar}
 \end{table}
 
-Klassenwahrscheinlichkeiten im einzelnen...blub...aber Test blüb
+Insgesamt schneidet Random Forest hinsichtlich der Zuverlässigkeit sowie dem Anteil klassifizierter Anfragen sichtlich besser ab. Bereits ab einer Klassenwahrscheinlichkeit von $p = 0.4$ können 58% der Anfragen klassifiziert werden, wovon widerum 90% richtig klassifiziert sind. Um die selbe Zuverlässigkeit wie bei Random Forest zu erzielen, muss man die erforderliche Klassenwahrscheinlichkeit bei Support Vector Machines auf mindestens $p = 0.7$ festlegen. Dabei werden jedoch weniger Anfragen klassifiziert (40,56% gegenüber 58%). In Anbetracht dieser Ergebnisse wird für sämtliche nachfolgenden Modellierungen der C-Parameter auf 10 und *ntree* auf 200 festgelegt. 
+
+Da die Klassenwahrscheinlichkeiten herangezogen werden um eine möglichst zuverlässige Klassifikation zu ermöglichen, soll nun betrachtet werden wie die Klassenwahrscheinlichkeiten bezüglich der einzelnen Themen aussieht. In Abbildung \ref{probs_test} sind sämtliche Klassenwahrscheinlichkeiten für Random Forest und Support Vector Machines ersichtlich. 
 
 \begin{figure}[!h]
 	\caption{Klassenwahrscheinlichkeiten (Testklassifikation)}
-	\label{probs_real}
+	\label{probs_test}
 	\centering
 	\includegraphics[width=\textwidth]{images/rf_svm_prob_boxplot_2.png}
-	\caption*{\scriptsize }
+	\caption*{\scriptsize Anmerkung: ntree = 200; C-Paramter = 10}
 \end{figure}
+
+Dabei zeigt sich, dass Random Forest bei einzelnen Themen schlechter abschneidet wie Support Vector Machines. So liegen für die Themen *Wohnungsbau* und *Bürgerrechte* 
 
 Klassenwahrscheinlichkeiten für vollständige Klassifikation (Apendix, da kaum Unterschiede mit Testklassifikation...)
 

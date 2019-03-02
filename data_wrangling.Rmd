@@ -825,7 +825,8 @@ plot_anfragen_18_19 <- df_complete_clean %>%
   geom_text(position = position_dodge(width = 1), # positioning for grouped barplot
             aes(label = n), # n-value should be the label for each bar
             vjust = -0.5, # adjusting the vertical dimension (overlapping)
-            size = 3) + # setting the size of the label
+            size = 3,
+            family = "LM Roman 10") + # setting the size of the label
   labs(fill = "") +
   theme_bw() +
   theme(legend.position="bottom",
