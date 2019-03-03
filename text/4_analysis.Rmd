@@ -14,7 +14,7 @@ Durch die Wortklassifizierung konnten 2726 Anfragen eindeutig klassifiziert werd
 	\caption*{\scriptsize }
 \end{figure}
 
-Dabei wird ersichtlich, dass die Themen *Gesetz & Kriminalität*, *Einwanderung* und *Transport* jeweils einen Anteil von mindestens 10% der klassifizierten Themen aufweisen. Gleichzeitig liegen Themen wie *Wohnungsbau*, *Bürgerrechte* und *Regierungsoperationen* vor, welche jeweils nur einen Anteil von 0,6% bis gut 2,1% ausmachen. Diese Form der ungleichen Verteilung der Themenanteile kann bei den nachfolgenden Klassifikationsschritten unter Umständen dafür sorgen, dass die Themen unterschiedlich gut klassifiziert werden können.
+Dabei wird ersichtlich, dass die Themen *Gesetz & Kriminalität*, *Einwanderung* und *Transport* jeweils einen Anteil von mindestens 10% der klassifizierten Themen aufweisen. Gleichzeitig liegen Themen wie *Wohnungsbau*, *Bürgerrechte* und *Regierungsoperationen* vor, welche jeweils nur einen Anteil von 1,0% bis 1,5% ausmachen. Diese Form der ungleichen Verteilung der Themenanteile kann bei den nachfolgenden Klassifikationsschritten unter Umständen dafür sorgen, dass die Themen unterschiedlich gut klassifiziert werden können.
 
 Bevor eine Klassfikation anhand aller bereits klassifizierten Anfragen umgesetzt wird, soll zunächst die Performance beider Klassifikationsverfahren untersucht werden. Einerseits können auf diese Weise wichtige Paramter der jewiligen Modelle optimiert werden. Andererseits können so spezifische Grenzwerte festgelegt werden, die für eine zuverlässige Klassifizierung notwendig sind. Hierfür wurden mittels der 3047 klassifizierten Anfragen ein Testdatensatz erstellt, wobei 2300 dieser Anfragen für das Training der Modelle verwendet wurden und die übrigen 747 Anfragen zur Überprüfung genutzt wurden. Diese Einteilung erfolgte mit vorheriger Randomisierung des erstellten Testdatensatzes. 
 
@@ -48,14 +48,14 @@ Insgesamt schneidet Random Forest hinsichtlich der Zuverlässigkeit sowie dem An
 Da die Klassenwahrscheinlichkeiten herangezogen werden um eine möglichst zuverlässige Klassifikation zu ermöglichen, soll nun betrachtet werden wie die Klassenwahrscheinlichkeiten bezüglich der einzelnen Themen aussieht. In Abbildung \ref{probs_test} sind sämtliche Klassenwahrscheinlichkeiten für Random Forest und Support Vector Machines ersichtlich. 
 
 \begin{figure}[!h]
-	\caption{Klassenwahrscheinlichkeiten (Testklassifikation)}
+	\caption{Klassenwahrscheinlichkeiten der Testklassifikation}
 	\label{probs_test}
 	\centering
 	\includegraphics[width=\textwidth]{images/rf_svm_prob_boxplot_2.png}
 	\caption*{\scriptsize Anmerkung: ntree = 200; C-Paramter = 10}
 \end{figure}
 
-Dabei zeigt sich, dass Random Forest bei einzelnen Themen schlechter abschneidet wie Support Vector Machines. So liegen für die Themen *Wohnungsbau* und *Bürgerrechte* 
+Dabei zeigt sich, dass Random Forest bei einzelnen Themen schlechter abschneidet wie Support Vector Machines. So liegen für die Themen *Wohnungsbau* und *Bürgerrechte* keinerlei Klassenwahrscheinlichkeiten vor, da durch Random Forest keinerlei Anfragen zu diesen zwei Themen zugeordnet wurden bzw. keine einzige Anfrage wurde zu diesen gennnanten Themen zugeordnet.  liegen für manche Themen Die Klassenwahrscheinlichkeiten bei der Support Vector Machine performen bei manchen Themen 
 
 Klassenwahrscheinlichkeiten für vollständige Klassifikation (Apendix, da kaum Unterschiede mit Testklassifikation...)
 

@@ -417,7 +417,7 @@ fonts()
 # with percentage labels on the y-axis, yay
 themen_gesamt_manual_matching <- df_complete_clean %>%
   filter(thema != "zSonstiges") %>%
-  group_by(bt_f, thema) %>%
+  group_by(thema) %>%
   summarise(n = n()) %>%
   mutate(perc = (n/sum(n))) %>%
   ggplot(aes(x = reorder(thema, +perc), y = perc)) +
@@ -425,7 +425,6 @@ themen_gesamt_manual_matching <- df_complete_clean %>%
            stat = "identity",
            fill = "skyblue4",
            alpha = 0.8) +
-  facet_wrap(~bt_f, labeller = label_value) +
   geom_text(aes(y = perc, 
                 label = sprintf("%1.1f%%", round(100*perc, 1))),
             size = 3.1,
@@ -437,7 +436,7 @@ themen_gesamt_manual_matching <- df_complete_clean %>%
         plot.margin=grid::unit(c(0,0,0,0), "mm"),
         axis.title.x=element_blank(),
         axis.title.y = element_blank()) +
-  scale_y_continuous(labels = scales::percent_format(), limits=c(0,0.23)) +
+  scale_y_continuous(labels = scales::percent_format(), limits=c(0,0.20)) +
   coord_flip()
   
 ggpreview(themen_gesamt_manual_matching, width = 7, height = 4)
