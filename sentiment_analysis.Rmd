@@ -79,3 +79,52 @@ save(df_complete_fin, file = "df_complete_fin.RData")
 load("df_complete_fin.RData")
 ```
 
+## inspecting sentiments
+```{r}
+my_comparisons <- list( c("AfD", "Linke"), c("AfD", "Grüne"), c("AfD", "FDP"), 
+                        c("FDP", "Linke"), c("FDP", "Grüne"), c("Grüne", "Linke"))
+
+df_complete_fin %>% 
+  filter(label == "Gesetz & Kriminalität" & party != "SPD" & party != "Union") %>% 
+  group_by(party) %>% 
+  ggplot(., aes(x = party, y = sentiment, col = party)) +
+  geom_boxplot() +
+  ggpubr::stat_compare_means(comparisons = my_comparisons) +
+  scale_color_manual(values = c("Grüne" = "#50822E", "Linke" = "#B61C3E", 
+                     "CDU/CSU" = "#32372C", "SPD" = "#E3000F", "AfD" = "#0088FF", "FDP" = "#FFD600")) +
+  theme_bw() 
+
+df_complete_fin %>% 
+  filter(party != "SPD" & party != "Union") %>% 
+  filter(label == "Gesetz & Kriminalität" | label == "Einwanderung" | label == "Umwelt" | label == "Transport") %>% 
+  group_by(label, party) %>% 
+  ggplot(., aes(x = party, y = sentiment, col = party)) +
+  geom_boxplot() +
+  ggpubr::stat_compare_means(comparisons = my_comparisons) +
+  scale_color_manual(values = c("Grüne" = "#50822E", "Linke" = "#B61C3E", 
+                     "CDU/CSU" = "#32372C", "SPD" = "#E3000F", "AfD" = "#0088FF", "FDP" = "#FFD600")) +
+  theme_bw() +
+  facet_wrap(~label) 
+
+df_complete_fin %>% 
+  filter(party != "SPD" & party != "Union") %>% 
+  filter(label == "Gesetz & Kriminalität" | label == "Einwanderung") %>% 
+  group_by(label, party) %>% 
+  ggplot(., aes(x = party, y = sentiment, col = party)) +
+  geom_boxplot(alpha = 1, width = 0.2) +
+  geom_violin(alpha = 0.2) +
+  ggpubr::stat_compare_means(comparisons = my_comparisons, bracket.size = 0.3, size = 3.5, 
+                             text = element_text(family = "LM Roman 10")) +
+  scale_color_manual(values = c("Grüne" = "#50822E", "Linke" = "#B61C3E", 
+                     "CDU/CSU" = "#32372C", "SPD" = "#E3000F", "AfD" = "#0088FF", "FDP" = "#FFD600")) +
+  theme_bw() +
+  theme(text=element_text(size = 12, family = "LM Roman 10"), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm"),
+        axis.title.x=element_blank(),
+        axis.title.y = element_blank()) +
+  facet_wrap(~label) 
+
+args(ggpubr::stat_compare_means)
+
+```
+
