@@ -51,15 +51,31 @@ sentiment_df <- bind_rows("neg" = neg_df, "pos" = pos_df, .id = "neg_pos") %>%
 sentiment_df_2 <- sentiment_df %>% 
   mutate(duplicate = duplicated(Wort)) %>% 
   filter(duplicate != TRUE)
-
-duplicated(sentiment_df$Wort) %>% 
-  filter()
 ```
 
 ## creating custom sentiment dictonary
 ```{r}
+# creating two types of dictionaries
 sentiment_dictionary <- SentimentDictionaryWeighted(sentiment_df_2$Wort, sentiment_df_2$Wert)
+senti_dict_binary <- SentimentDictionaryBinary(pos_df$Wort, neg_df$Wort)
 
-nrow(sentiment_dictionary)
+# splitting df because memory can't handle the amount of data
+df_sonst_f <- df_complete_clean_f %>% 
+  filter(label == "Sonstiges")
+
+df_lab_f <- df_complete_clean_f %>% 
+  filter(label != "Sonstiges")
+
+# sentiment analysis for the two splitted parts of the df
+df_lab_f$sentiment <- analyzeSentiment(df_lab_f$content, rules=list("Amplifiers"=list(ruleSentiment,
+                                                                                  senti_dict_binary)))[,1]
+
+df_sonst_f$sentiment <- analyzeSentiment(df_sonst_f$content, rules=list("Amplifiers"=list(ruleSentiment,
+                                                                                  senti_dict_binary)))[,1]
+# combining splitted df with sentiment-scores
+df_complete_fin <- rbind(df_lab_f, df_sonst_f)
+
+save(df_complete_fin, file = "df_complete_fin.RData")
+load("df_complete_fin.RData")
 ```
 

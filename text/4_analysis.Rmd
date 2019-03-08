@@ -18,7 +18,7 @@ Dabei wird ersichtlich, dass die Themen *Gesetz & Kriminalität*, *Einwanderung*
 
 Bevor eine Klassfikation anhand aller bereits klassifizierten Anfragen umgesetzt wird, soll zunächst die Performance beider Klassifikationsverfahren untersucht werden. Einerseits können auf diese Weise wichtige Paramter der jewiligen Modelle optimiert werden. Andererseits können so spezifische Grenzwerte festgelegt werden, die für eine zuverlässige Klassifizierung notwendig sind. Hierfür wurden mittels der 3047 klassifizierten Anfragen ein Testdatensatz erstellt, wobei 2300 dieser Anfragen für das Training der Modelle verwendet wurden und die übrigen 747 Anfragen zur Überprüfung genutzt wurden. Diese Einteilung erfolgte mit vorheriger Randomisierung des erstellten Testdatensatzes. 
 
-Da für Random Forest und Support Vector Machines jeweils Klassenwahrscheinlichkeiten berechnet werden, ist es möglich diese als Grenzwert heranziehen zu können. Bei einem hohen Grenzwert steigt zwar die Zuverlässigkeit der Klassifikation, jedoch sinkt ebenso der gesamte Anteil an klassifizierten Anfragen. In Tabelle \ref{kat_rf_svm} ist für jedes Modell der Anteil der richtig klassifizierten Anfragen sowie der Gesamtanteil der klassifizierten Anfragen ersichtlich. So zeigen sich keine bedeutenden Unterschiede hinsichtlich der genutzten Anzahl an *Trees* bei Random Forest. Für die Support Vector Machines wurden unterschiedliche C-Paramter getestet, wobei ein Wert von 10 die beste Performance erzielt hat (vgl. Abbildung \ref{c_values}).
+Da für Random Forest (RF) und Support Vector Machines (SVM) jeweils Klassenwahrscheinlichkeiten berechnet werden, ist es möglich diese als Grenzwert heranziehen zu können. Bei einem hohen Grenzwert steigt zwar die Zuverlässigkeit der Klassifikation, jedoch sinkt ebenso der gesamte Anteil an klassifizierten Anfragen. In Tabelle \ref{kat_rf_svm} ist für jedes Modell der Anteil der richtig klassifizierten Anfragen sowie der Gesamtanteil der klassifizierten Anfragen ersichtlich. So zeigen sich keine bedeutenden Unterschiede hinsichtlich der genutzten Anzahl an *Trees* bei RF. Für SVM wurden unterschiedliche C-Paramter getestet, wobei ein Wert von 10 die beste Performance erzielt hat (vgl. Abbildung \ref{c_values}).
 
 \begin{table}[ht]
 \centering
@@ -43,9 +43,9 @@ mean   & 95,40    &   34,56   &    94,73    &   36,37   &   95,06     &   34,79 
 \caption*{\scriptsize Anmerkung: Angaben in Prozent; $p$ stellt den Cutt Off für die Klassenwahrscheinlichkeit dar}
 \end{table}
 
-Insgesamt schneidet Random Forest hinsichtlich der Zuverlässigkeit sowie dem Anteil klassifizierter Anfragen sichtlich besser ab. Bereits ab einer Klassenwahrscheinlichkeit von $p = 0.4$ können 58% der Anfragen klassifiziert werden, wovon widerum 90% richtig klassifiziert sind. Um die selbe Zuverlässigkeit wie bei Random Forest zu erzielen, muss man die erforderliche Klassenwahrscheinlichkeit bei Support Vector Machines auf mindestens $p = 0.7$ festlegen. Dabei werden jedoch weniger Anfragen klassifiziert (40,56% gegenüber 58%). In Anbetracht dieser Ergebnisse wird für sämtliche nachfolgenden Modellierungen der C-Parameter auf 10 und *ntree* auf 200 festgelegt. 
+Insgesamt schneidet Random Forest hinsichtlich der Zuverlässigkeit sowie dem Anteil klassifizierter Anfragen sichtlich besser ab. Bereits ab einer Klassenwahrscheinlichkeit von $p = 0.4$ können 58% der Anfragen klassifiziert werden, wovon widerum 90% richtig klassifiziert sind. Um die selbe Zuverlässigkeit wie bei RF zu erzielen, muss man die erforderliche Klassenwahrscheinlichkeit bei SVM auf mindestens $p = 0.7$ festlegen. Dabei werden jedoch weniger Anfragen klassifiziert (40,56% gegenüber 58%). In Anbetracht dieser Ergebnisse wird für sämtliche nachfolgenden Modellierungen der C-Parameter auf 10 und *ntree* auf 200 festgelegt. 
 
-Da die Klassenwahrscheinlichkeiten herangezogen werden um eine möglichst zuverlässige Klassifikation zu ermöglichen, soll nun betrachtet werden wie die Klassenwahrscheinlichkeiten bezüglich der einzelnen Themen aussieht. In Abbildung \ref{probs_test} sind sämtliche Klassenwahrscheinlichkeiten für Random Forest und Support Vector Machines ersichtlich. 
+Da die Klassenwahrscheinlichkeiten herangezogen werden um eine möglichst zuverlässige Klassifikation zu ermöglichen, soll nun betrachtet werden wie die Klassenwahrscheinlichkeiten bezüglich der einzelnen Themen aussieht. In Abbildung \ref{probs_test} sind sämtliche Klassenwahrscheinlichkeiten für RF und SVM ersichtlich. 
 
 \begin{figure}[!h]
 	\caption{Klassenwahrscheinlichkeiten der Testklassifikation}
@@ -55,21 +55,24 @@ Da die Klassenwahrscheinlichkeiten herangezogen werden um eine möglichst zuverl
 	\caption*{\scriptsize Anmerkung: ntree = 200; C-Paramter = 10}
 \end{figure}
 
-Dabei zeigt sich, dass Random Forest bei einzelnen Themen schlechter abschneidet wie Support Vector Machines. So liegen für die Themen *Wohnungsbau* und *Bürgerrechte* keinerlei Klassenwahrscheinlichkeiten vor, da durch Random Forest keinerlei Anfragen zu diesen zwei Themen zugeordnet wurden bzw. keine einzige Anfrage wurde zu diesen gennnanten Themen zugeordnet.  liegen für manche Themen Die Klassenwahrscheinlichkeiten bei der Support Vector Machine performen bei manchen Themen 
+Dabei zeigt sich, dass RF bei einzelnen Themen schlechter abschneidet wie SVM. So liegen für die Themen *Wohnungsbau* und *Bürgerrechte* keinerlei Klassenwahrscheinlichkeiten vor, da durch Random Forest keinerlei Anfragen zu diesen zwei Themen zugeordnet wurden. Ausgehend der leicht besseren themenspezifischen Performance von Support Vector Machines, liegt es nahe eine Kombination von RF und SVM für die Klassifikation heranzuziehen. Hinsichtlich der Testklassifikation hat sich gezeigt, dass eine kombinierte Klassifikation von RF ($p \geq 0.5$) und SVM ($p \geq 0.75$) eine Klassifikation von über $52\%$ ermöglicht, wovon widerum über $93\%$ richtig klassifiziert wurden.
 
-Klassenwahrscheinlichkeiten für vollständige Klassifikation (Apendix, da kaum Unterschiede mit Testklassifikation...)
+In Abbildung \ref{vert_final} ist die Verteilung der Themen nach der finalen Klassifikation mittels einer Kombination von RF und SVM ersichtlich.[^12] Die jeweiligen Klassenwahrscheinlichkeiten können im Anhang in Abbildung \ref{probs_real} eingesehen werden. Letztlich konnten insgesamt 3982 der 6349 Anfragen ($63\%$) klassifiziert werden. Hierbei sei jedoch anzumerken, dass einige der nicht klassifizierten Anfragen aufgrund starker Themenüberschneidungen auch auf manuelle Weise nur bedingt klar klassifiziert werden könnten.
 
 \begin{figure}[!h]
-	\caption{Klassenwahrscheinlichkeiten (vollständige Klassifikation)}
-	\label{probs_real}
+	\caption{Verteilung der Themen nach Klassifikation (RF + SVM)}
+	\label{vert_final}
 	\centering
-	\includegraphics[width=\textwidth]{images/prob_boxplot_real_mod_2.png}
+	\includegraphics[width=\textwidth]{images/themen_gesamt_matching_f.png}
 	\caption*{\scriptsize }
 \end{figure}
 
+Hinsichtlich der Themenverteilung hat sich ungleiche Verteilung leicht verstärkt, was jedoch der Tatsache geschuldet ist, dass die Genauigkeit der Klassifikation für die häufig vorkommenen Themen besser ausfällt. Summiert man die Anteile der Themen *Gesetz & Kriminallität*, *Transport*, *Einwanderung* und *Verteidigung*, kommt man bereits auf einen Anteil von über $52\%$. Summiert man hingegen die vier am wenigsten vorkommenen Themen *Wohnungsbau*, *Bürgerrechte*, *Agrarwirtschaft* und *Bildung*, so kommt man auf einen Anteil von weniger als $5\%$. Die teils besonders kleinen Anteile mancher Themen sollten bezüglich der Analyse als kritisch angesehen werden.
+
 ## Deskriptive Analyse
 
-Darstellung der Anfragen nach Partei
+Im 
+
 \begin{figure}[!h]
 	\caption{Anzahl gestellter Anfragen nach Partei}
 	\label{anfragen_count}
@@ -78,5 +81,16 @@ Darstellung der Anfragen nach Partei
 	\caption*{\scriptsize Anmerkung: Anzahl der kleinen Anfragen nach Jahr und Legislaturperiode}
 \end{figure}
 
+\begin{figure}[!h]
+	\caption{Anteil der Anfragen nach Thema und Partei}
+	\label{topic_party}
+	\centering
+	\includegraphics[width=\textwidth]{images/topic_by_party.png}
+	\caption*{\scriptsize Anmerkung: Der prozentuale Anteil stellt den parteispezifschen Anteil des jeweiligen Themas dar}
+\end{figure}
+
+\pagebreak 
+
 ## Sentiment Analyse
 
+[^12]: Die Klassifikation erfolgte dabei auf die selbe Weise wie es bei der Testklassifikation der Fall war. So wurden zunächst sämtliche Anfragen mit RF klassifiziert, für welche die Klassenwahrscheinlichkeit $p \geq 0.5$ war. Anschließend wurden die nicht-klassifizierten Anfragen durch SVM klassifiziert, für welche die Klassenwahrscheinlichkeit $p \geq 0.75$ betrug.

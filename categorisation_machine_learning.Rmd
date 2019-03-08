@@ -452,7 +452,7 @@ nrow(test_rf_prob)/nrow(test_svm_rf)
 test_total <- test_svm_rf %>% 
   mutate(thema_f = case_when(
     prob_rf_200 >= 0.5 ~ as.character(thema_rf_200),
-    prob_svm >= 0.72 ~ as.character(thema_svm), # ab .71/72 it's above .9 right matching
+    prob_svm >= 0.75 ~ as.character(thema_svm), # ab .71/72 it's above .9 right matching
     TRUE ~ "nope"
   )) %>% 
   filter(thema_f != "nope")
@@ -460,7 +460,7 @@ test_total <- test_svm_rf %>%
 # checking matching regarding svm + rf
 length(which(test_total$thema==test_total$thema_f))/length(test_total$thema)
 nrow(test_total)/nrow(test_svm_rf)  
-# 91.54% right // 52.2% total match
+# 93.23% right // 52.2% total match
 
 test_total <- test_svm_rf %>% 
   mutate(thema_f = case_when(
@@ -644,6 +644,7 @@ df_complete_clean_f %>%
 # 2423 (.8)
 # 2375 (.75)
 
+colnames(df_complete_clean_f)
 save(df_complete_clean_f, file = "df_complete_clean_f.RData")
 load("df_complete_clean_f.RData")
 ```
@@ -654,8 +655,40 @@ load("df_complete_clean_f.RData")
 ggplot(df_complete_clean, aes(thema)) +
   geom_bar(position="dodge")
 
+themen_gesamt_matching_f <- df_complete_clean_f %>%
+  filter(label != "Sonstiges") %>%
+  group_by(label) %>%
+  summarise(n = n()) %>%
+  mutate(perc = (n/sum(n))) %>%
+  ggplot(aes(x = reorder(label, +perc), y = perc)) +
+  geom_bar(position = "dodge", 
+           stat = "identity",
+           fill = "skyblue4",
+           alpha = 0.8) +
+  geom_text(aes(y = perc, 
+                label = sprintf("%1.1f%%", round(100*perc, 1))),
+            size = 3.1,
+            color=rgb(100,100,100, maxColorValue=255),
+            hjust=-0.1) +
+  #ylim(0,0.22)
+  theme_bw() +
+  theme(text=element_text(size = 12, family = "LM Roman 10"), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm"),
+        axis.title.x=element_blank(),
+        axis.title.y = element_blank()) +
+  scale_y_continuous(labels = scales::percent_format(), limits=c(0,0.21)) +
+  coord_flip()
+
+ggpreview(themen_gesamt_matching_f, width = 7, height = 4)
+ggsave("themen_gesamt_matching_f.png", themen_gesamt_matching_f, 
+       path = "./images/", width = 6.5, height = 4)
+
+df_complete_clean_f %>% 
+  filter(label != "Sonstiges") %>% 
+  nrow()
+
 # little plot for RF labels...
-df_complete_clean_f %>%
+topic_by_party <- df_complete_clean_f %>%
   filter(label != "Sonstiges") %>% 
   mutate(label_f = as.factor(label)) %>% 
   group_by(party, label_f) %>%
@@ -663,11 +696,11 @@ df_complete_clean_f %>%
   filter(!is.na(label_f)) %>% 
   summarise(n = n()) %>%
   mutate(perc = (n/sum(n))) %>%
-  mutate(label_f = fct_reorder2(label_f, party, perc)) %>% 
+  mutate(label_f = fct_reorder2(label_f, party, -perc)) %>% 
   ggplot(aes(x = label_f, y = perc, fill = party)) +
   geom_bar(position = "dodge",
            stat = "identity",
-           alpha = 0.9) +
+           alpha = 0.8) +
   scale_fill_manual(values = c("Grüne" = "#50822E", "Linke" = "#B61C3E", 
                      "CDU/CSU" = "#32372C", "SPD" = "#E3000F", "AfD" = "#0088FF", "FDP" = "#FFD600")) +
   #ylim(0,0.22)
@@ -680,6 +713,10 @@ df_complete_clean_f %>%
   theme(legend.position="bottom") +
   scale_y_continuous(labels = scales::percent_format()) +
   coord_flip()
+
+ggpreview(topic_by_party, width = 6.5, height = 9.5)
+ggsave("topic_by_party.png", topic_by_party,
+       path = "./images/", width = 6.5, height = 9.5)
 
 unique(df_complete_clean$party)
 ```

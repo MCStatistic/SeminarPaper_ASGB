@@ -73,12 +73,10 @@ z <- 34.876
 ```{r child = '5_fazit.Rmd'}
 ```
 
-
 \setstretch{1,5}
 
 \clearpage
 \newpage
-
 
 # Literaturverzeichnis
 \setlength{\parindent}{-0.2in}
