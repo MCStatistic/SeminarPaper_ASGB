@@ -45,7 +45,7 @@ mean   & 95,40    &   34,56   &    94,73    &   36,37   &   95,06     &   34,79 
 
 Insgesamt schneidet Random Forest hinsichtlich der Zuverlässigkeit sowie dem Anteil klassifizierter Anfragen sichtlich besser ab. Bereits ab einer Klassenwahrscheinlichkeit von $p = 0.4$ können 58% der Anfragen klassifiziert werden, wovon widerum 90% richtig klassifiziert sind. Um die selbe Zuverlässigkeit wie bei RF zu erzielen, muss man die erforderliche Klassenwahrscheinlichkeit bei SVM auf mindestens $p = 0.7$ festlegen. Dabei werden jedoch weniger Anfragen klassifiziert (40,56% gegenüber 58%). In Anbetracht dieser Ergebnisse wird für sämtliche nachfolgenden Modellierungen der C-Parameter auf 10 und *ntree* auf 200 festgelegt. 
 
-Da die Klassenwahrscheinlichkeiten herangezogen werden um eine möglichst zuverlässige Klassifikation zu ermöglichen, soll nun betrachtet werden wie die Klassenwahrscheinlichkeiten bezüglich der einzelnen Themen aussieht. In Abbildung \ref{probs_test} sind sämtliche Klassenwahrscheinlichkeiten für RF und SVM ersichtlich. 
+Da die Klassenwahrscheinlichkeiten herangezogen werden um eine möglichst zuverlässige Klassifikation zu ermöglichen, soll nun betrachtet werden wie die Klassenwahrscheinlichkeiten bezüglich der einzelnen Themen aussehen. In Abbildung \ref{probs_test} sind sämtliche Klassenwahrscheinlichkeiten für RF und SVM ersichtlich. 
 
 \begin{figure}[!h]
 	\caption{Klassenwahrscheinlichkeiten der Testklassifikation}
@@ -79,13 +79,13 @@ Bei der Betrachtung der Anzahl der gestellten Anfragen (siehe Abbildung \ref{anf
 	\caption{Anzahl gestellter Anfragen nach Partei}
 	\label{anfragen_count}
 	\centering
-	\includegraphics[width=\textwidth]{images/AnfragenPartei_18_19_complete.png}
+	\includegraphics[width=0.9\textwidth]{images/AnfragenPartei_18_19_complete.png}
 	\caption*{\scriptsize Anmerkung: Anzahl der kleinen Anfragen nach Jahr und Legislaturperiode}
 \end{figure}
 
 \newpage
 
-In Abbildung \ref{topic_party} sind die prozentualen Anteile der Themen nach Partei für den 18. und 19. Bundestag ersichtlich. Hierbei lassen sich teilweise parteispezifische Themenschwerpunkte identifizieren.
+In Abbildung \ref{topic_party} sind die prozentualen Anteile der Themen nach Partei für den 18. und 19. Bundestag ersichtlich. Hierbei lassen sich parteispezifische Themenschwerpunkte identifizieren. Darüber hinaus Bei den Grünen sind vor allem die Themen *Transport*, *Umwelt* und *Energie* stark vertreten. Hinsichtlich zum Thema *Transport* sind es vor allem Bereiche[^13] wie E-Mobilität, größere Infrastrukturprojekte oder Schienenverkehrsthemen. 
 
 \begin{figure}[!h]
 	\caption{Anteil der Anfragen nach Thema und Partei}
@@ -95,6 +95,23 @@ In Abbildung \ref{topic_party} sind die prozentualen Anteile der Themen nach Par
 	\caption*{\scriptsize Anmerkung: Der prozentuale Anteil stellt den parteispezifschen Anteil des jeweiligen Themas dar}
 \end{figure}
 
+\newpage 
+
+Bei der Linken lassen sich ebenso klare Themenschwerpunkte identifizieren. Das Thema *Gesetz & Kriminalität* macht für den 18. Bundestag bereits einen Anteil von über 30% aller gestellten Anfragen der Linken aus. Mit jeweils ca. 12% folgen dann die Themen *Einwanderung* und *Umwelt*. Beim Thema *Gesetz & Kriminalität* liegen seitens der Linken Anfragen bzgl. rechtsextremen, islamfeindlichen und antisemitischen Straftaten vor. Im Hinblick auf das Thema *Einwanderungen* steht maßgeblich die Flüchtlingsthematik im Fokus. Mit über 27% macht das Thema *Einwanderung* bei der AfD den größten Anteil der gestellten Anfragen aus. Anschließend folgt mit knapp 18% das Thema *Gesetz & Kriminalität*. *Transport* und *Soziale Wohlfahrt* folgen mit jeweils weniger als 10%. Hinsichtlich der *Einwanderung* liegt der Schwerpunkt tendenziell auf der illegalen Einwanderung. Bei der FDP stellt das Thema *Transport* mit knapp 19% den größten Anteil dar. Anschließend folgt das Thema *Makroökonomie* mit ca. 13%. Generell stechen bei der FDP keine Themen deutlich hervor so wie es bei den anderen Parteien der Fall ist wo stets ein Thema vorhanden ist, welches mindestens 25% der gesamten Anfragen der jeweiligen Partei ausmacht.
+
+In Anbetracht der Forschnungsfrage zeigt sich, dass trotz des Einzugs der AfD keine merkliche Veränderung hinsichtlich der parteispezifischen prozentualen Anteile der einzelnen Themen gibt. Ausgehend der Hypothese *H1* sollte der Anteil der Anfragen zum Thema *Einwanderung* bei den Parteien Linke und Grüne deutlich angestiegen sein. Bei beiden Parteien hat sich jedoch nahezu nichts verändert. Bei den Grünen ist der prozentuale Anteil von 7,6% auf 5,1% gesunken. Ausgehend der Daten und den kaum vorhanden Veränderungen bezüglich den parteispezifischen prozentualen Anteile, muss die Hypothese *H1* verworfen werden. 
+
 ## Sentiment Analyse
 
+\begin{landscape}
+ \begin{figure}[!h]
+	\caption{Mittelwertvergleich (t-Test) der Sentiments für ausgewählte Themen}
+	\label{sentiment_party}
+	\centering
+	\noindent\includegraphics[width=\linewidth,height=.9\textheight,keepaspectratio]{images/sentiment_party.png}
+	\caption*{\scriptsize}
+ \end{figure}
+\end{landscape} 
+
 [^12]: Die Klassifikation erfolgte dabei auf die selbe Weise wie es bei der Testklassifikation der Fall war. So wurden zunächst sämtliche Anfragen mit RF klassifiziert, für welche die Klassenwahrscheinlichkeit $p \geq 0.5$ war. Anschließend wurden die nicht-klassifizierten Anfragen durch SVM klassifiziert, für welche die Klassenwahrscheinlichkeit $p \geq 0.75$ betrug.
+[^13]: Die hier genannten Unterthemen der gestellten Anfragen wurden mittels einer explorativen Sichtung der einzelnen Anfragen identifiziert. Dies gilt ebenso für die nachfolgend genannten Unterthemen. Auf den Aspekt der differenzierten Betrachtung einzelner Themen wird im Fazit noch einmal detailliert eingegangen.

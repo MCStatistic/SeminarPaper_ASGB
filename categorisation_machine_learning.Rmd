@@ -720,4 +720,25 @@ ggsave("topic_by_party.png", topic_by_party,
        path = "./images/", width = 6.5, height = 7)
 
 unique(df_complete_clean$party)
+
+df_complete_clean_f %>%
+  filter(label != "Sonstiges") %>% 
+  mutate(label_f = as.factor(label)) %>% 
+  group_by(bt_f, party, label_f) %>%
+  filter(party != "SPD" & party != "Union" & party != "NA") %>% 
+  filter(!is.na(label_f)) %>% 
+  summarise(n = n()) %>%
+  mutate(perc = (n/sum(n))) %>%
+  mutate(label_f = fct_reorder2(label_f, party, -perc))
+
+# green_18: Einwa: 0.076127820
+# green_19: Einwa: 0.050793651
+# linke_18: Einwa: 0.126460481
+# linke_19: Einwa: 0.127862595
 ```
+
+```{r}
+df_complete_clean_f %>% 
+  filter(party == "FDP", label == "Transport")
+```
+
