@@ -691,7 +691,7 @@ df_complete_clean_f %>%
 topic_by_party <- df_complete_clean_f %>%
   filter(label != "Sonstiges") %>% 
   mutate(label_f = as.factor(label)) %>% 
-  group_by(party, label_f) %>%
+  group_by(bt_f, party, label_f) %>%
   filter(party != "SPD" & party != "Union" & party != "NA") %>% 
   filter(!is.na(label_f)) %>% 
   summarise(n = n()) %>%
@@ -712,11 +712,12 @@ topic_by_party <- df_complete_clean_f %>%
         axis.title.y = element_blank()) +
   theme(legend.position="bottom") +
   scale_y_continuous(labels = scales::percent_format()) +
+  facet_wrap(~bt_f) +
   coord_flip()
 
-ggpreview(topic_by_party, width = 6.5, height = 9.5)
+ggpreview(topic_by_party, width = 6.5, height = 7)
 ggsave("topic_by_party.png", topic_by_party,
-       path = "./images/", width = 6.5, height = 9.5)
+       path = "./images/", width = 6.5, height = 7)
 
 unique(df_complete_clean$party)
 ```

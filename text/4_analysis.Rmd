@@ -69,9 +69,11 @@ In Abbildung \ref{vert_final} ist die Verteilung der Themen nach der finalen Kla
 
 Hinsichtlich der Themenverteilung hat sich ungleiche Verteilung leicht verstärkt, was jedoch der Tatsache geschuldet ist, dass die Genauigkeit der Klassifikation für die häufig vorkommenen Themen besser ausfällt. Summiert man die Anteile der Themen *Gesetz & Kriminallität*, *Transport*, *Einwanderung* und *Verteidigung*, kommt man bereits auf einen Anteil von über $52\%$. Summiert man hingegen die vier am wenigsten vorkommenen Themen *Wohnungsbau*, *Bürgerrechte*, *Agrarwirtschaft* und *Bildung*, so kommt man auf einen Anteil von weniger als $5\%$. Die teils besonders kleinen Anteile mancher Themen sollten bezüglich der Analyse als kritisch angesehen werden.
 
+\newpage
+
 ## Deskriptive Analyse
 
-Im 
+Bei der Betrachtung der Anzahl der gestellten Anfragen (siehe Abbildung \ref{anfragen_count}) wird besonders deutlich, dass es sich hierbei um ein Mittel der Opposition handelt. Zwar haben auch die Regierungsparteien Anfragen gestellt, jedoch handelt es sich bei sämtlichen dieser Anfragen um eine Anfrage bzgl. der Kriminalitätsstatistik des jeweiligen Monats. Folglich wird die CDU/CSU sowie die SPD aus den nachfolgenden Auswertungen ausgeschlossen. Die Linke hat im Vergleich zu den anderen Parteien in jedem Jahr die meisten Anfragen gestellt. Dennoch befindet sich die Anzahl gestellter Anfragen der Oppositionsparteien auf einem ähnlichem Niveau.
 
 \begin{figure}[!h]
 	\caption{Anzahl gestellter Anfragen nach Partei}
@@ -81,6 +83,10 @@ Im
 	\caption*{\scriptsize Anmerkung: Anzahl der kleinen Anfragen nach Jahr und Legislaturperiode}
 \end{figure}
 
+\newpage
+
+In Abbildung \ref{topic_party} sind die prozentualen Anteile der Themen nach Partei für den 18. und 19. Bundestag ersichtlich. Hierbei lassen sich teilweise parteispezifische Themenschwerpunkte identifizieren.
+
 \begin{figure}[!h]
 	\caption{Anteil der Anfragen nach Thema und Partei}
 	\label{topic_party}
@@ -88,8 +94,6 @@ Im
 	\includegraphics[width=\textwidth]{images/topic_by_party.png}
 	\caption*{\scriptsize Anmerkung: Der prozentuale Anteil stellt den parteispezifschen Anteil des jeweiligen Themas dar}
 \end{figure}
-
-\pagebreak 
 
 ## Sentiment Analyse
 
