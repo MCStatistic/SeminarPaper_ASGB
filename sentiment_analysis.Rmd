@@ -82,7 +82,7 @@ df_lab_f$sentiment2 <- analyzeSentiment(df_lab_f$content, rules=list("Amplifiers
 
 df_sonst_f$sentiment2 <- analyzeSentiment(df_sonst_f$content, rules=list("Amplifiers"=list(ruleSentimentPolarity,
                                                                                   senti_dict_binary)))[,1]
-
+ruleSentiment
 # ruleSentimentPolarity()
 # diff <- p - n
 # more positive words than negative words = positive value
@@ -100,79 +100,15 @@ load("df_complete_fin.RData")
 my_comparisons <- list( c("AfD", "Linke"), c("AfD", "Grüne"), c("AfD", "FDP"), 
                         c("FDP", "Linke"), c("FDP", "Grüne"), c("Grüne", "Linke"))
 
-df_complete_fin %>% 
-  filter(label == "Gesetz & Kriminalität" & party != "SPD" & party != "Union") %>% 
-  group_by(party) %>% 
-  ggplot(., aes(x = party, y = sentiment, col = party)) +
-  geom_boxplot() +
-  ggpubr::stat_compare_means(comparisons = my_comparisons) +
-  scale_color_manual(values = c("Grüne" = "#50822E", "Linke" = "#B61C3E", 
-                     "CDU/CSU" = "#32372C", "SPD" = "#E3000F", "AfD" = "#0088FF", "FDP" = "#FFD600")) +
-  theme_bw() 
-
-df_complete_fin %>% 
-  filter(party != "SPD" & party != "Union") %>% 
-  filter(label == "Gesetz & Kriminalität" | label == "Einwanderung" | label == "Umwelt" | label == "Transport") %>% 
-  group_by(label, party) %>% 
-  ggplot(., aes(x = party, y = sentiment, col = party)) +
-  geom_boxplot() +
-  ggpubr::stat_compare_means(comparisons = my_comparisons) +
-  scale_color_manual(values = c("Grüne" = "#50822E", "Linke" = "#B61C3E", 
-                     "CDU/CSU" = "#32372C", "SPD" = "#E3000F", "AfD" = "#0088FF", "FDP" = "#FFD600")) +
-  theme_bw() +
-  facet_wrap(~label) 
-
-df_complete_fin %>% 
-  filter(party != "SPD" & party != "Union") %>% 
-  filter(label == "Gesetz & Kriminalität" | label == "Einwanderung") %>% 
-  group_by(label, party) %>% 
-  ggplot(., aes(x = party, y = sentiment2, col = party)) +
-  geom_boxplot(alpha = 1, width = 0.2) +
-  geom_violin(alpha = 0.3) +
-  labs(fill ="") +
-  ggpubr::stat_compare_means(comparisons = my_comparisons, bracket.size = 0.3, size = 3.5, 
-                             text = element_text(family = "LM Roman 10")) +
-  scale_color_manual(values = c("Grüne" = "#50822E", "Linke" = "#B61C3E", 
-                     "CDU/CSU" = "#32372C", "SPD" = "#E3000F", "AfD" = "#0088FF", "FDP" = "#FFD600")) +
-  theme_bw() +
-  theme(text=element_text(size = 12, family = "LM Roman 10"), 
-        plot.margin=grid::unit(c(0,0,0,0), "mm"),
-        axis.title.x=element_blank(),
-        axis.title.y = element_blank(),
-        legend.position = "bottom") +
-  facet_wrap(~label) 
-
-
-df_complete_fin %>% 
-  filter(party != "SPD" & party != "Union") %>% 
-  filter(label == "Gesetz & Kriminalität" | label == "Einwanderung" | label == "Umwelt" | label == "Transport") %>% 
-  group_by(label, party) %>% 
-  ggplot(., aes(x = party, y = sentiment2, col = party)) +
-  geom_boxplot(alpha = 1, width = 0.2) +
-  geom_violin(alpha = 0.3) +
-  labs(fill ="") +
-  ggpubr::stat_compare_means(comparisons = my_comparisons, bracket.size = 0.3, size = 3.5, 
-                             text = element_text(family = "LM Roman 10")) +
-  scale_color_manual(values = c("Grüne" = "#50822E", "Linke" = "#B61C3E", 
-                     "CDU/CSU" = "#32372C", "SPD" = "#E3000F", "AfD" = "#0088FF", "FDP" = "#FFD600")) +
-  theme_bw() +
-  theme(text=element_text(size = 12, family = "LM Roman 10"), 
-        plot.margin=grid::unit(c(0,0,0,0), "mm"),
-        axis.title.x=element_blank(),
-        axis.title.y = element_blank(),
-        legend.position = "bottom") +
-  facet_wrap(~label) 
-
-
 sentiment_party <- df_complete_fin %>% 
   filter(party != "SPD" & party != "Union") %>% 
   filter(label == "Gesetz & Kriminalität" | label == "Einwanderung" | label == "Umwelt" | label == "Transport" | 
            label == "Verteidigung" | label == "Energie") %>% 
   group_by(label, party) %>% 
-  ggplot(., aes(x = party, y = sentiment2, col = party)) +
+  ggplot(., aes(x = party, y = sentiment, col = party)) +
   geom_boxplot(alpha = 1, width = 0.2) +
   geom_violin(alpha = 0.3) +
-  labs(fill ="") +
+  labs(fill ="", color = "") +
   ggpubr::stat_compare_means(comparisons = my_comparisons, bracket.size = 0.3, size = 3, 
                              text = element_text(family = "LM Roman 10")) +
   scale_color_manual(values = c("Grüne" = "#50822E", "Linke" = "#B61C3E", 
@@ -189,7 +125,36 @@ ggpreview(sentiment_party, width = 12, height = 8)
 ggsave("sentiment_party.png", sentiment_party,
        path = "./images/", width = 12, height = 8)
 
-args(ggpubr::stat_compare_means)
+sentiment_app <- df_complete_fin %>% 
+  filter(party != "SPD" & party != "Union") %>% 
+  filter(label == "Gesundheit" | label == "Makroökonomie") %>% 
+  group_by(label, party) %>% 
+  ggplot(., aes(x = party, y = sentiment2, col = party)) +
+  geom_boxplot(alpha = 1, width = 0.2) +
+  geom_violin(alpha = 0.3) +
+  labs(fill ="") +
+  ggpubr::stat_compare_means(comparisons = my_comparisons, bracket.size = 0.3, size = 3, 
+                             text = element_text(family = "LM Roman 10")) +
+  scale_color_manual(values = c("Grüne" = "#50822E", "Linke" = "#B61C3E", 
+                     "CDU/CSU" = "#32372C", "SPD" = "#E3000F", "AfD" = "#0088FF", "FDP" = "#FFD600")) +
+  theme_bw() +
+  theme(text=element_text(size = 12, family = "LM Roman 10"), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm"),
+        axis.title.x=element_blank(),
+        axis.title.y = element_blank(),
+        legend.position = "bottom") +
+  facet_wrap(~label) 
+```
 
+
+```{r}
+df_complete_fin %>% 
+  filter(label == "Verteidigung" & party == "AfD" & sentiment2  == 1)
+
+df_complete_fin %>% 
+  filter(party != "SPD" & party != "Union") %>% 
+  filter(label == "Verteidigung") %>% 
+  group_by(label, party) %>%
+  summarize(mean = mean(sentiment2)) 
 ```
 
