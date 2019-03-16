@@ -149,7 +149,7 @@ sentiment_app <- df_complete_fin %>%
 
 ```{r}
 df_complete_fin %>% 
-  filter(label == "Verteidigung" & party == "AfD" & sentiment2  == 1)
+  filter(label == "Umwelt" & party == "FDP")
 
 df_complete_fin %>% 
   filter(party != "SPD" & party != "Union") %>% 

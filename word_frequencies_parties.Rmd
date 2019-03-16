@@ -1,0 +1,194 @@
+---
+title: "word_frequencies_parties"
+author: "Marlon Schumacher"
+date: "11 3 2019"
+output: html_document
+---
+
+```{r}
+pacman::p_load(pdftools, dplyr, tm, ggplot2, ggthemes, readr, stringr)
+```
+
+```{r}
+afd_19 <- pdf_text("./parteiprogramme/19_afd.pdf") %>% 
+  str_remove_all("\n") %>% 
+  str_remove_all("\t") %>% 
+  unlist() %>% 
+  str_c(collapse = T)
+
+afd_19 %<>% 
+  tolower() %>% 
+  removePunctuation() %>% 
+  removeNumbers() %>% 
+  removeWords(.,stopwords_ger_s) %>% 
+  removeWords(stopwords("german")) 
+
+afd_19_dtm <- afd_19 %>% 
+  VectorSource() %>% 
+  Corpus() %>% 
+  TermDocumentMatrix()
+
+v<- sort(rowSums(as.matrix(afd_19_dtm)), decreasing = T)
+d <- data.frame(word = names(v), freq = v)
+head(d, 50)
+
+d %<>% 
+  mutate(party = "AFD")
+
+linke_19 <- pdf_text("./parteiprogramme/19_linke.pdf") %>% 
+  str_remove_all("\n") %>% 
+  str_remove_all("\t") %>% 
+  unlist() %>% 
+  str_c(collapse = T)
+
+linke_19 %<>% 
+  tolower() %>% 
+  removePunctuation() %>% 
+  removeNumbers() %>% 
+  removeWords(.,stopwords_ger_s) %>% 
+  removeWords(stopwords("german")) 
+
+linke_19_dtm <- linke_19 %>% 
+  VectorSource() %>% 
+  Corpus() %>% 
+  TermDocumentMatrix()
+
+v_linke <- sort(rowSums(as.matrix(linke_19_dtm)), decreasing = T)
+d_lnke <- data.frame(word = names(v_linke), freq = v_linke) %>% 
+  mutate(party = "Linke")
+
+g_19 <- pdf_text("./parteiprogramme/19_gruene.pdf") %>% 
+  str_remove_all("\n") %>% 
+  str_remove_all("\t") %>% 
+  unlist() %>% 
+  str_c(collapse = T)
+
+g_19 %<>% 
+  tolower() %>% 
+  removePunctuation() %>% 
+  removeNumbers() %>% 
+  removeWords(.,stopwords_ger_s) %>% 
+  removeWords(stopwords("german")) 
+
+g_19_dtm <- g_19 %>% 
+  VectorSource() %>% 
+  Corpus() %>% 
+  TermDocumentMatrix()
+
+v_g <- sort(rowSums(as.matrix(g_19_dtm)), decreasing = T)
+d_g <- data.frame(word = names(v_g), freq = v_g) %>% 
+  mutate(party = "Grüne")
+
+f_19 <- pdf_text("./parteiprogramme/19_fdp.pdf") %>% 
+  str_remove_all("\n") %>% 
+  str_remove_all("\t") %>% 
+  unlist() %>% 
+  str_c(collapse = T)
+
+f_19 %<>% 
+  tolower() %>% 
+  removePunctuation() %>% 
+  removeNumbers() %>% 
+  removeWords(.,stopwords_ger_s) %>% 
+  removeWords(stopwords("german")) 
+
+f_19_dtm <- f_19 %>% 
+  VectorSource() %>% 
+  Corpus() %>% 
+  TermDocumentMatrix()
+
+v_f <- sort(rowSums(as.matrix(f_19_dtm)), decreasing = T)
+d_f <- data.frame(word = names(v_f), freq = v_f) %>% 
+  mutate(party = "FDP")
+
+freq_parties <- bind_rows(d, d_lnke, d_g, d_f)
+
+unique(freq_parties$party)
+```
+
+## plot
+```{r}
+library(forcats)
+afd_freq <- freq_parties %>% 
+  filter(freq > 25 & party == "AFD") %>% 
+  filter(word != "müssen" & word != "dafür" & word != "afd") %>% 
+  mutate(word = fct_reorder(word, freq)) %>% 
+  head(15) %>% 
+  ggplot(aes(word, freq)) +
+  geom_bar(stat = "identity",
+           position = "dodge",
+           fill = "#0088FF",
+           alpha = 0.8) +
+  labs(y ="", x ="") +
+  ggplot2::coord_flip() +
+  facet_grid(~party) +
+  theme_bw() +
+  theme(text=element_text(size = 12, family = "LM Roman 10"), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm"),
+        axis.title.x=element_blank(),
+        axis.title.y = element_blank())
+
+
+linke_freq <- freq_parties %>% 
+  filter(freq > 25 & party == "Linke") %>% 
+  filter(word != "–" & word != "setzen" & word != "müssen" & word != "linke") %>% 
+  mutate(word = fct_reorder(word, freq)) %>% 
+  head(15) %>% 
+  ggplot(aes(word, freq)) +
+  geom_bar(stat = "identity",
+           position = "dodge",
+           fill = "#B61C3E",
+           alpha = 0.8) +
+  labs(y ="", x ="") +
+  ggplot2::coord_flip() +
+  facet_grid(~party) +
+  theme_bw() +
+  theme(text=element_text(size = 12, family = "LM Roman 10"), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm"),
+        axis.title.x=element_blank(),
+        axis.title.y = element_blank())
+
+gruene_freq <- freq_parties %>% 
+  filter(freq > 25 & party == "Grüne") %>% 
+  filter(word != "–" & word != "setzen" & word != "müssen" & word != "grünentruebundestagswahlprogramm", word != "bundestagswahlprogramm" & word != "bündnis") %>% 
+  mutate(word = fct_reorder(word, freq)) %>% 
+  head(15) %>% 
+  ggplot(aes(word, freq)) +
+  geom_bar(stat = "identity",
+           position = "dodge",
+           fill = "#50822E",
+           alpha = 0.8) +
+  labs(y ="", x ="") +
+  ggplot2::coord_flip() +
+  facet_grid(~party) +
+  theme_bw() +
+  theme(text=element_text(size = 12, family = "LM Roman 10"), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm"),
+        axis.title.x=element_blank(),
+        axis.title.y = element_blank())
+
+fdp_freq <- freq_parties %>% 
+  filter(freq > 25 & party == "FDP") %>% 
+  filter(word != "–" & word != "setzen" & word != "müssen" & word != "dafür", word != "zudem" & word != "bündnis" & word != "freie" & word != "demokraten") %>% 
+  mutate(word = fct_reorder(word, freq)) %>% 
+  head(15) %>% 
+  ggplot(aes(word, freq)) +
+  geom_bar(stat = "identity",
+           position = "dodge",
+           fill = "#FFD600",
+           alpha = 0.8) +
+  labs(y ="", x ="") +
+  ggplot2::coord_flip() +
+  facet_grid(~party) +
+  theme_bw() +
+  theme(text=element_text(size = 12, family = "LM Roman 10"), 
+        plot.margin=grid::unit(c(0,0,0,0), "mm"),
+        axis.title.x=element_blank(),
+        axis.title.y = element_blank())
+
+library(ggpubr)
+freq_multi <- ggarrange(afd_freq, linke_freq, gruene_freq, fdp_freq)
+
+ggpreview(freq_multi, width = 7, height = 8)
+```
+
