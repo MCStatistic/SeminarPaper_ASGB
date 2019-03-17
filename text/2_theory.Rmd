@@ -13,7 +13,9 @@ Die Wissenschaftler Budge und Farlie beschreiben *Issue Ownership* als die Wahrn
 
 Eines der Hauptprobleme der empirischen Analyse der *Issue Ownership* in Deutschland ist die Messung der Themen. Diese findet in der breiten Forschung durch Survey Fragen statt, mit welchen herausgefunden wird inwiefern bestimmte Parteien erhöhte Kompetenzen in einem Themenfeld besitzen und/oder ob gewisse Parteien mit einem Thema assoziiert werden. Für Deutschland liegen hierfür jedoch keine Daten vor. Mit dieser Problematik setzt sich auch die vorliegende Arbeit auseinander. Können kleine Anfragen für den Bundestag als Messmethode für die *Issue Ownership* Theorie benutzt werden? Ein anderer wichtiger Aspekt, der nicht in der breiten Forschung diskutiert wird, sind die behandelten Themen der Parteien in der politischen Arbeit. Wie positionieren sich die Oppositionsparteien im deutschen Bundestag? Fokussieren sich die Parteien auf gewisse Themen, in denen sie ihre eigene Expertise sehen oder versuchen Parteien, alle wichtigen Themen gleichzeitig zu bedienen? Ausgehend dessen lässt sich die erste Hypothese wie folgt formulieren:
 
-> *H1: Die Parteien weisen bei den kleinen Anfragen Themenschwerpunkte vor, welche sich zwischen den Parteien nochmals unterscheiden.*
+> *H1: Die Parteien weisen bei den kleinen Anfragen Themenschwerpunkte vor, welche sich zwischen den Parteien unterscheiden.*
+
+\newpage 
 
 Anhand dieser Hypothese soll ermittelt werden, ob sich in der parlamentarischen Arbeit thematischen Präferenzen von Parteien erkennen lassen. Diese Frage könnte in der Parteienforschung interessant werden, um zu ermitteln, inwiefern eine Partei thematische Schwerpunkte im Wahlprogramm setzt, um Wahlen zu gewinnen oder ob die Partei inhärent den Drang besitzt, ein Thema im politischen System zu bedienen. Durch Anfragen im Bundestag können Oppositionsparteien stetig Informationen aus den Regierungsfraktionen erhalten, welche letztendlich in kommenden Wahlkämpfen instrumentalisierbar sind. 
 
@@ -23,7 +25,7 @@ Das Instrument der kleinen Anfragen wird im Bundestag hauptsächlich nur von Opp
 
 Eine letzte zu untersuchende Frage besteht darin, ob sich die Ansichten von Parteien aus ähnlichen politischen Richtungen bezüglich der selben Themen unterscheiden? Ein Beispiel hierfür wäre, zu untersuchen, ob sich die Ansichten der Parteien *Die Linke* und *Bündnis 90/Die Grünen* im Themenfeld Flüchtlingspolitik signifikant unterscheiden oder ähneln. Zusammengefasst lautet die dritte Hypothese:
 
-> *H3: Parteien aus unterschiedlichen politischen Ausrichtungen weisen bei den kleinen Anfragen zu ähnlichen Themen unterschiedliche Sentiments auf.*
+> *H3: Parteien weisen bei den kleinen Anfragen zu gleichen Themen unterschiedliche Sentiments auf.*
 
 ### Aktueller Forschungsstand
 

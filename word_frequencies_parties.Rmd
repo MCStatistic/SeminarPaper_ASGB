@@ -103,6 +103,10 @@ d_f <- data.frame(word = names(v_f), freq = v_f) %>%
 
 freq_parties <- bind_rows(d, d_lnke, d_g, d_f)
 
+freq_parties %>% 
+  filter(party == "Grüne") %>% 
+  arrange(desc(freq))
+
 unique(freq_parties$party)
 ```
 
@@ -150,7 +154,7 @@ linke_freq <- freq_parties %>%
 
 gruene_freq <- freq_parties %>% 
   filter(freq > 25 & party == "Grüne") %>% 
-  filter(word != "–" & word != "setzen" & word != "müssen" & word != "grünentruebundestagswahlprogramm", word != "bundestagswahlprogramm" & word != "bündnis") %>% 
+  filter(word != "–" & word != "setzen" & word != "müssen" & word != "grünentruebundestagswahlprogramm", word != "bundestagswahlprogramm" & word != "bündnis" & word != "grüne" & word != "grünen") %>% 
   mutate(word = fct_reorder(word, freq)) %>% 
   head(15) %>% 
   ggplot(aes(word, freq)) +

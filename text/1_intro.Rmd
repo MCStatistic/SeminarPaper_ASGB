@@ -2,17 +2,8 @@
 output: pdf_document
 ---
 
-Einfüüührung!!!
 
-While previous authors used economic and cultural factors to determine support for (mostly traditionalist) populism, we propose a hierarchical theoretical model that distinguishes between traditionalist and progressive populism. This model involves two steps: 
 
-\begin{enumerate}
-\renewcommand{\labelenumii}{\alph{enumii}.}
-\item \textbf{Economically deprived individuals} - seeking to change the status quo - are more likely to reject establishment parties and consequently support populist parties instead. 
-\item \textbf{Cultural values} determine whether these individuals support progressive or traditionalist populism: 
-\begin{enumerate}
-\item \textit{Traditionalist populists} draw their support from people who believe that cosmopolitan liberal elites undermine national unity and that societal change has gone too far.
-\item \textit{Progressive populists} draw their support from people who believe that "neoliberal" elites (represented by institutions like multinational banks and companies) undermine the people's will by safeguarding the deeply reactionary society that is in dire need of radical change.
-\end{enumerate}
-\end{enumerate}
+Forschungsfrage: Liegen zwischen den Parteien Unterschiede hinischtlich ihrer Themenschwerpunkte vor und können durch den Einzug der AfD und FDP Veränderungen festgestellt werden? 
 
+In Kapitel \ref{theorie}
