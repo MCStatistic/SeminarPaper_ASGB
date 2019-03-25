@@ -2,8 +2,12 @@
 output: pdf_document
 ---
 
+Die Bundestagswahl 2017 hat das Parlament deutlich verändert. Die AfD ist als drittstärkste Kraft zum ersten Mal in den Bundestag gekommen. Ebenso gelang es der FDP einen Einzug in den Bundestag zu realisieren. Entgegen diesen Erfolgen stehen die Verluste der Union und SPD, welche zusammen über 10% der Stimmen verloren haben [vgl. @tagesschau2017; @welt2017].
 
+In Hinblick dieser Veränderung und dem Einzug der neuen Parteien mit deren politischen Agenda, ergibt sich die Frage wie sich dies auf die politische Agenda der bisher im Bundestag vertretenen Parteien ausgewirkt hat. Insbesondere der Einzug der AfD ist dabei interessant, da diese Partei, im Gegensatz zur FDP, zum ersten Mal im Bundestag vertreten ist. In dieser Arbeit soll daher versucht werden die folgende Forschungsfrage zu beantworten: 
 
-Forschungsfrage: Liegen zwischen den Parteien Unterschiede hinischtlich ihrer Themenschwerpunkte vor und können durch den Einzug der AfD und FDP Veränderungen festgestellt werden? 
+> *Liegen zwischen den Parteien Unterschiede hinischtlich ihrer Themenschwerpunkte vor und können durch den Einzug der AfD und FDP Veränderungen festgestellt werden?*
 
-In Kapitel \ref{theorie}
+Um diese Forschungsfrage zu beantworten müssen einerseits entsprechende Daten herangezogen werden, mit welchen die Identifizierung von Themenschwerpunkten möglich ist. Andererseits müssen klare Themen definiert werden, zwischen welchen differenziert werden soll. Dabei werden die kleinen Anfragen als Datenquelle herangezogen. Grund für die Wahl der kleinen Anfragen ist zum einen die öffentliche Zugänglichkeit, wodurch eine Nachvollziehbarkeit dieser Arbeit gewährleistet ist. Zum anderen ist es auf diese Weise möglich die *Issue Ownerships* auf eine quantitative Weise zu identifizieren. Für die Themenklassifizierung werden die Themen des *Comparative Agendas Project* herangezogen. Da es sich bei den kleinen Anfragen jedoch primär um ein Oppositionsmittel handelt, beschränkt sich die Forschungsfrage auf die Oppositionsparteien des Bundestags.  
+
+In Kapitel 2 erfolgt eine theoretische Einbettung sowie die Hypothesengenerierung. Ebenso soll hierbei auf den Forschungsstand der Theorie Issue Ownership eingegangen werden. Die Methodik wird in Kapitel 3 umfänglich beschrieben. Dabei wird die Datenquelle und Datenaufbereitung beschrieben. Die Klassifizierung wird in diesem Kapitel ebenso detailliert beschrieben. Im Anschluss werden in Kapitel 4 die Ergebnisse dargestellt. Dabei wird ebenso die Klassifizierung als solche analysiert. Letztlich erfolgt im Fazit (Kapitel 5) eine kurze Zusammenfassung und kritische Betrachtung der Ergebnisse. Ebenso sollen potentielle Themen für künftige Forschungsarbeiten dargelegt werden.
