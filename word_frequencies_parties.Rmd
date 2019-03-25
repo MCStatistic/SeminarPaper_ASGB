@@ -196,3 +196,14 @@ freq_multi <- ggarrange(afd_freq, linke_freq, gruene_freq, fdp_freq)
 ggpreview(freq_multi, width = 7, height = 8)
 ```
 
+## wordcloud
+```{r}
+library(wordcloud2)
+wordcloud2::wordcloud2(freq_parties %>% 
+                         filter(freq > 5 & party == "Grüne") %>% 
+                         filter(word != "–" & word != "setzen" & word != "müssen" & word != "grünentruebundestagswahlprogramm", word != "bundestagswahlprogramm" & word != "bündnis" & word != "grüne" & word != "grünen"), 
+                       shuffle = FALSE, minSize = 0.2)
+
+args(wordcloud2)
+```
+
