@@ -24,7 +24,7 @@ library(pacman)
 p_load(magrittr, dplyr, stringr, downloader, purrr, pdftools, 
        glue, tm, janeaustenr, tidytext, corpus)
 ```
-
+gg
 ## creating URL's for each PDF
 ```{r}
 # short code for creating all 5800 URL's (19. BTD)
