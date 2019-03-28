@@ -8,6 +8,7 @@ output:
      before_body: title_page.tex
      after_body: appendix.tex
 documentclass: article
+classoption: a4paper
 bibliography: references_asgb.bib
 #cls: systats.cls
 csl: university-of-stuttgart-sowi-standards.csl
